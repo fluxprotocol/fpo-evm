@@ -4,34 +4,12 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
-  * @notice Onchain verification of reports from the offchain reporting protocol
-
-  * @dev For details on its operation, see the offchain reporting protocol design
-  * @dev doc, which refers to this contract as simply the "contract".
-*/
+ * @notice Simple data posting on chain of a scalar value
+ */
 contract FluxPriceFeed is AccessControl {
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
     uint256 private constant maxUint32 = (1 << 32) - 1;
-
-    // Storing these fields used on the hot path in a HotVars variable reduces the
-    // retrieval of all of them to a single SLOAD. If any further fields are
-    // added, make sure that storage of the struct still takes at most 32 bytes.
-    struct HotVars {
-        // Provides 128 bits of security against 2nd pre-image attacks, but only
-        // 64 bits against collisions. This is acceptable, since a malicious owner has
-        // easier way of messing up the protocol than to find hash collisions.
-        bytes16 latestConfigDigest;
-        uint40 latestEpochAndRound; // 32 most sig bits for epoch, 8 least sig bits for round
-        // Current bound assumed on number of faulty/dishonest oracles participating
-        // in the protocol, this value is referred to as f in the design
-        uint8 threshold;
-        // Chainlink Aggregators expose a roundId to consumers. The offchain reporting
-        // protocol does not use this id anywhere. We increment it whenever a new
-        // transmission is made to provide callers with contiguous ids for successive
-        // reports.
-        uint32 latestAggregatorRoundId;
-    }
-    HotVars internal s_hotVars;
+    uint32 public latestAggregatorRoundId;
 
     // Transmission records the median answer from the transmit transaction at
     // time timestamp
@@ -77,7 +55,7 @@ contract FluxPriceFeed is AccessControl {
 
     // Used to relieve stack pressure in transmit
     struct ReportData {
-        HotVars hotVars; // Only read from storage once
+        uint32 latestAggregatorRoundId; // Only read from storage once
         bytes observers; // ith element is the index of the ith observer
         int192[] observations; // ith element is the ith observation
         bytes vs; // jth element is the v component of the jth signature
@@ -93,25 +71,9 @@ contract FluxPriceFeed is AccessControl {
    * @return latestAnswer median value from latest report
    * @return latestTimestamp when the latest report was transmitted
    */
-    function latestTransmissionDetails()
-        external
-        view
-        returns (
-            bytes16 configDigest,
-            uint32 epoch,
-            uint8 round,
-            int192 _latestAnswer,
-            uint64 _latestTimestamp
-        )
-    {
+    function latestTransmissionDetails() external view returns (int192 _latestAnswer, uint64 _latestTimestamp) {
         require(msg.sender == tx.origin, "Only callable by EOA");
-        return (
-            s_hotVars.latestConfigDigest,
-            uint32(s_hotVars.latestEpochAndRound >> 8),
-            uint8(s_hotVars.latestEpochAndRound),
-            s_transmissions[s_hotVars.latestAggregatorRoundId].answer,
-            s_transmissions[s_hotVars.latestAggregatorRoundId].timestamp
-        );
+        return (s_transmissions[latestAggregatorRoundId].answer, s_transmissions[latestAggregatorRoundId].timestamp);
     }
 
     /**
@@ -121,16 +83,11 @@ contract FluxPriceFeed is AccessControl {
     function transmit(int192 _answer) external {
         require(hasRole(VALIDATOR_ROLE, msg.sender), "Caller is not a validator");
 
-        ReportData memory r;
-        r.hotVars = s_hotVars;
-        {
-            // Check the report contents, and record the result
-            r.hotVars.latestAggregatorRoundId++;
-            s_transmissions[r.hotVars.latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
+        // Check the report contents, and record the result
+        latestAggregatorRoundId++;
+        s_transmissions[latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
 
-            emit NewTransmission(r.hotVars.latestAggregatorRoundId, _answer, msg.sender);
-        }
-        s_hotVars = r.hotVars;
+        emit NewTransmission(latestAggregatorRoundId, _answer, msg.sender);
     }
 
     /*
@@ -141,21 +98,21 @@ contract FluxPriceFeed is AccessControl {
      * @notice median from the most recent report
      */
     function latestAnswer() public view virtual returns (int256) {
-        return s_transmissions[s_hotVars.latestAggregatorRoundId].answer;
+        return s_transmissions[latestAggregatorRoundId].answer;
     }
 
     /**
      * @notice timestamp of block in which last report was transmitted
      */
     function latestTimestamp() public view virtual returns (uint256) {
-        return s_transmissions[s_hotVars.latestAggregatorRoundId].timestamp;
+        return s_transmissions[latestAggregatorRoundId].timestamp;
     }
 
     /**
      * @notice Aggregator round (NOT OCR round) in which last report was transmitted
      */
     function latestRound() public view virtual returns (uint256) {
-        return s_hotVars.latestAggregatorRoundId;
+        return latestAggregatorRoundId;
     }
 
     /**
@@ -251,7 +208,7 @@ contract FluxPriceFeed is AccessControl {
             uint80 answeredInRound
         )
     {
-        roundId = s_hotVars.latestAggregatorRoundId;
+        roundId = latestAggregatorRoundId;
 
         // Skipped for compatability with existing FluxAggregator in which latestRoundData never reverts.
         // require(roundId != 0, V3_NO_DATA_ERROR);

@@ -5,6 +5,8 @@ import "solidity-coverage";
 
 import "./tasks/accounts";
 import "./tasks/deploy";
+import "./tasks/latestAnswer";
+import "./tasks/transmit";
 
 import { resolve } from "path";
 
@@ -61,6 +63,13 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       chainId: chainIds.hardhat,
+    },
+    aurora: {
+      accounts: {
+        mnemonic,
+      },
+      chainId: 1313161554,
+      url: "https://mainnet.aurora.dev",
     },
     goerli: getChainConfig("goerli"),
     kovan: getChainConfig("kovan"),
