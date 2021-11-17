@@ -1,18 +1,3 @@
-# Solidity Template
-
-My favorite setup for writing Solidity smart contracts.
-
-- [Hardhat](https://github.com/nomiclabs/hardhat): compile and run the smart contracts on a local development network
-- [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript types for smart contracts
-- [Ethers](https://github.com/ethers-io/ethers.js/): renowned Ethereum library and wallet implementation
-- [Waffle](https://github.com/EthWorks/Waffle): tooling for writing comprehensive smart contract tests
-- [Solhint](https://github.com/protofire/solhint): linter
-- [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
-- [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter
-
-This is a GitHub template, which means you can reuse it as many times as you want. You can do that by clicking the "Use this
-template" button at the top of the page.
-
 ## Usage
 
 ### Pre Requisites
@@ -95,7 +80,7 @@ $ yarn clean
 Deploy the contracts to Hardhat Network:
 
 ```sh
-$ yarn deploy --greeting "Bonjour, le monde!"
+$ yarn deploy --validator "0xMyAddress" --decimals 6 --description "ETH/USD" --network aurora
 ```
 
 ## Syntax Highlighting
