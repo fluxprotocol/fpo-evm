@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "./AggregatorV2V3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
- * @notice Simple data posting on chain of a scalar value
+ * @notice Simple data posting on chain of a scalar value, compatible with Chainlink V2 and V3 aggregator interface
  */
-contract FluxPriceFeed is AccessControl {
+contract FluxPriceFeed is AccessControl, AggregatorV2V3Interface {
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
     uint256 private constant maxUint32 = (1 << 32) - 1;
     uint32 public latestAggregatorRoundId;
 
-    // Transmission records the median answer from the transmit transaction at
+    // Transmission records the answer from the transmit transaction at
     // time timestamp
     struct Transmission {
         int192 answer; // 192 bits ought to be enough for anyone
@@ -20,7 +21,8 @@ contract FluxPriceFeed is AccessControl {
     mapping(uint32 => Transmission) /* aggregator round ID */
         internal s_transmissions;
 
-    /*
+    /**
+     * @param _validator the initial validator that can post data to this contract
      * @param _decimals answers are stored in fixed-point format, with this many digits of precision
      * @param _description short human-readable description of observable this contract's answers pertain to
      */
@@ -48,29 +50,16 @@ contract FluxPriceFeed is AccessControl {
     /**
      * @notice indicates that a new report was transmitted
      * @param aggregatorRoundId the round to which this report was assigned
-     * @param answer median of the observations attached this report
+     * @param answer value posted by validator
      * @param transmitter address from which the report was transmitted
      */
     event NewTransmission(uint32 indexed aggregatorRoundId, int192 answer, address transmitter);
 
-    // Used to relieve stack pressure in transmit
-    struct ReportData {
-        uint32 latestAggregatorRoundId; // Only read from storage once
-        bytes observers; // ith element is the index of the ith observer
-        int192[] observations; // ith element is the ith observation
-        bytes vs; // jth element is the v component of the jth signature
-        bytes32 rawReportContext;
-    }
-
-    /*
-   * @notice details about the most recent report
-
-   * @return configDigest domain separation tag for the latest report
-   * @return epoch epoch in which the latest report was generated
-   * @return round OCR round in which the latest report was generated
-   * @return latestAnswer median value from latest report
-   * @return latestTimestamp when the latest report was transmitted
-   */
+    /**
+     * @notice details about the most recent report
+     * @return _latestAnswer value from latest report
+     * @return _latestTimestamp when the latest report was transmitted
+     */
     function latestTransmissionDetails() external view returns (int192 _latestAnswer, uint64 _latestTimestamp) {
         require(msg.sender == tx.origin, "Only callable by EOA");
         return (s_transmissions[latestAggregatorRoundId].answer, s_transmissions[latestAggregatorRoundId].timestamp);
@@ -95,31 +84,31 @@ contract FluxPriceFeed is AccessControl {
      */
 
     /**
-     * @notice median from the most recent report
+     * @notice answer from the most recent report
      */
-    function latestAnswer() public view virtual returns (int256) {
+    function latestAnswer() public view virtual override returns (int256) {
         return s_transmissions[latestAggregatorRoundId].answer;
     }
 
     /**
      * @notice timestamp of block in which last report was transmitted
      */
-    function latestTimestamp() public view virtual returns (uint256) {
+    function latestTimestamp() public view virtual override returns (uint256) {
         return s_transmissions[latestAggregatorRoundId].timestamp;
     }
 
     /**
-     * @notice Aggregator round (NOT OCR round) in which last report was transmitted
+     * @notice Aggregator round in which last report was transmitted
      */
-    function latestRound() public view virtual returns (uint256) {
+    function latestRound() public view virtual override returns (uint256) {
         return latestAggregatorRoundId;
     }
 
     /**
-     * @notice median of report from given aggregator round (NOT OCR round)
+     * @notice answer of report from given aggregator round
      * @param _roundId the aggregator round of the target report
      */
-    function getAnswer(uint256 _roundId) public view virtual returns (int256) {
+    function getAnswer(uint256 _roundId) public view virtual override returns (int256) {
         if (_roundId > 0xFFFFFFFF) {
             return 0;
         }
@@ -128,9 +117,9 @@ contract FluxPriceFeed is AccessControl {
 
     /**
      * @notice timestamp of block in which report from given aggregator round was transmitted
-     * @param _roundId aggregator round (NOT OCR round) of target report
+     * @param _roundId aggregator round of target report
      */
-    function getTimestamp(uint256 _roundId) public view virtual returns (uint256) {
+    function getTimestamp(uint256 _roundId) public view virtual override returns (uint256) {
         if (_roundId > 0xFFFFFFFF) {
             return 0;
         }
@@ -146,27 +135,27 @@ contract FluxPriceFeed is AccessControl {
     /**
      * @return answers are stored in fixed-point format, with this many digits of precision
      */
-    uint8 public immutable decimals;
+    uint8 public immutable override decimals;
 
     /**
      * @notice aggregator contract version
      */
-    uint256 public constant version = 1;
+    uint256 public constant override version = 1;
 
     string internal s_description;
 
     /**
      * @notice human-readable description of observable this contract is reporting on
      */
-    function description() public view virtual returns (string memory) {
+    function description() public view virtual override returns (string memory) {
         return s_description;
     }
 
     /**
      * @notice details for the given aggregator round
-     * @param _roundId target aggregator round (NOT OCR round). Must fit in uint32
+     * @param _roundId target aggregator round. Must fit in uint32
      * @return roundId _roundId
-     * @return answer median of report from given _roundId
+     * @return answer answer of report from given _roundId
      * @return startedAt timestamp of block in which report from given _roundId was transmitted
      * @return updatedAt timestamp of block in which report from given _roundId was transmitted
      * @return answeredInRound _roundId
@@ -175,6 +164,7 @@ contract FluxPriceFeed is AccessControl {
         public
         view
         virtual
+        override
         returns (
             uint80 roundId,
             int256 answer,
@@ -190,8 +180,8 @@ contract FluxPriceFeed is AccessControl {
 
     /**
      * @notice aggregator details for the most recently transmitted report
-     * @return roundId aggregator round of latest report (NOT OCR round)
-     * @return answer median of latest report
+     * @return roundId aggregator round of latest report
+     * @return answer answer of latest report
      * @return startedAt timestamp of block containing latest report
      * @return updatedAt timestamp of block containing latest report
      * @return answeredInRound aggregator round of latest report
@@ -200,6 +190,7 @@ contract FluxPriceFeed is AccessControl {
         public
         view
         virtual
+        override
         returns (
             uint80 roundId,
             int256 answer,
