@@ -1,10 +1,9 @@
 {
-  "name": "@paulrberg/solidity-template",
-  "description": "Template for writing Solidity smart contracts",
+  "name": "flux-evm-price-feeds",
+  "description": "",
   "version": "1.0.0",
   "author": {
-    "name": "Paul Razvan Berg",
-    "url": "https://paulrberg.com"
+    "name": "Flux Contributors"
   },
   "devDependencies": {
     "@codechecks/client": "^0.1.12",
@@ -83,5 +82,8 @@
     "prettier:check": "prettier --check --config ./.prettierrc.yaml \"**/*.{js,json,md,sol,ts}\"",
     "test": "hardhat test",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.3"
   }
 }
