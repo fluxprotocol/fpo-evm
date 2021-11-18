@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  */
 contract FluxPriceFeed is AccessControl, AggregatorV2V3Interface {
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
-    uint256 private constant maxUint32 = (1 << 32) - 1;
     uint32 public latestAggregatorRoundId;
 
     // Transmission records the answer from the transmit transaction at
