@@ -38,13 +38,13 @@ Save the address of the deployed contract for later use.
 Using the mnemonic of the validator in the `.env` file, update the value on a deployed contract:
 
 ```sh
-$ npx hardhat transmit --contract 0xContractAddress --answer 4200000000 --network aurora
+$ npx hardhat transmit --contract "0xContractAddress" --answer 4200000000 --network aurora
 ```
 
 ### Fetch latest answer
 
 ```sh
-$ npx hardhat latestAnswer --contract 0xContractAddress --network aurora
+$ npx hardhat latestAnswer --contract "0xContractAddress" --network aurora
 
 4200000000
 ```
