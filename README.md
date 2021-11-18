@@ -28,10 +28,10 @@ $ yarn compile
 Deploy a price feed contract to Aurora:
 
 ```sh
-$ yarn deploy --validator "0xMyAddress" --decimals 6 --description "ETH/USD" --network aurora
+$ yarn deploy --decimals 8 --description "ETH / USD" --network aurora
 ```
 
-Save the address of the deployed contract for later use.
+Optionally include `--validator "0xMyAddress"` to grant a different address the initial validator role rather than the one derived from the mnemonic in the `.env` file. Save the address of the deployed contract for later use.
 
 ### Update answer
 
