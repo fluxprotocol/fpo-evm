@@ -1,3 +1,7 @@
+# Flux - First-Party Price Feeds for EVM
+
+This repository contains contracts for first-party price feeds for EVM chains, using [OpenZeppelin](https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl) for access control. Those with a validator role can post numeric data to deployed contracts at any interval. Contracts are compatible with Chainlink's V2 and V3 aggregator interface.
+
 ## Usage
 
 ### Pre Requisites
@@ -17,6 +21,32 @@ Compile the smart contracts with Hardhat:
 
 ```sh
 $ yarn compile
+```
+
+### Deploy
+
+Deploy a price feed contract to Aurora:
+
+```sh
+$ yarn deploy --validator "0xMyAddress" --decimals 6 --description "ETH/USD" --network aurora
+```
+
+Save the address of the deployed contract for later use.
+
+### Update answer
+
+Using the mnemonic of the validator in the `.env` file, update the value on a deployed contract:
+
+```sh
+$ npx hardhat transmit --contract 0xContractAddress --answer 4200000000 --network aurora
+```
+
+### Fetch latest answer
+
+```sh
+$ npx hardhat latestAnswer --contract 0xContractAddress --network aurora
+
+4200000000
 ```
 
 ### TypeChain
@@ -73,14 +103,6 @@ Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
 
 ```sh
 $ yarn clean
-```
-
-### Deploy
-
-Deploy the contracts to Hardhat Network:
-
-```sh
-$ yarn deploy --validator "0xMyAddress" --decimals 6 --description "ETH/USD" --network aurora
 ```
 
 ## Syntax Highlighting
