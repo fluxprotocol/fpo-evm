@@ -27,5 +27,5 @@ yarn-error.log*
 # types
 src/types/*
 !src/types/common.ts
-!src/types/Greeter.ts
-!src/types/factories/Greeter__factory.ts
+!src/types/FluxPriceFeed.ts
+!src/types/factories/FluxPriceFeed__factory.ts
