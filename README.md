@@ -2,11 +2,11 @@
 
 This repository contains contracts for first-party price feeds for EVM chains, using [OpenZeppelin](https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl) for access control. Those with a validator role can post numeric data to deployed contracts at any interval. Contracts are compatible with Chainlink's V2 and V3 aggregator interface.
 
-Supported networks: `aurora`, `aurora-testnet`, `goerli`, `kovan`, `mainnet`, `rinkeby`, `ropsten`
+Supported networks: `arbitrum`, `arbitrum-testnet`, `aurora`, `aurora-testnet`, `avalanche`, `avalanche-testnet`, `bsc`, `bsc-testnet`, `celo`, `fantom`, `goerli`, `harmony`, `harmony-testnet`, `kovan`, `mainnet`, `matic-testnet`, `polygon`, `rinkeby`, `ropsten`, `xdai`
 
 ## Usage
 
-### Pre Requisites
+### Pre-Requisites
 
 Before running any command, you need to create a `.env` file and set a BIP-39 compatible mnemonic as an environment
 variable. Follow the example in `.env.example`. If you don't already have a mnemonic, use this [website](https://iancoleman.io/bip39/) to generate one.
