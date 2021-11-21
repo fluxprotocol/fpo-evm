@@ -2,6 +2,8 @@
 
 This repository contains contracts for first-party price feeds for EVM chains, using [OpenZeppelin](https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl) for access control. Those with a validator role can post numeric data to deployed contracts at any interval. Contracts are compatible with Chainlink's V2 and V3 aggregator interface.
 
+Supported networks: `aurora`, `aurora-testnet`, `goerli`, `kovan`, `mainnet`, `rinkeby`, `ropsten`
+
 ## Usage
 
 ### Pre Requisites

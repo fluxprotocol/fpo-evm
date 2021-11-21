@@ -17,7 +17,7 @@ import { NetworkUserConfig } from "hardhat/types";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
-const chainIds = {
+const ethChainIds = {
   goerli: 5,
   hardhat: 31337,
   kovan: 42,
@@ -37,7 +37,7 @@ if (!infuraApiKey) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
 }
 
-function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
+function getChainConfig(network: keyof typeof ethChainIds): NetworkUserConfig {
   const url: string = "https://" + network + ".infura.io/v3/" + infuraApiKey;
   return {
     accounts: {
@@ -45,7 +45,7 @@ function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
       mnemonic,
       path: "m/44'/60'/0'/0",
     },
-    chainId: chainIds[network],
+    chainId: ethChainIds[network],
     url,
   };
 }
@@ -63,7 +63,7 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic,
       },
-      chainId: chainIds.hardhat,
+      chainId: ethChainIds.hardhat,
     },
     aurora: {
       accounts: {
@@ -71,6 +71,13 @@ const config: HardhatUserConfig = {
       },
       chainId: 1313161554,
       url: "https://mainnet.aurora.dev",
+    },
+    "aurora-testnet": {
+      accounts: {
+        mnemonic,
+      },
+      chainId: 1313161555,
+      url: "https://testnet.aurora.dev",
     },
     goerli: getChainConfig("goerli"),
     kovan: getChainConfig("kovan"),
