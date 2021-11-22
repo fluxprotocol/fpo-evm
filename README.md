@@ -17,15 +17,15 @@ Then, proceed with installing dependencies:
 yarn install
 ```
 
-### Deploy
-
-First, compile the smart contracts with Hardhat:
+Next, compile the smart contracts with Hardhat:
 
 ```sh
 $ yarn compile
 ```
 
-Next, deploy a price feed contract, e.g. to Aurora:
+### Deploy
+
+Deploy a price feed contract (e.g. to Aurora):
 
 ```sh
 $ yarn deploy --decimals 8 --description "ETH / USD" --network aurora
