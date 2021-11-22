@@ -17,23 +17,25 @@ Then, proceed with installing dependencies:
 yarn install
 ```
 
-### Compile
+### Deploy
 
-Compile the smart contracts with Hardhat:
+First, compile the smart contracts with Hardhat:
 
 ```sh
 $ yarn compile
 ```
 
-### Deploy
-
-Deploy a price feed contract to Aurora:
+Next, deploy a price feed contract, e.g. to Aurora:
 
 ```sh
 $ yarn deploy --decimals 8 --description "ETH / USD" --network aurora
 ```
 
-Optionally include `--validator "0xMyAddress"` to grant a different address the initial validator role rather than the one derived from the mnemonic in the `.env` file. Save the address of the deployed contract for later use.
+Save the deployed contract address outputted by the command above.
+
+Optionally include `--validator "0xMyAddress"` to grant a different address the initial validator role rather than the one derived from the mnemonic in the `.env` file.
+
+_Note: We deployed a price feed contract on Aurora at address `0xb5c82C7F2a5a90b040f411fe7D80C154Cc082160` with all role-based permissions removed. Feel free to try posting and fetching data on this contract without deploying your own!_
 
 ### Update answer
 
@@ -50,6 +52,8 @@ $ yarn latestAnswer --contract "0xContractAddress" --network aurora
 
 4200000000
 ```
+
+---
 
 ### TypeChain
 
