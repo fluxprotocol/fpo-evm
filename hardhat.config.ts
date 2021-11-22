@@ -66,11 +66,13 @@ const config: HardhatUserConfig = {
       chainId: ethChainIds.hardhat,
     },
     arbitrum: {
+      accounts: { mnemonic },
       url: "https://arb1.arbitrum.io/rpc",
       chainId: 42161,
       blockGasLimit: 700000,
     },
     "arbitrum-testnet": {
+      accounts: { mnemonic },
       url: "https://kovan3.arbitrum.io/rpc",
       chainId: 79377087078960,
     },
@@ -89,47 +91,58 @@ const config: HardhatUserConfig = {
       url: "https://testnet.aurora.dev",
     },
     avalanche: {
+      accounts: { mnemonic },
       url: "https://api.avax.network/ext/bc/C/rpc",
       chainId: 43114,
       gasPrice: 470000000000,
     },
     "avalanche-testnet": {
+      accounts: { mnemonic },
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       chainId: 43113,
     },
     bsc: {
+      accounts: { mnemonic },
       url: "https://bsc-dataseed.binance.org",
       chainId: 56,
     },
     "bsc-testnet": {
+      accounts: { mnemonic },
       url: "https://data-seed-prebsc-2-s3.binance.org:8545",
       chainId: 97,
     },
     celo: {
+      accounts: { mnemonic },
       url: "https://forno.celo.org",
       chainId: 42220,
     },
     fantom: {
+      accounts: { mnemonic },
       url: "https://rpcapi.fantom.network",
       chainId: 250,
     },
     harmony: {
+      accounts: { mnemonic },
       url: "https://api.s0.t.hmny.io",
       chainId: 1666600000,
     },
     "harmony-testnet": {
+      accounts: { mnemonic },
       url: "https://api.s0.b.hmny.io",
       chainId: 1666700000,
     },
     "matic-testnet": {
+      accounts: { mnemonic },
       url: "https://rpc-mumbai.maticvigil.com/",
       chainId: 80001,
     },
     polygon: {
+      accounts: { mnemonic },
       url: `https://rpc-mainnet.maticvigil.com/`,
       chainId: 137,
     },
     xdai: {
+      accounts: { mnemonic },
       url: "https://rpc.xdaichain.com",
       chainId: 100,
     },
