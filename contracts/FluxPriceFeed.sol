@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.10;
 
-import "./AggregatorV2V3Interface.sol";
+import "./interface/CLV2V3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
  * @notice Simple data posting on chain of a scalar value, compatible with Chainlink V2 and V3 aggregator interface
  */
-contract FluxPriceFeed is AccessControl, AggregatorV2V3Interface {
+contract FluxPriceFeed is AccessControl, CLV2V3Interface {
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
     uint32 public latestAggregatorRoundId;
 
@@ -39,7 +39,7 @@ contract FluxPriceFeed is AccessControl, AggregatorV2V3Interface {
      * Versioning
      */
     function typeAndVersion() external pure virtual returns (string memory) {
-        return "FluxPriceFeed 1.0.0";
+        return "FluxPriceFeed 1.1.0";
     }
 
     /*
