@@ -75,6 +75,7 @@
     "deployAggregator": "hardhat deploy:FluxPriceAggregator",
     "latestAnswer": "hardhat latestAnswer",
     "transmit": "hardhat transmit",
+    "updatePrices": "hardhat updatePrices",
     "derivePrivateKey": "hardhat derivePrivateKey",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",

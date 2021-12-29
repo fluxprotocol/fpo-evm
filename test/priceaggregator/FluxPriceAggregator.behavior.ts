@@ -6,16 +6,16 @@ export function shouldBehaveLikeFluxPriceAggregator(): void {
     await this.oracles[0].connect(this.signers.admin).transmit(100);
     await this.oracles[1].connect(this.signers.admin).transmit(150);
     await this.oracles[2].connect(this.signers.admin).transmit(300);
-    expect(await this.priceaggregator.connect(this.signers.admin).lastUpdate()).to.equal(0);
+    expect(await this.priceaggregator.connect(this.signers.admin).latestTimestamp()).to.equal(0);
     await this.priceaggregator.connect(this.signers.admin).updatePrices();
-    expect(await this.priceaggregator.connect(this.signers.admin).lastAnswer()).to.equal(183);
-    expect((await this.priceaggregator.connect(this.signers.admin).lastUpdate()).toNumber()).to.greaterThan(0);
+    expect(await this.priceaggregator.connect(this.signers.admin).latestAnswer()).to.equal(183);
+    expect((await this.priceaggregator.connect(this.signers.admin).latestTimestamp()).toNumber()).to.greaterThan(0);
   });
   it("should count uninitialized prices as zero", async function () {
     await this.oracles[0].connect(this.signers.admin).transmit(100);
     await this.oracles[1].connect(this.signers.admin).transmit(75);
     await this.priceaggregator.connect(this.signers.admin).updatePrices();
-    expect(await this.priceaggregator.connect(this.signers.admin).lastAnswer()).to.equal(58);
+    expect(await this.priceaggregator.connect(this.signers.admin).latestAnswer()).to.equal(58);
   });
   it("should allow deployer to change delay", async function () {
     await this.priceaggregator.connect(this.signers.admin).setDelay(12345);

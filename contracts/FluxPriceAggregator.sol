@@ -7,8 +7,8 @@ import "./interface/CLV2V3Interface.sol";
 contract FluxPriceAggregator is AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    uint256 public lastUpdate;
-    uint256 public lastAnswer;
+    uint256 public latestTimestamp;
+    uint256 public latestAnswer;
     uint256 public minDelay = 1 minutes;
     address[] public oracles;
 
@@ -21,7 +21,7 @@ contract FluxPriceAggregator is AccessControl {
     /// @notice Update prices, callable by anyone
     function updatePrices() public {
         // require min delay since lastUpdate
-        require(block.timestamp > lastUpdate + minDelay);
+        require(block.timestamp > latestTimestamp + minDelay);
 
         // fetch sum of latestAnswer from oracles
         int256 sum = 0;
@@ -30,8 +30,8 @@ contract FluxPriceAggregator is AccessControl {
         }
 
         // calculate average of sum (assumes unsigned)
-        lastAnswer = uint256(sum) / oracles.length;
-        lastUpdate = block.timestamp;
+        latestAnswer = uint256(sum) / oracles.length;
+        latestTimestamp = block.timestamp;
     }
 
     /// @notice Changes min delay, only callable by admin

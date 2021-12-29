@@ -8,6 +8,7 @@ import "./tasks/deploy";
 import "./tasks/derivePrivateKey";
 import "./tasks/latestAnswer";
 import "./tasks/transmit";
+import "./tasks/updatePrices";
 
 import { resolve } from "path";
 
