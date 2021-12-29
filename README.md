@@ -23,6 +23,8 @@ Next, compile the smart contracts with Hardhat:
 $ yarn compile
 ```
 
+## First-party price feed
+
 ### Deploy
 
 Deploy a price feed contract (e.g. to Aurora):
@@ -33,7 +35,7 @@ $ yarn deploy --decimals 8 --description "ETH / USD" --network aurora
 
 Save the deployed contract address outputted by the command above.
 
-Optionally include `--validator "0xMyAddress"` to grant a different address the initial validator role rather than the one derived from the mnemonic in the `.env` file.
+Optionally include `--validator "0xMyAddress"` to grant a specific address the initial validator role rather than the deployer.
 
 _Note: We deployed a price feed contract on Aurora at address `0xb5c82C7F2a5a90b040f411fe7D80C154Cc082160` with all role-based permissions removed. Feel free to try posting and fetching data on this contract without deploying your own!_
 
@@ -52,6 +54,22 @@ $ yarn latestAnswer --contract "0xContractAddress" --network aurora
 
 4200000000
 ```
+
+## Price aggregator
+
+The price aggregator contract pulls from multiple first-party price feeds to return an averaged price. A minimum delay time is set, and anyone is allowed to update the latest price on the aggregator by calling `updatePrices()`. Like the first-party contract, it is compatible with Chainlink's V2 and V3 aggregator interface.
+
+### Deploy
+
+Deploy an aggregator contract (e.g. to Aurora):
+
+```bash
+deployAggregator --oracles 0x201FA7D0838726f16e93fED5E456d50B93CA79b0,0x19f622DFCb93a52e06e45202534EDf6f81A71063,0x77Aa1441D9BBf2102824CD73e6C3E4a765161b82 --network aurora
+```
+
+Save the deployed contract address outputted by the command above.
+
+Separate oracles with a single comma. Optionally include `--admin "0xMyAddress"` to grant a specific address the initial validator role rather than the deployer.
 
 ---
 
