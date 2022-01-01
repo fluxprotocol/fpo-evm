@@ -5,6 +5,8 @@ import "./interface/CLV2V3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
+ * @title Flux first-party price feed oracle
+ * @author fluxprotocol.org
  * @notice Simple data posting on chain of a scalar value, compatible with Chainlink V2 and V3 aggregator interface
  */
 contract FluxPriceFeed is AccessControl, CLV2V3Interface {
@@ -18,21 +20,21 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         uint64 timestamp;
     }
     mapping(uint32 => Transmission) /* aggregator round ID */
-        internal s_transmissions;
+        internal transmissions;
 
     /**
      * @param _validator the initial validator that can post data to this contract
      * @param _decimals answers are stored in fixed-point format, with this many digits of precision
-     * @param _description short human-readable description of observable this contract's answers pertain to
+     * @param __description short human-readable description of observable this contract's answers pertain to
      */
     constructor(
         address _validator,
         uint8 _decimals,
-        string memory _description
+        string memory __description
     ) {
         _setupRole(VALIDATOR_ROLE, _validator);
         decimals = _decimals;
-        s_description = _description;
+        _description = __description;
     }
 
     /*
@@ -61,7 +63,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      */
     function latestTransmissionDetails() external view returns (int192 _latestAnswer, uint64 _latestTimestamp) {
         require(msg.sender == tx.origin, "Only callable by EOA");
-        return (s_transmissions[latestAggregatorRoundId].answer, s_transmissions[latestAggregatorRoundId].timestamp);
+        return (transmissions[latestAggregatorRoundId].answer, transmissions[latestAggregatorRoundId].timestamp);
     }
 
     /**
@@ -73,7 +75,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
 
         // Check the report contents, and record the result
         latestAggregatorRoundId++;
-        s_transmissions[latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
+        transmissions[latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
 
         emit NewTransmission(latestAggregatorRoundId, _answer, msg.sender);
     }
@@ -86,14 +88,14 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * @notice answer from the most recent report
      */
     function latestAnswer() public view virtual override returns (int256) {
-        return s_transmissions[latestAggregatorRoundId].answer;
+        return transmissions[latestAggregatorRoundId].answer;
     }
 
     /**
      * @notice timestamp of block in which last report was transmitted
      */
     function latestTimestamp() public view virtual override returns (uint256) {
-        return s_transmissions[latestAggregatorRoundId].timestamp;
+        return transmissions[latestAggregatorRoundId].timestamp;
     }
 
     /**
@@ -111,7 +113,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         if (_roundId > 0xFFFFFFFF) {
             return 0;
         }
-        return s_transmissions[uint32(_roundId)].answer;
+        return transmissions[uint32(_roundId)].answer;
     }
 
     /**
@@ -122,7 +124,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         if (_roundId > 0xFFFFFFFF) {
             return 0;
         }
-        return s_transmissions[uint32(_roundId)].timestamp;
+        return transmissions[uint32(_roundId)].timestamp;
     }
 
     /*
@@ -141,13 +143,13 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      */
     uint256 public constant override version = 1;
 
-    string internal s_description;
+    string internal _description;
 
     /**
      * @notice human-readable description of observable this contract is reporting on
      */
     function description() public view virtual override returns (string memory) {
-        return s_description;
+        return _description;
     }
 
     /**
@@ -173,7 +175,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         )
     {
         require(_roundId <= 0xFFFFFFFF, V3_NO_DATA_ERROR);
-        Transmission memory transmission = s_transmissions[uint32(_roundId)];
+        Transmission memory transmission = transmissions[uint32(_roundId)];
         return (_roundId, transmission.answer, transmission.timestamp, transmission.timestamp, _roundId);
     }
 
@@ -203,7 +205,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         // Skipped for compatability with existing FluxAggregator in which latestRoundData never reverts.
         // require(roundId != 0, V3_NO_DATA_ERROR);
 
-        Transmission memory transmission = s_transmissions[uint32(roundId)];
+        Transmission memory transmission = transmissions[uint32(roundId)];
         return (roundId, transmission.answer, transmission.timestamp, transmission.timestamp, roundId);
     }
 }

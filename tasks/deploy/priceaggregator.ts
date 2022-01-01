@@ -7,6 +7,8 @@ import { FluxPriceAggregator__factory } from "../../src/types/factories/FluxPric
 
 task("deploy:FluxPriceAggregator")
   .addParam("oracles", "Initial oracle addresses, separated by a single comma")
+  .addParam("decimals", "The number of decimals in the value posted")
+  .addParam("description", "The description of the contract")
   .addOptionalParam("admin", "The admin allowed to modify the oracles and minimum update time")
   .setAction(async function (taskArgs: TaskArguments, { ethers }) {
     const accounts: Signer[] = await ethers.getSigners();
@@ -25,7 +27,7 @@ task("deploy:FluxPriceAggregator")
       await ethers.getContractFactory("FluxPriceAggregator")
     );
     const priceaggregator: FluxPriceAggregator = <FluxPriceAggregator>(
-      await priceaggregatorFactory.deploy(admin, oracles)
+      await priceaggregatorFactory.deploy(admin, oracles, taskArgs.decimals, taskArgs.description)
     );
     await priceaggregator.deployed();
     console.log("FluxPriceAggregator deployed to: ", priceaggregator.address);

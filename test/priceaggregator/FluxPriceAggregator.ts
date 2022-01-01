@@ -35,11 +35,15 @@ describe("Unit tests", function () {
       }
 
       // deploy aggregator
+      const decimals: number = 6;
+      const description: string = "My description";
       const priceaggregatorArtifact: Artifact = await artifacts.readArtifact("FluxPriceAggregator");
       this.priceaggregator = <FluxPriceAggregator>(
         await waffle.deployContract(this.signers.admin, priceaggregatorArtifact, [
           this.signers.admin.address,
           [this.oracles[0].address, this.oracles[1].address, this.oracles[2].address],
+          decimals,
+          description,
         ])
       );
     });

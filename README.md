@@ -64,7 +64,7 @@ The price aggregator contract pulls from multiple first-party price feeds to ret
 Deploy an aggregator contract (e.g. to Aurora):
 
 ```bash
-$ yarn deployAggregator --oracles 0x201FA7D0838726f16e93fED5E456d50B93CA79b0,0x19f622DFCb93a52e06e45202534EDf6f81A71063,0x77Aa1441D9BBf2102824CD73e6C3E4a765161b82 --network aurora
+$ yarn deployAggregator --oracles 0x201FA7D0838726f16e93fED5E456d50B93CA79b0,0x19f622DFCb93a52e06e45202534EDf6f81A71063,0x77Aa1441D9BBf2102824CD73e6C3E4a765161b82 --decimals 8 --description "ETH / USD" --network aurora
 ```
 
 Save the deployed contract address outputted by the command above.
