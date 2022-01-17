@@ -35,7 +35,7 @@ Save the deployed contract address outputted by the command above.
 
 Optionally include `--validator "0xMyAddress"` to grant a different address the initial validator role rather than the one derived from the mnemonic in the `.env` file.
 
-_Note: We deployed a price feed contract on Aurora at address `0xb5c82C7F2a5a90b040f411fe7D80C154Cc082160` with all role-based permissions removed. Feel free to try posting and fetching data on this contract without deploying your own!_
+_Note: We deployed a price feed contract on Aurora at address `0x8BAac7F07c86895cd017C8a2c7d3C72cF9f1051F` with all role-based permissions removed. Feel free to try posting and fetching data on this contract without deploying your own!_
 
 ### Update answer
 
