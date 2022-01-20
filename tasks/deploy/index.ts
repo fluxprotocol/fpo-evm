@@ -1,1 +1,2 @@
 import "./pricefeeds";
+import "./priceaggregator";

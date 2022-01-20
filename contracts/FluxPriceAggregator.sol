@@ -3,14 +3,17 @@ pragma solidity ^0.8.10;
 
 import "./interface/CLV2V3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
- * @title Flux first-party price feed oracle
+ * @title Flux first-party price feed oracle aggregator
  * @author fluxprotocol.org
- * @notice Simple data posting on chain of a scalar value, compatible with Chainlink V2 and V3 aggregator interface
+ * @notice Aggregates from multiple first-party price oracles (FluxPriceFeed.sol), compatible with
+ *     Chainlink V2 and V3 aggregator interface
  */
-contract FluxPriceFeed is AccessControl, CLV2V3Interface {
-    bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
+contract FluxPriceAggregator is AccessControl, CLV2V3Interface, Pausable {
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     uint32 public latestAggregatorRoundId;
 
     // Transmission records the answer from the transmit transaction at
@@ -22,17 +25,25 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
     mapping(uint32 => Transmission) /* aggregator round ID */
         internal transmissions;
 
+    uint256 public minDelay = 1 minutes;
+    address[] public oracles;
+
     /**
-     * @param _validator the initial validator that can post data to this contract
+     * @dev Initialize oracles and fetch initial prices
+     * @param _admin the initial admin that can aggregate data from and set the oracles
+     * @param _oracles the oracles to aggregate data from
      * @param _decimals answers are stored in fixed-point format, with this many digits of precision
      * @param __description short human-readable description of observable this contract's answers pertain to
      */
+
     constructor(
-        address _validator,
+        address _admin,
+        address[] memory _oracles,
         uint8 _decimals,
         string memory __description
     ) {
-        _setupRole(VALIDATOR_ROLE, _validator);
+        _setupRole(ADMIN_ROLE, _admin);
+        oracles = _oracles;
         decimals = _decimals;
         _description = __description;
     }
@@ -41,43 +52,66 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * Versioning
      */
     function typeAndVersion() external pure virtual returns (string memory) {
-        return "FluxPriceFeed 1.1.0";
+        return "FluxPriceAggregator 1.0.0";
     }
 
     /*
-     * Transmission logic
+     * Publicly-callable mutative functions
      */
 
-    /**
-     * @notice indicates that a new report was transmitted
-     * @param aggregatorRoundId the round to which this report was assigned
-     * @param answer value posted by validator
-     * @param transmitter address from which the report was transmitted
-     */
-    event NewTransmission(uint32 indexed aggregatorRoundId, int192 answer, address transmitter);
+    /// @notice Update prices, callable by anyone
+    function updatePrices() public whenNotPaused {
+        // require min delay since lastUpdate
+        require(block.timestamp > transmissions[latestAggregatorRoundId].timestamp + minDelay);
 
-    /**
-     * @notice details about the most recent report
-     * @return _latestAnswer value from latest report
-     * @return _latestTimestamp when the latest report was transmitted
-     */
-    function latestTransmissionDetails() external view returns (int192 _latestAnswer, uint64 _latestTimestamp) {
-        require(msg.sender == tx.origin, "Only callable by EOA");
-        return (transmissions[latestAggregatorRoundId].answer, transmissions[latestAggregatorRoundId].timestamp);
-    }
+        // fetch sum of latestAnswer from oracles
+        int256 sum = 0;
+        for (uint256 i = 0; i < oracles.length; i++) {
+            sum += CLV2V3Interface(oracles[i]).latestAnswer();
+        }
 
-    /**
-     * @notice transmit is called to post a new report to the contract
-     * @param _answer latest answer
-     */
-    function transmit(int192 _answer) external {
-        require(hasRole(VALIDATOR_ROLE, msg.sender), "Caller is not a validator");
+        // calculate average of sum
+        int192 _answer = int192(int256(uint256(sum) / oracles.length));
 
-        // Check the report contents, and record the result
+        // update round
         latestAggregatorRoundId++;
         transmissions[latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
 
-        emit NewTransmission(latestAggregatorRoundId, _answer, msg.sender);
+        emit AnswerUpdated(_answer, latestAggregatorRoundId, block.timestamp);
+    }
+
+    /*
+     * Admin-only functions
+     */
+
+    /// @notice Changes min delay, only callable by admin
+    function setDelay(uint256 _minDelay) public {
+        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not a admin");
+        minDelay = _minDelay;
+    }
+
+    /// @notice Changes oracles, only callable by admin
+    function setOracles(address[] memory _oracles) public {
+        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not a admin");
+        oracles = _oracles;
+    }
+
+    /// @notice Pauses or unpauses updating the price, only callable by admin
+    function pause(bool __pause) public {
+        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not a admin");
+        if (__pause) {
+            _pause();
+        } else {
+            _unpause();
+        }
+    }
+
+    /// @notice Overrides the price, only callable by admin
+    function setManualAnswer(int192 _answer) public {
+        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not a admin");
+        latestAggregatorRoundId++;
+        transmissions[latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
+        emit AnswerUpdated(_answer, latestAggregatorRoundId, block.timestamp);
     }
 
     /*

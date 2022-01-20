@@ -8,6 +8,7 @@ import "./tasks/deploy";
 import "./tasks/derivePrivateKey";
 import "./tasks/latestAnswer";
 import "./tasks/transmit";
+import "./tasks/updatePrices";
 
 import { resolve } from "path";
 
@@ -159,7 +160,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.9",
+    version: "0.8.10",
     settings: {
       metadata: {
         // Not including the metadata hash
