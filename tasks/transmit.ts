@@ -6,7 +6,7 @@ task("transmit", "Submits an answer to a price feed")
   .addParam("answer", "The answer to post")
   .setAction(async (_taskArgs, hre) => {
     const accounts: Signer[] = await hre.ethers.getSigners();
-    const FluxPriceFeed = await hre.ethers.getContractFactory("FluxPriceFeed");
+    const FluxPriceFeed = await hre.ethers.getContractFactory("contracts/FluxPriceFeed.sol:FluxPriceFeed");
     const contract = await FluxPriceFeed.attach(_taskArgs.contract);
 
     const tx = await contract.transmit(_taskArgs.answer);
