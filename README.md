@@ -55,6 +55,22 @@ $ yarn latestAnswer --contract "0xContractAddress" --network aurora
 4200000000
 ```
 
+## Feeds registry
+
+`FeedsRegistry.sol` mimicks the [Chainlink Feed Registry](https://blog.chain.link/introducing-the-chainlink-feed-registry/) interface to query the latest value from price feeds by only providing a pair of asset and denomination addresses, without needing to know each feed’s contract address.
+
+### Deploy
+
+Deploy a feed registry (e.g. to Aurora):
+
+```bash
+$ yarn deployFeedsRegistry --network aurora
+```
+
+Save the deployed contract address outputted by the command above.
+
+Optionally include `--admin "0xMyAddress"` to grant a specific address the initial validator role rather than the deployer.
+
 ## Price aggregator
 
 The price aggregator contract pulls from multiple first-party price feeds to return an averaged price. A minimum delay time is set, and anyone is allowed to update the latest price on the aggregator by calling `updatePrices()`. Similar to the first-party feed, the latest price is fetched using `latestAnswer()`.
