@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 interface LayerZeroContract {
     function updateBlockHeader(
@@ -18,68 +19,103 @@ interface LayerZeroContract {
  * @author fluxprotocol.org
  */
 contract FluxPriceFeed is AccessControl {
+    using EnumerableSet for EnumerableSet.UintSet;
+
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     struct Request {
         uint256 requestedAtBlock;
-        uint256 blockConfimations;
+        uint256 requiredBlockConfirmations;
         address layerZeroContract;
         bytes blockHash;
         bytes receiptsRoot;
         bool notified;
     }
 
-    mapping(bytes32 => Request) public requests;
+    EnumerableSet.UintSet private pendingRequests;
+    uint256 public numRequests = 0;
+    mapping(uint256 => Request) public requests;
+
+    //
+    // EVENTS
+    //
+
+    event Requested(
+        uint256 indexed requestId,
+        address layerZeroContract,
+        uint256 requiredBlockConfirmations,
+        bytes blockHash,
+        bytes receiptsRoot
+    );
+    event Notified(uint256 indexed requestId);
+
+    //
+    // CONSTRUCTOR
+    //
 
     constructor(address _admin) {
         _setupRole(ADMIN_ROLE, _admin);
     }
 
-    /**
-     * PUBLIC
-     */
+    //
+    // EXTERNAL METHODS
+    //
 
     function startRequest(
-        address contractAddress,
-        uint256 blockConfirmations,
+        address layerZeroContract,
+        uint256 requiredBlockConfirmations,
         bytes32 blockHash,
         bytes32 receiptsRoot
-    ) public {
-        bytes32 key = _hash(msg.sender, block.number);
-        Request memory request = requests[key];
+    ) external {
+        require(hasRole(ADMIN_ROLE, msg.sender), "Only admin can start a request");
+        numRequests++;
+        Request memory request = requests[numRequests];
         if (request.layerZeroContract == address(0)) {
-            request.layerZeroContract = contractAddress;
-            request.blockConfimations = blockConfirmations;
+            request.layerZeroContract = layerZeroContract;
+            request.requiredBlockConfirmations = requiredBlockConfirmations;
             request.requestedAtBlock = block.number;
             request.blockHash = abi.encodePacked(blockHash);
             request.receiptsRoot = abi.encodePacked(receiptsRoot);
             request.notified = false;
         }
-        requests[key] = request;
+        requests[numRequests] = request; // add to requests mapping
+        pendingRequests.add(numRequests); // add to pending requests set
+
+        emit Requested(
+            numRequests,
+            request.layerZeroContract,
+            request.requiredBlockConfirmations,
+            request.blockHash,
+            request.receiptsRoot
+        );
     }
 
-    function notify(bytes32 key) public {
+    function notify(uint256 key) external {
         Request memory request = requests[key];
         require(request.layerZeroContract != address(0), "Request not initialized");
         require(request.notified == false, "Request already notified");
         uint256 confirmationsSinceRequest = block.number - request.requestedAtBlock;
-        require(confirmationsSinceRequest >= request.blockConfimations);
+        require(confirmationsSinceRequest >= request.requiredBlockConfirmations, "Not enough confirmations");
 
         LayerZeroContract(request.layerZeroContract).updateBlockHeader(
             uint16(block.chainid), // chain id
-            msg.sender, // oracle
+            address(this), // oracle
             request.blockHash, // block hash
             confirmationsSinceRequest, // confirmations
             request.receiptsRoot // receipts root
         );
-        requests[key] = request;
+        request.notified = true;
+        requests[key] = request; // update request in requests mapping
+        pendingRequests.remove(key); // remove from pending requests set
+
+        emit Notified(key);
     }
 
-    /**
-     * INTERNAL
-     */
+    //
+    // VIEW METHODS
+    //
 
-    function _hash(address _from, uint256 _blockNumber) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_from, _blockNumber));
+    function getPendingRequests() internal view returns (uint256[] memory _pendingRequests) {
+        return pendingRequests.values();
     }
 }
