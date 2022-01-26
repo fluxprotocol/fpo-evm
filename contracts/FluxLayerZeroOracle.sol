@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import "./interface/ILayerZeroOracle.sol";
+import "./interface/ILayerZeroNetwork.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -11,7 +12,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  * @title Flux LayerZero oracle
  * @author fluxprotocol.org
  */
-contract FluxPriceFeed is AccessControl, ILayerZeroOracle, ReentrancyGuard {
+contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeERC20 for IERC20;
 
@@ -20,7 +21,7 @@ contract FluxPriceFeed is AccessControl, ILayerZeroOracle, ReentrancyGuard {
 
     struct Request {
         uint16 chainId;
-        bytes layerZeroAddress;
+        address layerZeroAddress;
         uint256 confirmations;
         uint256 requestedAtBlock;
     }
@@ -64,9 +65,14 @@ contract FluxPriceFeed is AccessControl, ILayerZeroOracle, ReentrancyGuard {
         bytes calldata dstNetworkAddress,
         uint256 blockConfirmations
     ) external override {
-        require(hasRole(LAYERZERO_ROLE, msg.sender), "LayerZero only");
+        // require(hasRole(LAYERZERO_ROLE, msg.sender), "LayerZero only");
 
-        Request memory request = Request(dstChainId, dstNetworkAddress, blockConfirmations, block.number);
+        Request memory request = Request(
+            dstChainId,
+            bytesToAddress(dstNetworkAddress),
+            blockConfirmations,
+            block.number
+        );
         numRequests++;
         requests[numRequests] = request; // add to requests mapping
 
@@ -74,10 +80,25 @@ contract FluxPriceFeed is AccessControl, ILayerZeroOracle, ReentrancyGuard {
     }
 
     /// @notice called by admin after updateBlockHeader() is called on LayerZero for an existing request
-    function proceedUpdateBlockHeader(uint256 requestIndex) external {
-        require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
+    function proceedUpdateBlockHeader(
+        uint256 requestIndex,
+        bytes calldata _blockHash,
+        bytes calldata _data
+    ) external {
+        // require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
 
         Request memory request = requests[requestIndex];
+        require(block.number >= request.requestedAtBlock + request.confirmations, "Not enough comfirmations");
+        uint256 confirmationsSinceRequest = block.number - request.requestedAtBlock;
+
+        ILayerZeroNetwork(request.layerZeroAddress).updateBlockHeader(
+            request.chainId,
+            address(this),
+            _blockHash,
+            confirmationsSinceRequest,
+            _data
+        );
+
         requests[requestIndex] = request; // update request in requests mapping
         pendingRequests.remove(requestIndex); // remove from pending requests set
 
@@ -118,6 +139,16 @@ contract FluxPriceFeed is AccessControl, ILayerZeroOracle, ReentrancyGuard {
     function setPrice(uint16 _destinationChainId, uint256 price) external {
         require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
         chainPriceLookup[_destinationChainId] = price;
+    }
+
+    //
+    // PURE METHODS
+    //
+
+    function bytesToAddress(bytes memory bys) private pure returns (address addr) {
+        assembly {
+            addr := mload(add(bys, 32))
+        }
     }
 
     //

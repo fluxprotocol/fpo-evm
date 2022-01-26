@@ -73,6 +73,7 @@
     "coverage": "yarn typechain && hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/**/*.ts\"",
     "deploy": "hardhat deploy:FluxPriceFeed",
     "deployAggregator": "hardhat deploy:FluxPriceAggregator",
+    "deployLayerZeroOracle": "hardhat deploy:FluxLayerZeroOracle",
     "latestAnswer": "hardhat latestAnswer",
     "transmit": "hardhat transmit",
     "updatePrices": "hardhat updatePrices",
