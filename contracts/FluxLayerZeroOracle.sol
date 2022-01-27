@@ -4,7 +4,6 @@ pragma solidity ^0.8.10;
 import "./interface/ILayerZeroOracle.sol";
 import "./interface/ILayerZeroNetwork.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -13,7 +12,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  * @author fluxprotocol.org
  */
 contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard {
-    using EnumerableSet for EnumerableSet.UintSet;
     using SafeERC20 for IERC20;
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -27,8 +25,8 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     }
 
     uint256 public numRequests = 0;
-    EnumerableSet.UintSet private pendingRequests;
     mapping(uint256 => Request) public requests;
+    uint256[] public sortedRequestsByBlock;
     mapping(uint16 => uint256) public chainPriceLookup;
 
     //
@@ -42,7 +40,6 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         uint256 requiredBlockConfirmations,
         uint256 requestedAtBlock
     );
-    event Notified(uint256 indexed requestId);
     event WithdrawTokens(address token, address to, uint256 amount);
     event Withdraw(address to, uint256 amount);
 
@@ -75,34 +72,9 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         );
         numRequests++;
         requests[numRequests] = request; // add to requests mapping
+        insertSortedRequestsByBlock(numRequests); // add to sortedRequestsByBlock
 
         emit NotifyOracleOfBlock(numRequests, dstChainId, dstNetworkAddress, blockConfirmations, block.number);
-    }
-
-    /// @notice called by admin after updateBlockHeader() is called on LayerZero for an existing request
-    function proceedUpdateBlockHeader(
-        uint256 requestIndex,
-        bytes calldata _blockHash,
-        bytes calldata _data
-    ) external {
-        // require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
-
-        Request memory request = requests[requestIndex];
-        require(block.number >= request.requestedAtBlock + request.confirmations, "Not enough comfirmations");
-        uint256 confirmationsSinceRequest = block.number - request.requestedAtBlock;
-
-        ILayerZeroNetwork(request.layerZeroAddress).updateBlockHeader(
-            request.chainId,
-            address(this),
-            _blockHash,
-            confirmationsSinceRequest,
-            _data
-        );
-
-        requests[requestIndex] = request; // update request in requests mapping
-        pendingRequests.remove(requestIndex); // remove from pending requests set
-
-        emit Notified(requestIndex);
     }
 
     // owner can approve a token spender
@@ -142,6 +114,29 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     }
 
     //
+    // INTERNAL METHODS
+    //
+
+    function insertSortedRequestsByBlock(uint256 requestIndex) internal {
+        // first, insert the new request at the end of the array
+        sortedRequestsByBlock[numRequests] = requestIndex;
+
+        // then, bubble down the new request to its correct position
+        uint256 i = numRequests;
+        while (
+            i > 0 &&
+            (requests[sortedRequestsByBlock[i]].requestedAtBlock + requests[sortedRequestsByBlock[i]].confirmations) <
+            (requests[sortedRequestsByBlock[i - 1]].requestedAtBlock +
+                requests[sortedRequestsByBlock[i - 1]].confirmations)
+        ) {
+            uint256 temp = sortedRequestsByBlock[i];
+            sortedRequestsByBlock[i] = sortedRequestsByBlock[i - 1];
+            sortedRequestsByBlock[i - 1] = temp;
+            i--;
+        }
+    }
+
+    //
     // PURE METHODS
     //
 
@@ -156,7 +151,18 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     //
 
     function getPendingRequests() internal view returns (uint256[] memory _pendingRequests) {
-        return pendingRequests.values();
+        // return all requests with eligible block <= block.number, assuming sortedRequestsByBlock is sorted
+        uint256[] memory pendingRequests;
+        uint256 numPendingRequests = 0;
+        for (uint256 i = numRequests; i > 0; i--) {
+            if (requests[sortedRequestsByBlock[i]].requestedAtBlock <= block.number) {
+                pendingRequests[numPendingRequests] = sortedRequestsByBlock[i];
+                numPendingRequests++;
+            } else {
+                break;
+            }
+        }
+        return pendingRequests;
     }
 
     // return whether this signing address is whitelisted

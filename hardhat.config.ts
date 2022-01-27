@@ -9,6 +9,7 @@ import "./tasks/derivePrivateKey";
 import "./tasks/latestAnswer";
 import "./tasks/transmit";
 import "./tasks/updatePrices";
+import "./tasks/notifyOracleOfBlock";
 
 import { resolve } from "path";
 
