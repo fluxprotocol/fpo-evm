@@ -17,16 +17,6 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant LAYERZERO_ROLE = keccak256("LAYERZERO_ROLE");
 
-    struct Request {
-        uint16 chainId;
-        address layerZeroAddress;
-        uint256 confirmations;
-        uint256 requestedAtBlock;
-    }
-
-    uint256 public numRequests = 0;
-    mapping(uint256 => Request) public requests;
-    uint256[] public sortedRequestsByBlock;
     mapping(uint16 => uint256) public chainPriceLookup;
 
     //
@@ -34,12 +24,12 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     //
 
     event NotifyOracleOfBlock(
-        uint256 indexed requestId,
         uint16 chainId,
         bytes layerZeroContract,
         uint256 requiredBlockConfirmations,
         uint256 requestedAtBlock
     );
+    event Notified(bytes dstNetworkAddress, uint16 _srcChainId, bytes _blockHash, uint256 _confirmations, bytes _data);
     event WithdrawTokens(address token, address to, uint256 amount);
     event Withdraw(address to, uint256 amount);
 
@@ -57,6 +47,9 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     //
 
     /// @notice called by LayerZero to initiate a request
+    /// @param dstChainId - chainId of source chain
+    /// @param dstNetworkAddress - address of the LayerZero contract on the specified chain on which to call updateBlockHeader()
+    /// @param blockConfirmations - number of blocks to wait for before calling updateBlockHeader() from this call's block.timestamp
     function notifyOracleOfBlock(
         uint16 dstChainId,
         bytes calldata dstNetworkAddress,
@@ -64,17 +57,33 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     ) external override {
         // require(hasRole(LAYERZERO_ROLE, msg.sender), "LayerZero only");
 
-        Request memory request = Request(
-            dstChainId,
-            bytesToAddress(dstNetworkAddress),
-            blockConfirmations,
-            block.number
-        );
-        numRequests++;
-        requests[numRequests] = request; // add to requests mapping
-        insertSortedRequestsByBlock(numRequests); // add to sortedRequestsByBlock
+        emit NotifyOracleOfBlock(dstChainId, dstNetworkAddress, blockConfirmations, block.number);
+    }
 
-        emit NotifyOracleOfBlock(numRequests, dstChainId, dstNetworkAddress, blockConfirmations, block.number);
+    /// @notice called by admin after updateBlockHeader() is called on LayerZero for an existing request
+    /// @param dstNetworkAddress - address of the LayerZero contract on the specified chain on which to call updateBlockHeader()
+    /// @param _srcChainId - id of the source chain
+    /// @param _blockHash - hash of the remote block header
+    /// @param  _confirmations - number of confirmations waited
+    /// @param _data - receiptsRoot (for EVMs) for the corresponding remote blockHash
+    function proceedUpdateBlockHeader(
+        bytes calldata dstNetworkAddress,
+        uint16 _srcChainId,
+        bytes calldata _blockHash,
+        uint256 _confirmations,
+        bytes calldata _data
+    ) external {
+        // require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
+
+        ILayerZeroNetwork(bytesToAddress(dstNetworkAddress)).updateBlockHeader(
+            _srcChainId,
+            address(this),
+            _blockHash,
+            _confirmations,
+            _data
+        );
+
+        emit Notified(dstNetworkAddress, _srcChainId, _blockHash, _confirmations, _data);
     }
 
     // owner can approve a token spender
@@ -114,29 +123,6 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     }
 
     //
-    // INTERNAL METHODS
-    //
-
-    function insertSortedRequestsByBlock(uint256 requestIndex) internal {
-        // first, insert the new request at the end of the array
-        sortedRequestsByBlock[numRequests] = requestIndex;
-
-        // then, bubble down the new request to its correct position
-        uint256 i = numRequests;
-        while (
-            i > 0 &&
-            (requests[sortedRequestsByBlock[i]].requestedAtBlock + requests[sortedRequestsByBlock[i]].confirmations) <
-            (requests[sortedRequestsByBlock[i - 1]].requestedAtBlock +
-                requests[sortedRequestsByBlock[i - 1]].confirmations)
-        ) {
-            uint256 temp = sortedRequestsByBlock[i];
-            sortedRequestsByBlock[i] = sortedRequestsByBlock[i - 1];
-            sortedRequestsByBlock[i - 1] = temp;
-            i--;
-        }
-    }
-
-    //
     // PURE METHODS
     //
 
@@ -144,25 +130,6 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         assembly {
             addr := mload(add(bys, 32))
         }
-    }
-
-    //
-    // VIEW METHODS
-    //
-
-    function getPendingRequests() internal view returns (uint256[] memory _pendingRequests) {
-        // return all requests with eligible block <= block.number, assuming sortedRequestsByBlock is sorted
-        uint256[] memory pendingRequests;
-        uint256 numPendingRequests = 0;
-        for (uint256 i = numRequests; i > 0; i--) {
-            if (requests[sortedRequestsByBlock[i]].requestedAtBlock <= block.number) {
-                pendingRequests[numPendingRequests] = sortedRequestsByBlock[i];
-                numPendingRequests++;
-            } else {
-                break;
-            }
-        }
-        return pendingRequests;
     }
 
     // return whether this signing address is whitelisted
