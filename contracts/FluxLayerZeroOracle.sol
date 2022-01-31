@@ -29,7 +29,13 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         uint256 requiredBlockConfirmations,
         uint256 requestedAtBlock
     );
-    event Notified(bytes dstNetworkAddress, uint16 _srcChainId, bytes _blockHash, uint256 _confirmations, bytes _data);
+    event Notified(
+        address dstNetworkAddress,
+        uint16 _srcChainId,
+        bytes _blockHash,
+        uint256 _confirmations,
+        bytes _data
+    );
     event WithdrawTokens(address token, address to, uint256 amount);
     event Withdraw(address to, uint256 amount);
 
@@ -67,7 +73,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     /// @param  _confirmations - number of confirmations waited
     /// @param _data - receiptsRoot (for EVMs) for the corresponding remote blockHash
     function proceedUpdateBlockHeader(
-        bytes calldata dstNetworkAddress,
+        address dstNetworkAddress,
         uint16 _srcChainId,
         bytes calldata _blockHash,
         uint256 _confirmations,
@@ -75,7 +81,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     ) external {
         // require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
 
-        ILayerZeroNetwork(bytesToAddress(dstNetworkAddress)).updateBlockHeader(
+        ILayerZeroNetwork(dstNetworkAddress).updateBlockHeader(
             _srcChainId,
             address(this),
             _blockHash,
@@ -123,18 +129,12 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     }
 
     //
-    // PURE METHODS
+    // VIEW METHODS
     //
-
-    function bytesToAddress(bytes memory bys) private pure returns (address addr) {
-        assembly {
-            addr := mload(add(bys, 32))
-        }
-    }
 
     // return whether this signing address is whitelisted
     function isApproved(address oracleAddress) external view override returns (bool approved) {
-        return hasRole(ADMIN_ROLE, oracleAddress);
+        return oracleAddress == address(this);
     }
 
     function getPrice(uint16 dstChainId) external view returns (uint256 priceInWei) {

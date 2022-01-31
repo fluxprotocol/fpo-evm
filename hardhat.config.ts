@@ -10,6 +10,7 @@ import "./tasks/latestAnswer";
 import "./tasks/transmit";
 import "./tasks/updatePrices";
 import "./tasks/notifyOracleOfBlock";
+import "./tasks/proceedUpdateBlockHeader";
 
 import { resolve } from "path";
 
