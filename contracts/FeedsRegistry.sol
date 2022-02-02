@@ -50,9 +50,6 @@ contract FeedsRegistry is AccessControl {
         address tokenEth = ethFeeds[currencyKey];
         address ethUsd = usdFeeds[ETH];
 
-        // console.log("tokenEth feed address = %s", tokenEth);
-        // console.log("ethUsd feed address = %s", ethUsd);
-
         if (tokenEth != address(0) && ethUsd != address(0)) {
             uint256 price1 = _latestPrice(tokenEth);
             uint256 price2 = _latestPrice(ethUsd);
@@ -95,8 +92,6 @@ contract FeedsRegistry is AccessControl {
         require(_latestPrice(feed) > 0, "Price should be > 0");
         ethFeeds[currencyKey] = feed;
         emit AddFeed(currencyKey, true, feed);
-        // console.log("Added ethFeed for %d", currencyKey);
-        // console.logBytes32(currencyKey);
     }
 
     function getPriceFromSymbol(string memory symbol) external view returns (uint256) {
