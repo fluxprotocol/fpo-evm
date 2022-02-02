@@ -49,6 +49,7 @@ contract FeedsRegistry is AccessControl {
 
         address tokenEth = ethFeeds[currencyKey];
         address ethUsd = usdFeeds[ETH];
+
         if (tokenEth != address(0) && ethUsd != address(0)) {
             uint256 price1 = _latestPrice(tokenEth);
             uint256 price2 = _latestPrice(ethUsd);
@@ -58,6 +59,8 @@ contract FeedsRegistry is AccessControl {
             return price1.mul(price2).div(1e18);
         } else if (currencyKey == USD) {
             return 1e8;
+        } else {
+            revert("Couldn't find feeds");
         }
     }
 

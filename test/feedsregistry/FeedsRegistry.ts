@@ -17,24 +17,29 @@ describe("Unit tests", function () {
 
     this.oracles = [] as FluxPriceFeed[];
 
-    this.usd = "0x5553440000000000000000000000000000000000000000000000000000000000";
+    this.usd = "0x5553440000000000000000000000000000000000000000000000000000000000"; // stringToBytes32("USD")
+    this.eth = "0x4554480000000000000000000000000000000000000000000000000000000000"; // stringToBytes32("ETH")
+    this.flx = "0x464c580000000000000000000000000000000000000000000000000000000000"; // stringToBytes32("FLX")
   });
 
   describe("FeedsRegistry", function () {
-    beforeEach(async function () {
-      // deploy three oracles
-      for (let i = 0; i < 3; i++) {
-        const decimals: number = 6;
-        const description: string = "My description";
-        const pricefeedArtifact: Artifact = await artifacts.readArtifact("FluxPriceFeed");
-        this.oracles[i] = <FluxPriceFeed>(
-          await waffle.deployContract(this.signers.admin, pricefeedArtifact, [
-            this.signers.admin.address,
-            decimals,
-            description,
-          ])
-        );
-      }
+    before(async function () {
+      const pricefeedArtifact: Artifact = await artifacts.readArtifact("FluxPriceFeed");
+      this.oracles[0] = <FluxPriceFeed>(
+        await waffle.deployContract(this.signers.admin, pricefeedArtifact, [
+          this.signers.admin.address,
+          18,
+          "ETH / USD",
+        ])
+      );
+
+      this.oracles[1] = <FluxPriceFeed>(
+        await waffle.deployContract(this.signers.admin, pricefeedArtifact, [
+          this.signers.admin.address,
+          18,
+          "FLX / ETH",
+        ])
+      );
 
       // deploy feeds registry
       const frArtifact: Artifact = await artifacts.readArtifact("FeedsRegistry");
