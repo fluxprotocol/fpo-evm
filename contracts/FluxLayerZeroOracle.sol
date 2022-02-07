@@ -27,6 +27,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         uint16 chainId,
         bytes layerZeroContract,
         uint256 requiredBlockConfirmations,
+        bytes32 payloadHash,
         uint256 requestedAtBlock
     );
     event Notified(
@@ -53,17 +54,19 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     //
 
     /// @notice called by LayerZero to initiate a request
-    /// @param dstChainId - chainId of source chain
-    /// @param dstNetworkAddress - address of the LayerZero contract on the specified chain on which to call updateBlockHeader()
+    /// @param chainId - chainId of source chain
+    /// @param networkAddress - address of the LayerZero contract on the specified chain on which to call updateBlockHeader()
     /// @param blockConfirmations - number of blocks to wait for before calling updateBlockHeader() from this call's block.timestamp
+    /// @param payloadHash -
     function notifyOracleOfBlock(
-        uint16 dstChainId,
-        bytes calldata dstNetworkAddress,
-        uint256 blockConfirmations
+        uint16 chainId,
+        bytes calldata networkAddress,
+        uint256 blockConfirmations,
+        bytes32 payloadHash
     ) external override {
         // require(hasRole(LAYERZERO_ROLE, msg.sender), "LayerZero only");
 
-        emit NotifyOracleOfBlock(dstChainId, dstNetworkAddress, blockConfirmations, block.number);
+        emit NotifyOracleOfBlock(chainId, networkAddress, blockConfirmations, payloadHash, block.number);
     }
 
     /// @notice called by admin after updateBlockHeader() is called on LayerZero for an existing request

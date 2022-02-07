@@ -9,9 +9,10 @@ interface ILayerZeroOracle {
 
     // initiates the offchain oracle to do its job
     function notifyOracleOfBlock(
-        uint16 dstChainId,
-        bytes calldata dstNetworkAddress,
-        uint256 blockConfirmations
+        uint16 chainId,
+        bytes calldata endpointAddress,
+        uint256 blockConfirmations,
+        bytes32 payloadHash
     ) external;
 
     // return true if the address is allowed to call updateBlockHeader()
