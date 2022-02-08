@@ -147,6 +147,18 @@ const config: HardhatUserConfig = {
       url: "https://rpc.xdaichain.com",
       chainId: 100,
     },
+    tanenbaum: {
+      accounts: { mnemonic },
+      url: "https://rpc.tanenbaum.io",
+      chainId: 5700,
+      blockGasLimit: 8000000,
+    },
+    syscoin: {
+      accounts: { mnemonic },
+      url: "https://rpc.syscoin.org",
+      chainId: 57,
+      blockGasLimit: 8000000,
+    },
     goerli: getChainConfig("goerli"),
     kovan: getChainConfig("kovan"),
     rinkeby: getChainConfig("rinkeby"),
