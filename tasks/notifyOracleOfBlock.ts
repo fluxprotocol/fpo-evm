@@ -1,5 +1,6 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { task } from "hardhat/config";
+import { ethers } from "ethers";
 
 task("notifyOracleOfBlock")
   .addParam("contract")
@@ -15,6 +16,7 @@ task("notifyOracleOfBlock")
       _taskArgs.dstChainId,
       _taskArgs.dstNetworkAddress,
       _taskArgs.blockConfirmations,
+      ethers.constants.HashZero,
     );
     console.log(`Tx hash: ${tx.hash}`);
   });

@@ -103,6 +103,7 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       chainId: 43113,
+      gasMultiplier: 2,
     },
     bsc: {
       accounts: { mnemonic },
@@ -113,6 +114,7 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       url: "https://data-seed-prebsc-2-s3.binance.org:8545",
       chainId: 97,
+      gasMultiplier: 2,
     },
     celo: {
       accounts: { mnemonic },

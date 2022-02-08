@@ -64,7 +64,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         uint256 blockConfirmations,
         bytes32 payloadHash
     ) external override {
-        // require(hasRole(LAYERZERO_ROLE, msg.sender), "LayerZero only");
+        require(hasRole(LAYERZERO_ROLE, msg.sender), "LayerZero only");
 
         emit NotifyOracleOfBlock(chainId, networkAddress, blockConfirmations, payloadHash, block.number);
     }
@@ -82,7 +82,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         uint256 _confirmations,
         bytes calldata _data
     ) external {
-        // require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
+        require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
 
         ILayerZeroNetwork(dstNetworkAddress).updateBlockHeader(
             _srcChainId,
