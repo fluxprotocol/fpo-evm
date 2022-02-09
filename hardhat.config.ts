@@ -2,6 +2,7 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "hardhat-deploy";
 
 import "./tasks/accounts";
 import "./tasks/deploy";
@@ -182,6 +183,11 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "src/types",
     target: "ethers-v5",
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
   },
 };
 
