@@ -65,4 +65,8 @@ export function shouldBehaveLikeFluxPriceFeed(): void {
     await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
     expect(await this.pricefeed.connect(this.signers.admin).latestRound()).to.equal(1);
   });
+  it("should let the consumer contract call latestAnswer()", async function () {
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    expect(await this.pricefeedconsumer.connect(this.signers.admin).getLatestPrice()).to.equal(TEST_VALUE);
+  });
 }
