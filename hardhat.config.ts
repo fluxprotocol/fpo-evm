@@ -2,6 +2,8 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "hardhat-gas-reporter";
+// import "buidler-gas-reporter";
 
 import "./tasks/accounts";
 import "./tasks/deploy";
@@ -55,7 +57,10 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   gasReporter: {
     currency: "USD",
+    token: "ETH",
+    gasPriceApi: "https://api.etherscan.io/api?module=proxy&action=eth_gasPrice",
     enabled: process.env.REPORT_GAS ? true : false,
+    coinmarketcap: process.env.COINMARKETCAP_API,
     excludeContracts: [],
     src: "./contracts",
   },
