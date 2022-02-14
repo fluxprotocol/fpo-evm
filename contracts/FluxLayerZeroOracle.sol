@@ -84,7 +84,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     ) external {
         require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
 
-        ILayerZeroNetwork(dstNetworkAddress).updateBlockHeader(_srcChainId, _blockHash, _confirmations, _data);
+        ILayerZeroUltraLightNode(dstNetworkAddress).updateHash(_srcChainId, _blockHash, _confirmations, _data);
 
         emit Notified(dstNetworkAddress, _srcChainId, _blockHash, _confirmations, _data);
     }
