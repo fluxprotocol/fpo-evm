@@ -5,6 +5,7 @@ import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signe
 import type { FluxPriceFeed } from "../../src/types/FluxPriceFeed";
 import { Signers } from "../types";
 import { shouldBehaveLikeFluxPriceFeed } from "./FluxPriceFeed.behavior";
+import { ExamplePriceFeedConsumer } from "../../src/types/ExamplePriceFeedConsumer";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -26,6 +27,10 @@ describe("Unit tests", function () {
           decimals,
           description,
         ])
+      );
+      const pricefeedconsumerArtifact: Artifact = await artifacts.readArtifact("ExamplePriceFeedConsumer");
+      this.pricefeedconsumer = <ExamplePriceFeedConsumer>(
+        await waffle.deployContract(this.signers.admin, pricefeedconsumerArtifact, [this.pricefeed.address])
       );
     });
 
