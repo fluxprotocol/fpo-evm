@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import "./interface/ILayerZeroOracle.sol";
-import "./interface/ILayerZeroNetwork.sol";
+import "./interface/ILayerZeroUltraLightNode.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
