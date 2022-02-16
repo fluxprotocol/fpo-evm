@@ -23,14 +23,15 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     // EVENTS
     //
 
-    event NotifyOracleOfBlock(
+    event NotifiedOracle(
         uint16 chainId,
-        bytes layerZeroContract,
+        uint16 outboundProofType,
+        bytes32 layerZeroContract,
         uint256 requiredBlockConfirmations,
         bytes32 payloadHash,
         uint256 requestedAtBlock
     );
-    event Notified(
+    event NotifiedLayerZero(
         address dstNetworkAddress,
         uint16 _srcChainId,
         bytes _blockHash,
@@ -54,42 +55,48 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     //
 
     /// @notice called by LayerZero to initiate a request
-    /// @param chainId - chainId of source chain
-    /// @param networkAddress - address of the LayerZero contract on the specified chain on which to call updateBlockHeader()
-    /// @param blockConfirmations - number of blocks to wait for before calling updateBlockHeader() from this call's block.timestamp
-    /// @param payloadHash -
-    function notifyOracleOfBlock(
-        uint16 chainId,
-        bytes calldata networkAddress,
-        uint256 blockConfirmations,
-        bytes32 payloadHash
-    ) external override {
-        require(hasRole(LAYERZERO_ROLE, msg.sender), "LayerZero only");
-
-        emit NotifyOracleOfBlock(chainId, networkAddress, blockConfirmations, payloadHash, block.number);
+    /// @param _dstChainId - chainId of source chain
+    /// @param _outboundProofType -
+    /// @param _remoteUlnAddress - address of the LayerZero contract on the specified chain on which to call updateHash()
+    /// @param _outboundBlockConfirmations - number of blocks to wait for before calling updateHash() from this call's block.timestamp
+    /// @param _payloadHash - payload
+    function notifyOracle(
+        uint16 _dstChainId,
+        uint16 _outboundProofType,
+        bytes32 _remoteUlnAddress,
+        uint64 _outboundBlockConfirmations,
+        bytes32 _payloadHash
+    ) external override onlyRole(LAYERZERO_ROLE) {
+        emit NotifiedOracle(
+            _dstChainId,
+            _outboundProofType,
+            _remoteUlnAddress,
+            _outboundBlockConfirmations,
+            _payloadHash,
+            block.number
+        );
     }
 
-    /// @notice called by admin after updateBlockHeader() is called on LayerZero for an existing request
-    /// @param dstNetworkAddress - address of the LayerZero contract on the specified chain on which to call updateBlockHeader()
+    /// @notice called by admin after LayerZero has notified us of a new hash via notifyOracle()
+    /// @param dstNetworkAddress - address of the LayerZero contract on the specified chain on which to call updateHash()
     /// @param _srcChainId - id of the source chain
     /// @param _blockHash - hash of the remote block header
     /// @param  _confirmations - number of confirmations waited
     /// @param _data - receiptsRoot (for EVMs) for the corresponding remote blockHash
-    function proceedUpdateBlockHeader(
+    function updateHash(
         address dstNetworkAddress,
         uint16 _srcChainId,
         bytes calldata _blockHash,
         uint256 _confirmations,
         bytes calldata _data
-    ) external {
-        require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
-
+    ) external onlyRole(ADMIN_ROLE) {
+        // make the call to LayerZero
         ILayerZeroUltraLightNode(dstNetworkAddress).updateHash(_srcChainId, _blockHash, _confirmations, _data);
 
-        emit Notified(dstNetworkAddress, _srcChainId, _blockHash, _confirmations, _data);
+        emit NotifiedLayerZero(dstNetworkAddress, _srcChainId, _blockHash, _confirmations, _data);
     }
 
-    // owner can approve a token spender
+    // admin can approve a token spender
     function approveToken(
         address _token,
         address _spender,
@@ -100,28 +107,30 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         token.safeApprove(_spender, _amount);
     }
 
-    // owner can withdraw native
-    function withdraw(address payable _to, uint256 _amount) public nonReentrant {
-        require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
+    // admin can withdraw from a LayerZero ULN which accumulates native tokens per call
+    function withdrawOracleFee(address _remoteUlnAddress, uint256 _amount) external onlyRole(ADMIN_ROLE) {
+        ILayerZeroUltraLightNode(_remoteUlnAddress).withdrawOracleFee(msg.sender, _amount);
+    }
+
+    // admin can withdraw native
+    function withdraw(address payable _to, uint256 _amount) public nonReentrant onlyRole(ADMIN_ROLE) {
         (bool success, ) = _to.call{ value: _amount }("");
         require(success, "OracleClient: failed to withdraw");
         emit Withdraw(_to, _amount);
     }
 
-    // owner can withdraw tokens
+    // admin can withdraw tokens
     function withdrawTokens(
         address _token,
         address _to,
         uint256 _amount
-    ) public {
-        require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
+    ) public onlyRole(ADMIN_ROLE) {
         IERC20(_token).safeTransfer(_to, _amount);
         emit WithdrawTokens(_token, _to, _amount);
     }
 
-    // owner can set gas price
-    function setPrice(uint16 _destinationChainId, uint256 price) external {
-        require(hasRole(ADMIN_ROLE, msg.sender), "Admin only");
+    // admin can set gas price
+    function setPrice(uint16 _destinationChainId, uint256 price) external onlyRole(ADMIN_ROLE) {
         chainPriceLookup[_destinationChainId] = price;
     }
 
