@@ -2,7 +2,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { task } from "hardhat/config";
 import { ethers } from "ethers";
 
-task("notifyOracleOfBlock")
+task("notifyOracle")
   .addParam("contract")
   .addParam("dstChainId")
   .addParam("dstNetworkAddress")
@@ -12,9 +12,10 @@ task("notifyOracleOfBlock")
     const FluxLayerZeroOracle = await hre.ethers.getContractFactory("FluxLayerZeroOracle");
     const contract = await FluxLayerZeroOracle.attach(_taskArgs.contract);
 
-    const tx = await contract.notifyOracleOfBlock(
+    const tx = await contract.notifyOracle(
       _taskArgs.dstChainId,
-      _taskArgs.dstNetworkAddress,
+      1,
+      ethers.utils.hexZeroPad(_taskArgs.dstNetworkAddress, 32),
       _taskArgs.blockConfirmations,
       ethers.constants.HashZero,
     );
