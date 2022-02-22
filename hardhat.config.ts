@@ -3,14 +3,17 @@ import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
+import "@nomiclabs/buidler/config"
 // import "buidler-gas-reporter";
 
 import "./tasks/accounts";
-import "./tasks/deploy";
+import "./tasks/deploy/";
 import "./tasks/derivePrivateKey";
 import "./tasks/latestAnswer";
 import "./tasks/transmit";
 import "./tasks/updatePrices";
+import "./tasks/multiPriceFeedTransmit"
+import "./tasks/deploy/multipricefeed"
 
 import { resolve } from "path";
 
