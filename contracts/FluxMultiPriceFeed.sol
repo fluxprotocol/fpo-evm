@@ -27,6 +27,11 @@ contract FluxMultiPriceFeed is AccessControl, IERC2362 {
         _setupRole(VALIDATOR_ROLE, _validator);
     }
 
+
+    /**
+     * @notice answer from the most recent report of a certain price pair
+     * @param _id Keccak256 hash of the price pair string we wanna query
+     */
     function valueFor(bytes32 _id)
         external
         view
@@ -43,10 +48,16 @@ contract FluxMultiPriceFeed is AccessControl, IERC2362 {
         return (feeds[_id].price, feeds[_id].timestamp, 200);
     }
 
-    function transmit(bytes32[] calldata _pricePairs, int256[] calldata _answer) external onlyRole(VALIDATOR_ROLE) {
-        require(_answer.length == _pricePairs.length, "The transmitted arrays must be equal");
+    /**
+     * @notice transmit is called to post a new value to the contract price pairs
+     * @param _pricePairs array of price pairs ids we wanna post values for
+     * @param _answers array of prices we wanna post
+
+     */
+    function transmit(bytes32[] calldata _pricePairs, int256[] calldata _answers) external onlyRole(VALIDATOR_ROLE) {
+        require(_answers.length == _pricePairs.length, "The transmitted arrays must be equal");
         for (uint256 i = 0; i < _pricePairs.length; i++) {
-            feeds[_pricePairs[i]].price = _answer[i];
+            feeds[_pricePairs[i]].price = _answers[i];
             feeds[_pricePairs[i]].timestamp = block.timestamp;
         }
     }
