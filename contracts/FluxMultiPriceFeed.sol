@@ -43,9 +43,10 @@ contract FluxMultiPriceFeed is AccessControl, IERC2362 {
         return (feeds[_id].price, feeds[_id].timestamp, 200);
     }
 
-    function transmit(bytes32[] calldata _pricePairs, int256 _answer) external onlyRole(VALIDATOR_ROLE) {
+    function transmit(bytes32[] calldata _pricePairs, int256[] calldata _answer) external onlyRole(VALIDATOR_ROLE) {
+        require(_answer.length == _pricePairs.length, "The transmitted arrays must be equal");
         for (uint256 i = 0; i < _pricePairs.length; i++) {
-            feeds[_pricePairs[i]].price = _answer;
+            feeds[_pricePairs[i]].price = _answer[i];
             feeds[_pricePairs[i]].timestamp = block.timestamp;
         }
     }
