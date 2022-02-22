@@ -13,7 +13,7 @@ import "./tasks/latestAnswer";
 import "./tasks/transmit";
 import "./tasks/updatePrices";
 import "./tasks/multiPriceFeedTransmit"
-import "./tasks/deploy/multipricefeed"
+import "./tasks/multiPriceFeedValueFor"
 
 import { resolve } from "path";
 
