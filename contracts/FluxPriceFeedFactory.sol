@@ -6,9 +6,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./FluxMultiPriceFeed.sol";
 import "./FluxPriceFeed.sol";
 /**
- * @title Flux first-party multi price feed oracle
+ * @title Flux first-party price feed factory
  * @author fluxprotocol.org
- * @notice Simple posting of multiple scalars, compatible with ERC 2362
  */
 contract FluxPriceFeedFactory is AccessControl {
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
@@ -29,7 +28,7 @@ contract FluxPriceFeedFactory is AccessControl {
     
    
 
-
+    /// @notice create new priceFeed
     ///@param _description Price-ETH/USD-3
     function CreateNewPriceFeed(address _validator, uint8 _decimals, string memory _description) 
         public returns (address)
@@ -42,11 +41,18 @@ contract FluxPriceFeedFactory is AccessControl {
 
     }
 
+    /**
+     * @notice answer from the most recent report
+     */
     function priceFeedLatestAnswer(string memory _description) public returns (int256) {
         return FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).latestAnswer();
 
     }
 
+     /**
+     * @notice transmit is called to post a new report to the contract
+     * @param _answer latest answer
+     */
     function priceFeedTransmit(string memory _description, int192 _answer) public onlyRole(VALIDATOR_ROLE){
         FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).transmit(_answer);
 
@@ -57,8 +63,8 @@ contract FluxPriceFeedFactory is AccessControl {
 
 
 
-
-     function CreateNewMultiPriceFeed(address _validator) public returns (address){
+    /// @notice create new multiPriceFeed
+    function CreateNewMultiPriceFeed(address _validator) public returns (address){
         FluxMultiPriceFeed multiPricFeed = new FluxMultiPriceFeed(_validator);
         FluxMultiPriceFeedsArray.push(multiPricFeed);
         return address(multiPricFeed);
@@ -75,10 +81,10 @@ contract FluxPriceFeedFactory is AccessControl {
             uint256
         )
     {
-        FluxMultiPriceFeed(address(FluxMultiPriceFeedsArray[_FluxMultiPriceFeedIndex])).valueFor(_id);
+        return FluxMultiPriceFeed(address(FluxMultiPriceFeedsArray[_FluxMultiPriceFeedIndex])).valueFor(_id);
       
     }
-
+ 
 
 
     function multiPriceFeedTransmit(uint256 _FluxMultiPriceFeedIndex, 
