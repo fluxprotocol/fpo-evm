@@ -12,56 +12,34 @@ import "./FluxPriceFeed.sol";
 contract FluxPriceFeedFactory is AccessControl, IERC2362 {
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
 
-    bytes32[] public FluxPriceFeedsArray;
+    // array of price pairs in bytes ex: 0xdfaa6f747f0f012e8f2069d6ecacff25f5cdf0258702051747439949737fc0b5
+    bytes32[] public PricePairsIds; 
+
+    // array of price pairs in strings ex: Price-ETH/USD-3
+    string[] public PricePairsStrings; 
+
+    // array of created oracles addresses
+    address[] public PriceFeedsAddresses; 
+
+    // id -> oracle
     mapping(bytes32 => FluxPriceFeed) public FluxPriceFeedsMapping;
 
+    // id -> price details
+    mapping(bytes32 => PricePair) public PricePairsMapping; 
 
     
     struct PricePair {
         int256 price;
         uint256 timestamp;
     }
-    mapping(bytes32 => PricePair) public FluxMultiPriceFeedsMapping;
-    bytes32[] public FluxMultiPriceFeedsArray;
-
+    
     constructor(address _validator) {
         _setupRole(VALIDATOR_ROLE, _validator);
     }
 
-     /**
-     * @notice answer from the most recent report of a certain price pair
-     * @param _id Keccak256 hash of the price pair string we wanna query
-     */
-    function valueFor(bytes32 _id)
-        external
-        view
-        override
-        returns (
-            int256,
-            uint256,
-            uint256
-        )
-    {
-        // if not found, return 404
-        if (FluxMultiPriceFeedsMapping[_id].timestamp <= 0) return (0, 0, 404);
+     
 
-        return (FluxMultiPriceFeedsMapping[_id].price, FluxMultiPriceFeedsMapping[_id].timestamp, 200);
-    }
-
-    /**
-     * @notice transmit is called to post a new value to the contract price pairs
-     * @param _pricePairs array of price pairs ids we wanna post values for
-     * @param _answers array of prices we wanna post
-
-     */
-    function transmit(bytes32[] calldata _pricePairs, int256[] calldata _answers) external onlyRole(VALIDATOR_ROLE) {
-        require(_answers.length == _pricePairs.length, "The transmitted arrays must be equal");
-        for (uint256 i = 0; i < _pricePairs.length; i++) {
-            FluxMultiPriceFeedsArray.push(_pricePairs[i]);
-            FluxMultiPriceFeedsMapping[_pricePairs[i]].price = _answers[i];
-            FluxMultiPriceFeedsMapping[_pricePairs[i]].timestamp = block.timestamp;
-        }
-    }
+   
     
    
 
@@ -73,17 +51,10 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
         FluxPriceFeed priceFeed = new FluxPriceFeed(_validator, _decimals, _description);
         // FluxPriceFeedsArray.push(priceFeed);
         bytes32 _id = keccak256(abi.encodePacked(_description));
-        FluxPriceFeedsArray.push(_id);
+        PricePairsIds.push(_id);
         FluxPriceFeedsMapping[_id] = priceFeed;
+        PriceFeedsAddresses.push(address(priceFeed));
         return address(priceFeed);
-
-    }
-
-    /**
-     * @notice answer from the most recent report
-     */
-    function priceFeedLatestAnswer(string memory _description) public view returns (int256) {
-        return FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).latestAnswer();
 
     }
 
@@ -96,16 +67,104 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
 
     }
 
-    function listPriceFeeds() public view returns(bytes32[] memory){
-        return FluxPriceFeedsArray;
+    /**
+     * @notice answer from the most recent report
+     */
+    function priceFeedLatestAnswer(string memory _description) public view returns (int256) {
+        return FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).latestAnswer();
+
+    }
+
+    
+
+     /**
+     * @notice transmit is called to post a new value to the contract price pairs and to the created oracles(price feeds)
+     * @param _pricePairs array of price pairs strings we wanna post values for
+     * @param _answers array of prices we wanna post
+
+     */
+    function transmit(string[] calldata _pricePairs, int192[] calldata _answers) external onlyRole(VALIDATOR_ROLE) {
+        require(_answers.length == _pricePairs.length, "The transmitted arrays must be equal");
+        
+        
+        for (uint256 i = 0; i < _pricePairs.length; i++) {
+            bool exists = false;
+
+            bytes32 id = keccak256(abi.encodePacked(_pricePairs[i]));
+
+
+            // Check if that id already exists
+            for(uint256 j = 0; j < PricePairsIds.length; j++){
+                if(PricePairsIds[i] == id){
+                    exists = true;
+                    break;
+                }
+            }
+            // If it doesn't, create a new oracle (aka a new price feed) 
+            if(!exists){
+                PricePairsStrings.push(_pricePairs[i]);
+                PricePairsIds.push(id);
+                bytes memory strBytes = bytes(_pricePairs[i]);
+
+                // Price-ETH/USD-3 (last byte is the decimal used)
+                bytes1 decimals = strBytes[strBytes.length - 1]; 
+                CreateNewPriceFeed(msg.sender,  uint8(decimals), _pricePairs[i]);
+
+            }
+            
+            // Then update this contract's price pairs
+            FluxPriceFeed(address(FluxPriceFeedsMapping[id])).transmit(_answers[i]);
+            PricePairsMapping[id].price = _answers[i];
+            PricePairsMapping[id].timestamp = block.timestamp;
+        }
+    }
+
+    /**
+     * @notice answer from the most recent report of a certain price pair from factory
+     * @param _id hash of the price pair string we wanna query
+     */
+    function valueFor(bytes32 _id)
+         external
+        view
+        override
+        returns (
+            int256,
+            uint256,
+            uint256
+        )
+    {
+        // if not found, return 404
+        if (PricePairsMapping[_id].timestamp <= 0) return (0, 0, 404);
+
+        return (PricePairsMapping[_id].price, PricePairsMapping[_id].timestamp, 200);
+    }
+
+
+     /**
+     * @notice answer from the most recent report of a certain price pair from depoyed oracle
+     * @param _description the price pair string we wanna query
+     */
+    function fetchValueFromPriceFeedOracle(string memory _description) public view returns (int256){
+       return FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).latestAnswer();
+    }
+
+
+
+
+    function listPricePairsIds() public view returns(bytes32[] memory){
+        return PricePairsIds;
+        
+    }
+    function listPricePairsStrings() public view returns(string[] memory){
+        return PricePairsStrings;
         
     }
 
-    function listMutiPricePairs() public view returns(bytes32[] memory){
-        return FluxMultiPriceFeedsArray;
-        
+    function listPriceFeedsAddresses() public view returns(address[] memory){
+        return PriceFeedsAddresses;
     }
 
+  
 
 
 }
