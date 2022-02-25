@@ -67,13 +67,7 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
 
     }
 
-    /**
-     * @notice answer from the most recent report
-     */
-    function priceFeedLatestAnswer(string memory _description) public view returns (int256) {
-        return FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).latestAnswer();
-
-    }
+   
 
     
 
@@ -139,15 +133,16 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
         return (PricePairsMapping[_id].price, PricePairsMapping[_id].timestamp, 200);
     }
 
-
      /**
-     * @notice answer from the most recent report of a certain price pair from depoyed oracle
-     * @param _description the price pair string we wanna query
+     * @notice answer from the most recent report
      */
-    function fetchValueFromPriceFeedOracle(string memory _description) public view returns (int256){
-       return FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).latestAnswer();
+    function priceFeedLatestAnswer(string memory _description) public view returns (int256) {
+        return FluxPriceFeed(address(FluxPriceFeedsMapping[keccak256(abi.encodePacked(_description))])).latestAnswer();
+
     }
 
+
+   
 
 
 
