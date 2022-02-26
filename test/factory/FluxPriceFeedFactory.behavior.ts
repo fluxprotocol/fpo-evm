@@ -10,7 +10,6 @@ export function shouldBehaveLikeFluxPriceFeedFactory(): void {
     let pricePairs = [this.eth_usd_str, this.btc_usd_str];
     let decimals = [3, 3];
     let answers = [3000, 37600];
-    // console.log("validator = ", this.signers.admin.address);
     await this.factory.connect(this.signers.admin).transmit(pricePairs, decimals, answers);
     [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3000);
