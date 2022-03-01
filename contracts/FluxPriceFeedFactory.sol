@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.11;
 
 import "./interface/IERC2362.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -21,7 +21,27 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
     event Log(string message);
 
     constructor(address _validator) {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(VALIDATOR_ROLE, _validator);
+    }
+
+    /**
+     * @notice internal function to create a new FluxPriceFeed
+     * @dev only a validator should be able to call this function
+     */
+    function _deployOracle(
+        bytes32 _id,
+        string calldata _pricePair,
+        uint8 _decimals
+    ) internal {
+        // deploy the new contract and store it in the mapping
+        FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
+        fluxPriceFeeds[_id] = newPriceFeed;
+
+        // also grant this contract's admin VALIDATOR_ROLE on the new FluxPriceFeed
+        newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
+
+        emit FluxPriceFeedCreated(_id, address(newPriceFeed));
     }
 
     /**
@@ -35,33 +55,30 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
         uint8[] calldata _decimals,
         int192[] calldata _answers
     ) external onlyRole(VALIDATOR_ROLE) {
-        require((_pricePairs.length == _decimals.length) && (_pricePairs.length == _answers.length), "Transmitted arrays must be equal");
+        require(
+            (_pricePairs.length == _decimals.length) && (_pricePairs.length == _answers.length),
+            "Transmitted arrays must be equal"
+        );
         // Iterate through each transmitted price pair
         for (uint256 i = 0; i < _pricePairs.length; i++) {
             // Find the price pair id
             string memory str = string(abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i])));
             bytes32 id = keccak256(bytes(str));
-            
+
             // if oracle exists then transmit values
-            if(address(fluxPriceFeeds[id]) != address(0x0) ){
+            if (address(fluxPriceFeeds[id]) != address(0x0)) {
                 // try to transmit or create new price pair if it doesn't exist
                 try fluxPriceFeeds[id].transmit(_answers[i]) {
                     // transmission is successful, nothing to do
-                }catch Error(string memory reason) {
+                } catch Error(string memory reason) {
                     // catch failing revert() and require()
                     emit Log(reason);
                 }
-            // else create an oracle then transmit values
-            }else{
-                
-                FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals[i], _pricePairs[i]);
-                fluxPriceFeeds[id] = newPriceFeed;
-                emit FluxPriceFeedCreated(id, address(newPriceFeed));
+                // else create an oracle then transmit values
+            } else {
+                _deployOracle(id, _pricePairs[i], _decimals[i]);
                 fluxPriceFeeds[id].transmit(_answers[i]);
-
             }
-
-         
         }
     }
 
@@ -80,24 +97,23 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
         )
     {
         // if oracle exists then fetch values
-        if( address(fluxPriceFeeds[_id]) != address(0x0) ){
+        if (address(fluxPriceFeeds[_id]) != address(0x0)) {
             // fetch the price feed contract and read its latest answer and timestamp
-            try fluxPriceFeeds[_id].latestRoundData() 
-                returns (uint80 roundId,
-                        int256 answer,
-                        uint256 startedAt,
-                        uint256 updatedAt,
-                        uint80 answeredInRound){
-
+            try fluxPriceFeeds[_id].latestRoundData() returns (
+                uint80 roundId,
+                int256 answer,
+                uint256 startedAt,
+                uint256 updatedAt,
+                uint80 answeredInRound
+            ) {
                 return (answer, updatedAt, 200);
-
-            }catch{
+            } catch {
                 // catch failing revert() and require()
                 return (0, 0, 404);
             }
-          
-        // else return not found
-        }else{
+
+            // else return not found
+        } else {
             return (0, 0, 404);
         }
     }
