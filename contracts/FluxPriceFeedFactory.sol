@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.12;
 
-import "./interface/IERC2362.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./FluxPriceFeed.sol";
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "./interface/IERC2362.sol";
+import "./FluxPriceFeed.sol";
 
 /**
  * @title Flux first-party price feed factory

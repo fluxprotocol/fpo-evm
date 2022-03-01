@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.12;
 
 import "./interface/IERC2362.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -26,7 +26,6 @@ contract FluxMultiPriceFeed is AccessControl, IERC2362 {
     constructor(address _validator) {
         _setupRole(VALIDATOR_ROLE, _validator);
     }
-
 
     /**
      * @notice answer from the most recent report of a certain price pair
