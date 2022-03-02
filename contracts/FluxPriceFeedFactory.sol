@@ -124,4 +124,8 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
     function addressOfPricePair(bytes32 _id) external view returns (address) {
         return address(fluxPriceFeeds[_id]);
     }
+
+    function typeAndVersion() external pure virtual returns (string memory) {
+        return "FluxPriceFeedFactory 1.2.0";
+    }
 }
