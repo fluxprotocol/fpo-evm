@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Flux first-party price feed factory
@@ -17,7 +16,17 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
     // mapping of id to FluxPriceFeed
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
 
+    /**
+     * @notice indicates that a new oracle was created
+     * @param id hash of the price pair of the deployed oracle
+     * @param oracle address of the deployed oracle
+     */
     event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle);
+
+    /**
+     * @notice to log error messages
+     * @param message the logged message
+     */
     event Log(string message);
 
     constructor(address _validator) {
@@ -40,8 +49,7 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
 
         // also grant this contract's admin VALIDATOR_ROLE on the new FluxPriceFeed
         newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
-        console.logBytes32(_id);
-        console.log(address(newPriceFeed));
+    
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
     }
 
@@ -66,20 +74,16 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
             string memory str = string(abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i])));
             bytes32 id = keccak256(bytes(str));
 
-            // if oracle exists then transmit values
-            if (address(fluxPriceFeeds[id]) != address(0x0)) {
-                // try to transmit or create new price pair if it doesn't exist
-                try fluxPriceFeeds[id].transmit(_answers[i]) {
-                    // transmission is successful, nothing to do
-                } catch Error(string memory reason) {
-                    // catch failing revert() and require()
-                    console.log("ERRORR");
-                    emit Log(reason);
-                }
-                // else create an oracle then transmit values
-            } else {
+            // deploy a new oracle if there's none previously deployed
+            if (address(fluxPriceFeeds[id]) == address(0x0)) {
                 _deployOracle(id, _pricePairs[i], _decimals[i]);
-                fluxPriceFeeds[id].transmit(_answers[i]);
+            }
+            // try transmitting values to the oracle
+            try fluxPriceFeeds[id].transmit(_answers[i]) {
+                // transmission is successful, nothing to do
+            } catch Error(string memory reason) {
+                // catch failing revert() and require()
+                emit Log(reason);
             }
         }
     }
@@ -102,11 +106,11 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
         if (address(fluxPriceFeeds[_id]) != address(0x0)) {
             // fetch the price feed contract and read its latest answer and timestamp
             try fluxPriceFeeds[_id].latestRoundData() returns (
-                uint80 roundId,
+                uint80,
                 int256 answer,
-                uint256 startedAt,
+                uint256,
                 uint256 updatedAt,
-                uint80 answeredInRound
+                uint80
             ) {
                 return (answer, updatedAt, 200);
             } catch {
@@ -128,6 +132,9 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
         return address(fluxPriceFeeds[_id]);
     }
 
+
+    
+    ///@notice returns factory's type and version
     function typeAndVersion() external pure virtual returns (string memory) {
         return "FluxPriceFeedFactory 1.2.0";
     }

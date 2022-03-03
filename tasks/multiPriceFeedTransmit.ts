@@ -24,7 +24,6 @@ task("multiPriceFeedTransmit", "Submits an answer to multiPriceFeed")
     // let answers = [];
     for(let pair of received_pairs){
       pairs.push(ethers.utils.keccak256(ethers.utils.toUtf8Bytes(pair)));
-
     }
     console.log(pairs);
     console.log(received_answers);
