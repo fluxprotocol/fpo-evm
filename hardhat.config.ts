@@ -125,10 +125,30 @@ const config: HardhatUserConfig = {
       url: "https://forno.celo.org",
       chainId: 42220,
     },
+    "celo-testnet": {
+      accounts: { mnemonic },
+      url: "https://alfajores-forno.celo-testnet.org",
+      chainId: 44787,
+    },
+    chronos: {
+      accounts: { mnemonic },
+      url: "https://evm.cronos.org",
+      chainId: 25,
+    },
+    "chronos-testnet": {
+      accounts: { mnemonic },
+      url: "https://cronos-testnet-3.crypto.org:8545",
+      chainId: 338,
+    },
     fantom: {
       accounts: { mnemonic },
       url: "https://rpcapi.fantom.network",
       chainId: 250,
+    },
+    "fantom-testnet": {
+      accounts: { mnemonic },
+      url: "https://rpc.testnet.fantom.network",
+      chainId: 4002,
     },
     harmony: {
       accounts: { mnemonic },
@@ -140,31 +160,61 @@ const config: HardhatUserConfig = {
       url: "https://api.s0.b.hmny.io",
       chainId: 1666700000,
     },
+    kucoin: {
+      accounts: { mnemonic },
+      url: "https://rpc-mainnet.kcc.network",
+      chainId: 321,
+    },
+    "kucoin-testnet": {
+      accounts: { mnemonic },
+      url: "https://rpc-testnet.kcc.network",
+      chainId: 322,
+    },
     "matic-testnet": {
       accounts: { mnemonic },
-      url: "https://rpc-mumbai.maticvigil.com/",
-      chainId: 80001,
+      url: "https://stardust.metis.io/?owner=588",
+      chainId: 588,
+    },
+    metis: {
+      accounts: { mnemonic },
+      url: "https://andromeda.metis.io/?owner=1088",
+      chainId: 1088,
+    },
+    "metis-testnet": {
+      accounts: { mnemonic },
+      url: "https://proxy.devnet.neonlabs.org/solana",
+      chainId: 245022926,
+    },
+    neon: {
+      accounts: { mnemonic },
+      url: "https://proxy.mainnet.neonlabs.org/solana",
+      chainId: 245022934,
+    },
+    "neon-testnet": {
+      accounts: { mnemonic },
+      url: "https://proxy.devnet.neonlabs.org/solana",
+      chainId: 245022926,
     },
     polygon: {
       accounts: { mnemonic },
       url: `https://rpc-mainnet.maticvigil.com/`,
       chainId: 137,
     },
-    xdai: {
+    gnosis: {
       accounts: { mnemonic },
-      url: "https://rpc.xdaichain.com",
+      url: "https://rpc.gnosischain.com",
       chainId: 100,
-    },
-    tanenbaum: {
-      accounts: { mnemonic },
-      url: "https://rpc.tanenbaum.io",
-      chainId: 5700,
-      blockGasLimit: 8000000,
     },
     syscoin: {
       accounts: { mnemonic },
       url: "https://rpc.syscoin.org",
       chainId: 57,
+      blockGasLimit: 8000000,
+    },
+    "syscoin-testnet": {
+      accounts: { mnemonic },
+      url: "https://rpc.tanenbaum.io",
+      chainId: 5700,
       blockGasLimit: 8000000,
     },
     goerli: getChainConfig("goerli"),
