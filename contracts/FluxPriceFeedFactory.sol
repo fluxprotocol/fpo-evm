@@ -49,7 +49,6 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
 
         // also grant this contract's admin VALIDATOR_ROLE on the new FluxPriceFeed
         newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
-    
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
     }
 
@@ -132,9 +131,9 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
         return address(fluxPriceFeeds[_id]);
     }
 
-
-    
-    ///@notice returns factory's type and version
+    /**
+     * @notice returns factory's type and version
+     */
     function typeAndVersion() external pure virtual returns (string memory) {
         return "FluxPriceFeedFactory 1.2.0";
     }

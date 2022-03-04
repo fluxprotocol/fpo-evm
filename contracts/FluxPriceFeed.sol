@@ -63,7 +63,6 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * @return _latestTimestamp when the latest report was transmitted
      */
     function latestTransmissionDetails() external view returns (int192 _latestAnswer, uint64 _latestTimestamp) {
-        require(msg.sender == tx.origin, "Only callable by EOA");
         return (transmissions[latestAggregatorRoundId].answer, transmissions[latestAggregatorRoundId].timestamp);
     }
 
