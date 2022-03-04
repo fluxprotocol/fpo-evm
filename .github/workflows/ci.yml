@@ -1,0 +1,43 @@
+name: "build"
+
+env:
+  INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+  MNEMONIC: ${{ secrets.MNEMONIC }}
+
+on:
+  pull_request:
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Check out the repo"
+        uses: "actions/checkout@v2"
+
+      - name: "Install Node.js 12.x"
+        uses: "actions/setup-node@v1"
+        with:
+          node-version: "12.x"
+
+      - uses: "actions/cache@v2"
+        with:
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: "./node_modules"
+
+      - name: "Install dependencies"
+        run: "yarn install --frozen-lockfile"
+
+      - name: "Lint Solidity and TypeScript code"
+        run: "yarn run lint"
+
+      - name: "Compile the contracts and generate TypeChain artifacts"
+        run: "yarn run typechain"
+
+      - name: "Test the contracts"
+        run: "yarn run test"
