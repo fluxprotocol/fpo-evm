@@ -5,7 +5,6 @@ import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signe
 import type { FluxPriceFeedFactory } from "../../src/types/FluxPriceFeedFactory";
 import { Signers } from "../types";
 import { shouldBehaveLikeFluxPriceFeedFactory } from "./FluxPriceFeedFactory.behavior";
-import { ExamplePriceFeedConsumer } from "../../src/types/ExamplePriceFeedConsumer";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -23,13 +22,9 @@ describe("Unit tests", function () {
 
   describe("FluxPriceFeedFactory", function () {
     beforeEach(async function () {
-     
       const factoryArtifact: Artifact = await artifacts.readArtifact("FluxPriceFeedFactory");
       this.factory = <FluxPriceFeedFactory>(
-        await waffle.deployContract(this.signers.admin, factoryArtifact, [
-          this.signers.admin.address,
-          
-        ])
+        await waffle.deployContract(this.signers.admin, factoryArtifact, [this.signers.admin.address])
       );
       // console.log("+validator = ", this.signers.admin.address);
       // const pricefeedconsumerArtifact: Artifact = await artifacts.readArtifact("ExamplePriceFeedConsumer");

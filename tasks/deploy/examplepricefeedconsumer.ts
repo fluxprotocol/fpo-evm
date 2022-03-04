@@ -17,6 +17,7 @@ task("deploy:ExamplePriceFeedConsumer")
     } else {
       validator = await accounts[0].getAddress();
     }
+    console.log("Validator: ", validator);
 
     const pricefeedFactory: ExamplePriceFeedConsumer__factory = <ExamplePriceFeedConsumer__factory>(
       await ethers.getContractFactory("ExamplePriceFeedConsumer")

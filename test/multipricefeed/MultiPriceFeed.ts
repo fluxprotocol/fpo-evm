@@ -5,7 +5,6 @@ import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signe
 import type { FluxMultiPriceFeed } from "../../src/types/FluxMultiPriceFeed";
 import { Signers } from "../types";
 import { shouldBehaveLikeFluxMultiPriceFeed } from "./MultiPriceFeed.behavior";
-import { ExamplePriceFeedConsumer } from "../../src/types/ExamplePriceFeedConsumer";
 
 describe("Unit tests", function () {
   before(async function () {

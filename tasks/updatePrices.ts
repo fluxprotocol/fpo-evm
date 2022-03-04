@@ -1,10 +1,8 @@
-import { Signer } from "@ethersproject/abstract-signer";
 import { task } from "hardhat/config";
 
 task("updatePrices", "Fetches latest answers on oracles")
   .addParam("contract", "The price aggregator contract to update")
   .setAction(async (_taskArgs, hre) => {
-    const accounts: Signer[] = await hre.ethers.getSigners();
     const FluxPriceAggregator = await hre.ethers.getContractFactory(
       "contracts/FluxPriceAggregator.sol:FluxPriceAggregator",
     );
