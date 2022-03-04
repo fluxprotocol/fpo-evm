@@ -3,14 +3,17 @@ import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
+import "@nomiclabs/buidler/config";
 // import "buidler-gas-reporter";
 
 import "./tasks/accounts";
-import "./tasks/deploy";
+import "./tasks/deploy/";
 import "./tasks/derivePrivateKey";
 import "./tasks/latestAnswer";
 import "./tasks/transmit";
 import "./tasks/updatePrices";
+import "./tasks/multiPriceFeedTransmit";
+import "./tasks/multiPriceFeedValueFor";
 
 import { resolve } from "path";
 
@@ -177,7 +180,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.10",
+    version: "0.8.12",
     settings: {
       metadata: {
         // Not including the metadata hash

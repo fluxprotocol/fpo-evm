@@ -13,8 +13,8 @@ export function shouldBehaveLikeFluxPriceFeed(): void {
       await this.pricefeed.connect(this.signers.nonadmin).transmit(TEST_VALUE);
     } catch (e) {
       if (!(e instanceof Error)) return;
-      expect(e.message).to.equal(
-        "VM Exception while processing transaction: reverted with reason string 'Caller is not a validator'",
+      expect(e.message).to.include(
+        "VM Exception while processing transaction: reverted with reason string 'AccessControl: account",
       );
       expect(await this.pricefeed.connect(this.signers.admin).latestAnswer()).to.equal(0);
     }

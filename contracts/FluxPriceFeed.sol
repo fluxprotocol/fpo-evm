@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.12;
 
 import "./interface/CLV2V3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -32,6 +32,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         uint8 _decimals,
         string memory __description
     ) {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(VALIDATOR_ROLE, _validator);
         decimals = _decimals;
         _description = __description;
@@ -41,7 +42,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * Versioning
      */
     function typeAndVersion() external pure virtual returns (string memory) {
-        return "FluxPriceFeed 1.1.0";
+        return "FluxPriceFeed 1.2.0";
     }
 
     /*
@@ -62,7 +63,6 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * @return _latestTimestamp when the latest report was transmitted
      */
     function latestTransmissionDetails() external view returns (int192 _latestAnswer, uint64 _latestTimestamp) {
-        require(msg.sender == tx.origin, "Only callable by EOA");
         return (transmissions[latestAggregatorRoundId].answer, transmissions[latestAggregatorRoundId].timestamp);
     }
 
@@ -70,9 +70,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * @notice transmit is called to post a new report to the contract
      * @param _answer latest answer
      */
-    function transmit(int192 _answer) external {
-        require(hasRole(VALIDATOR_ROLE, msg.sender), "Caller is not a validator");
-
+    function transmit(int192 _answer) external onlyRole(VALIDATOR_ROLE) {
         // Check the report contents, and record the result
         latestAggregatorRoundId++;
         transmissions[latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
