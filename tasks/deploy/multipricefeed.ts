@@ -21,9 +21,7 @@ task("deploy:FluxMultiPriceFeed")
       await ethers.getContractFactory("FluxMultiPriceFeed")
     );
     console.log("Validator address: ", validator);
-    const multiPriceFeed: FluxMultiPriceFeed = <FluxMultiPriceFeed>(
-      await multiPricefeedFactory.deploy(validator)
-    );
+    const multiPriceFeed: FluxMultiPriceFeed = <FluxMultiPriceFeed>await multiPricefeedFactory.deploy(validator);
     await multiPriceFeed.deployed();
     console.log("FluxMultiPriceFeed deployed to: ", multiPriceFeed.address);
   });

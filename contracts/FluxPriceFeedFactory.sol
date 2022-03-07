@@ -78,6 +78,7 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
                 _deployOracle(id, _pricePairs[i], _decimals[i]);
             }
             // try transmitting values to the oracle
+            /* solhint-disable-next-line no-empty-blocks */
             try fluxPriceFeeds[id].transmit(_answers[i]) {
                 // transmission is successful, nothing to do
             } catch Error(string memory reason) {

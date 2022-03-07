@@ -7,18 +7,18 @@ export function shouldBehaveLikeFluxMultiPriceFeed(): void {
     expect(price).to.equal(0);
     expect(timeStamp).to.equal(0);
     expect(status).to.equal(404);
-    let pricePairs = [this.eth_usd, this.btc_usd];
-    let answers = [3000, 37600];
+    const pricePairs = [this.eth_usd, this.btc_usd];
+    const answers = [3000, 37600];
     await this.multiPriceFeed.connect(this.signers.admin).transmit(pricePairs, answers);
-    [price, , status] = await this.multiPriceFeed.connect(this.signers.admin).valueFor(this.eth_usd);
+    [price, timeStamp, status] = await this.multiPriceFeed.connect(this.signers.admin).valueFor(this.eth_usd);
     expect(price).to.equal(3000);
     expect(status).to.equal(200);
-    [price, , status] = await this.multiPriceFeed.connect(this.signers.admin).valueFor(this.btc_usd);
+    [price, timeStamp, status] = await this.multiPriceFeed.connect(this.signers.admin).valueFor(this.btc_usd);
     expect(price).to.equal(37600);
     expect(status).to.equal(200);
   });
   it("should overwrite values", async function () {
-    let pricePairs = [this.eth_usd, this.btc_usd];
+    const pricePairs = [this.eth_usd, this.btc_usd];
     let answers = [3000, 37600];
     await this.multiPriceFeed.connect(this.signers.admin).transmit(pricePairs, answers);
     let [price, , status] = await this.multiPriceFeed.connect(this.signers.admin).valueFor(this.eth_usd);
@@ -32,14 +32,14 @@ export function shouldBehaveLikeFluxMultiPriceFeed(): void {
   });
 
   it("should revert if caller is not a validator", async function () {
-    let pricePairs = [this.eth_usd, this.btc_usd];
-    let answers = [3000, 37600];
+    const pricePairs = [this.eth_usd, this.btc_usd];
+    const answers = [3000, 37600];
     await expect(this.multiPriceFeed.connect(this.signers.nonadmin).transmit(pricePairs, answers)).to.be.reverted;
   });
 
   it("should revert if transmitted arrays aren't equal", async function () {
-    let pricePairs = [this.eth_usd, this.btc_usd];
-    let answers = [3000];
+    const pricePairs = [this.eth_usd, this.btc_usd];
+    const answers = [3000];
     await expect(this.multiPriceFeed.connect(this.signers.admin).transmit(pricePairs, answers)).to.be.revertedWith(
       "The transmitted arrays must be equal",
     );

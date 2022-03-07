@@ -17,10 +17,12 @@ contract FluxMultiPriceFeed is AccessControl, IERC2362 {
         uint256 timestamp;
     }
 
+    /* solhint-disable max-line-length */
     // mapping of id to price pair. example:
     // Description   ValuePair   DecimalPlaces   String            Keccak256
     // Price         ETH/USD     3               Price-ETH/USD-3   0xdfaa6f747f0f012e8f2069d6ecacff25f5cdf0258702051747439949737fc0b5
     // Price         BTC/USD     3               Price-BTC/USD-3   0x637b7efb6b620736c247aaa282f3898914c0bef6c12faff0d3fe9d4bea783020
+    /* solhint-enable max-line-length */
     mapping(bytes32 => PricePair) public feeds;
 
     constructor(address _validator) {
