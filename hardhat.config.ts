@@ -14,6 +14,7 @@ import "./tasks/transmit";
 import "./tasks/updatePrices";
 import "./tasks/multiPriceFeedTransmit";
 import "./tasks/multiPriceFeedValueFor";
+import "./tasks/typeAndVersion";
 
 import { resolve } from "path";
 
