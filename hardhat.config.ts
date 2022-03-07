@@ -32,16 +32,8 @@ const ethChainIds = {
   ropsten: 3,
 };
 
-// Ensure that we have all the environment variables we need.
-const mnemonic: string | undefined = process.env.MNEMONIC;
-if (!mnemonic) {
-  throw new Error("Please set your MNEMONIC in a .env file");
-}
-
-const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
-if (!infuraApiKey) {
-  throw new Error("Please set your INFURA_API_KEY in a .env file");
-}
+const mnemonic = process.env.MNEMONIC || "test test test test test test test test test test test junk";
+const infuraApiKey = process.env.INFURA_API_KEY || "";
 
 function getChainConfig(network: keyof typeof ethChainIds): NetworkUserConfig {
   const url: string = "https://" + network + ".infura.io/v3/" + infuraApiKey;
