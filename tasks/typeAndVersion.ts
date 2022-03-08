@@ -1,4 +1,3 @@
-import { Signer } from "@ethersproject/abstract-signer";
 import { task } from "hardhat/config";
 
 task("typeAndVersion", "Fetches the type and version of the contract")
