@@ -10,15 +10,6 @@ const deployFunction: DeployFunction = async function ({
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const network = await deploy("LayerZeroNetwork", {
-    contract: "LayerZeroNetwork",
-    from: deployer,
-    args: [],
-    deterministicDeployment: false,
-  });
-
-  console.log("Deployed LayerZeroNetwork: ", network.address);
-
   const oracle = await deploy("FluxLayerZeroOracle", {
     contract: "FluxLayerZeroOracle",
     from: deployer,

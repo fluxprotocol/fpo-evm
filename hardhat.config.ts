@@ -69,94 +69,41 @@ const config: HardhatUserConfig = {
       },
       chainId: ethChainIds.hardhat,
     },
-    arbitrum: {
+    rinkeby: {
+      url: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      chainId: 4,
       accounts: { mnemonic },
-      url: "https://arb1.arbitrum.io/rpc",
-      chainId: 42161,
-      blockGasLimit: 700000,
-    },
-    "arbitrum-testnet": {
-      accounts: { mnemonic },
-      url: "https://kovan3.arbitrum.io/rpc",
-      chainId: 79377087078960,
-    },
-    aurora: {
-      accounts: {
-        mnemonic,
-      },
-      chainId: 1313161554,
-      url: "https://mainnet.aurora.dev",
-    },
-    "aurora-testnet": {
-      accounts: {
-        mnemonic,
-      },
-      chainId: 1313161555,
-      url: "https://testnet.aurora.dev",
-    },
-    avalanche: {
-      accounts: { mnemonic },
-      url: "https://api.avax.network/ext/bc/C/rpc",
-      chainId: 43114,
-      gasPrice: 470000000000,
-    },
-    "avalanche-testnet": {
-      accounts: { mnemonic },
-      url: "https://api.avax-test.network/ext/bc/C/rpc",
-      chainId: 43113,
-      gasMultiplier: 2,
-    },
-    bsc: {
-      accounts: { mnemonic },
-      url: "https://bsc-dataseed.binance.org",
-      chainId: 56,
     },
     "bsc-testnet": {
-      accounts: { mnemonic },
-      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       chainId: 97,
-      gasMultiplier: 2,
-    },
-    celo: {
       accounts: { mnemonic },
-      url: "https://forno.celo.org",
-      chainId: 42220,
     },
-    fantom: {
+    fuji: {
+      url: `https://api.avax-test.network/ext/bc/C/rpc`,
+      chainId: 43113,
       accounts: { mnemonic },
-      url: "https://rpcapi.fantom.network",
-      chainId: 250,
     },
-    harmony: {
-      accounts: { mnemonic },
-      url: "https://api.s0.t.hmny.io",
-      chainId: 1666600000,
-    },
-    "harmony-testnet": {
-      accounts: { mnemonic },
-      url: "https://api.s0.b.hmny.io",
-      chainId: 1666700000,
-    },
-    "matic-testnet": {
-      accounts: { mnemonic },
+    mumbai: {
       url: "https://rpc-mumbai.maticvigil.com/",
       chainId: 80001,
-    },
-    polygon: {
       accounts: { mnemonic },
-      url: `https://rpc-mainnet.maticvigil.com/`,
-      chainId: 137,
     },
-    xdai: {
+    "arbitrum-rinkeby": {
+      url: `https://rinkeby.arbitrum.io/rpc`,
+      chainId: 421611,
       accounts: { mnemonic },
-      url: "https://rpc.xdaichain.com",
-      chainId: 100,
     },
-    goerli: getChainConfig("goerli"),
-    kovan: getChainConfig("kovan"),
-    rinkeby: getChainConfig("rinkeby"),
-    ropsten: getChainConfig("ropsten"),
-    mainnet: getChainConfig("mainnet"),
+    "optimism-kovan": {
+      url: `https://kovan.optimism.io/`,
+      chainId: 69,
+      accounts: { mnemonic },
+    },
+    "fantom-testnet": {
+      url: `https://rpc.testnet.fantom.network/`,
+      chainId: 4002,
+      accounts: { mnemonic },
+    },
   },
   paths: {
     artifacts: "./artifacts",

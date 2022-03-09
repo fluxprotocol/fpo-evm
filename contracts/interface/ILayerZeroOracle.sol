@@ -5,7 +5,7 @@ pragma solidity ^0.8.10;
 // LayerZero oracle interface.
 interface ILayerZeroOracle {
     // the qty of native gas token (on source) for initiating the oracle with notifyOracleOfBlock()
-    function getPrice(uint16 dstChainId) external view returns (uint256 priceInWei);
+    function getPrice(uint16 dstChainId, uint16 _outboundProofType) external view returns (uint256 priceInWei);
 
     // initiates the offchain oracle to do its job
     function notifyOracle(

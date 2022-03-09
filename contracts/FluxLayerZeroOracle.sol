@@ -23,6 +23,8 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     // EVENTS
     //
 
+    event deployed(address admin, address lz);
+
     event NotifiedOracle(
         uint16 chainId,
         uint16 outboundProofType,
@@ -34,9 +36,9 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     event NotifiedLayerZero(
         address dstNetworkAddress,
         uint16 _srcChainId,
-        bytes _blockHash,
+        bytes32 _blockHash,
         uint256 _confirmations,
-        bytes _data
+        bytes32 _data
     );
     event WithdrawTokens(address token, address to, uint256 amount);
     event Withdraw(address to, uint256 amount);
@@ -48,6 +50,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     constructor(address _admin, address _layerZero) {
         _setupRole(ADMIN_ROLE, _admin);
         _setupRole(LAYERZERO_ROLE, _layerZero);
+        emit deployed(_admin, _layerZero);
     }
 
     //
@@ -86,9 +89,9 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     function updateHash(
         address dstNetworkAddress,
         uint16 _srcChainId,
-        bytes calldata _blockHash,
+        bytes32 _blockHash,
         uint256 _confirmations,
-        bytes calldata _data
+        bytes32 _data
     ) external onlyRole(ADMIN_ROLE) {
         // make the call to LayerZero
         ILayerZeroUltraLightNode(dstNetworkAddress).updateHash(_srcChainId, _blockHash, _confirmations, _data);
@@ -143,7 +146,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
         return oracleAddress == address(this);
     }
 
-    function getPrice(uint16 dstChainId) external view returns (uint256 priceInWei) {
+    function getPrice(uint16 dstChainId, uint16 _outboundProofType) external view returns (uint256 priceInWei) {
         return chainPriceLookup[dstChainId];
     }
 

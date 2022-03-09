@@ -13,13 +13,13 @@ contract LayerZeroNetwork is ILayerZeroUltraLightNode, ReentrancyGuard {
 
     struct BlockData {
         uint256 confirmations;
-        bytes data;
+        bytes32 data;
     }
 
-    event HeaderReceived(uint16 srcChainId, address oracle, uint256 confirmations, bytes blockhash);
+    event HeaderReceived(uint16 srcChainId, address oracle, uint256 confirmations, bytes32 blockhash);
     event WithdrawNative(address _owner, address _to, uint256 _amount);
 
-    mapping(address => mapping(uint16 => mapping(bytes => BlockData))) public blockHeaderLookup;
+    mapping(address => mapping(uint16 => mapping(bytes32 => BlockData))) public blockHeaderLookup;
 
     // _srcChainId - the source layerzero chainId the data is coming from
     // _blockHash - the source blockHash (for EVM: 32 bytes in length)
@@ -28,9 +28,9 @@ contract LayerZeroNetwork is ILayerZeroUltraLightNode, ReentrancyGuard {
     // Can be called by any address to update a block header
     function updateHash(
         uint16 _srcChainId,
-        bytes calldata _blockHash,
+        bytes32 _blockHash,
         uint256 _confirmations,
-        bytes calldata _data
+        bytes32 _data
     ) external override {
         // this function may revert with a default message if the oracle address is not an ILayerZeroOracle
         BlockData storage bd = blockHeaderLookup[msg.sender][_srcChainId][_blockHash];
