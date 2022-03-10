@@ -4,7 +4,7 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
 import "@nomiclabs/buidler/config";
-// import "buidler-gas-reporter";
+import "@nomiclabs/hardhat-etherscan";
 
 import "./tasks/accounts";
 import "./tasks/deploy/";
@@ -244,6 +244,9 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "src/types",
     target: "ethers-v5",
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
 
