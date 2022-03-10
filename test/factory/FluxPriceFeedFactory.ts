@@ -26,11 +26,6 @@ describe("Unit tests", function () {
       this.factory = <FluxPriceFeedFactory>(
         await waffle.deployContract(this.signers.admin, factoryArtifact, [this.signers.admin.address])
       );
-      // console.log("+validator = ", this.signers.admin.address);
-      // const pricefeedconsumerArtifact: Artifact = await artifacts.readArtifact("ExamplePriceFeedConsumer");
-      // this.pricefeedconsumer = <ExamplePriceFeedConsumer>(
-      //   await waffle.deployContract(this.signers.admin, pricefeedconsumerArtifact, [this.factory.address])
-      // );
     });
 
     shouldBehaveLikeFluxPriceFeedFactory();
