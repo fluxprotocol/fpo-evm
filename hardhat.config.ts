@@ -16,8 +16,8 @@ import "./tasks/multiPriceFeedTransmit";
 import "./tasks/multiPriceFeedValueFor";
 import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
-import "./tasks/fetchFactoryPricePairAddress"
-import "./tasks/factoryValueFor"
+import "./tasks/fetchFactoryPricePairAddress";
+import "./tasks/factoryValueFor";
 
 import { resolve } from "path";
 

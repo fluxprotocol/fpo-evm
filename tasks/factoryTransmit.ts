@@ -1,9 +1,7 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { ethers } from "ethers";
-import { keccak256 } from "ethers/lib/utils";
 
 import { task } from "hardhat/config";
-// import { task } from "@nomiclabs/buidler/config";
 
 // npx hardhat factoryTransmit --network kovan --contract 0x508086f87681A0724cA1a1C7a50ABFB79E7d2F64 --pricepairs "ETH/USD BTC/USD" --decimals "3 3" --answers "3000 37000"
 
@@ -29,14 +27,14 @@ task("factoryTransmit", "Submits an answer to factoryPriceFeed")
     console.log(received_answers);
     console.log(received_decimals);
 
-    let pairsIds = [];
+    const pairsIds = [];
     let pair;
-    for (let key in received_pairs){
-      pair = "Price-"+received_pairs[key]+"-"+received_decimals[key];
-      console.log(pair)
+    for (const key in received_pairs) {
+      pair = "Price-" + received_pairs[key] + "-" + received_decimals[key];
+      console.log(pair);
       pairsIds.push(ethers.utils.keccak256(ethers.utils.toUtf8Bytes(pair)));
     }
-    console.log(pairsIds)
+    console.log(pairsIds);
 
     let tx = await contract.connect(validator).transmit(received_pairs, received_decimals, received_answers);
     console.log("Transaction hash:", tx.hash);
