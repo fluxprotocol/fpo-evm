@@ -10,6 +10,7 @@ import { LayerZeroNetwork__factory } from "../../src/types/factories/LayerZeroNe
 task("deploy:FluxLayerZeroOracle")
   .addOptionalParam("admin")
   .addOptionalParam("layerzero")
+  .addOptionalParam("layerzeroTwo")
   .addOptionalParam("deployNetwork")
   .setAction(async function (taskArgs: TaskArguments, { ethers }) {
     const accounts: Signer[] = await ethers.getSigners();
@@ -42,4 +43,12 @@ task("deploy:FluxLayerZeroOracle")
     const lz: FluxLayerZeroOracle = <FluxLayerZeroOracle>await lzFactory.deploy(admin, layerzero);
     await lz.deployed();
     console.log(`Deployed FluxLayerZeroOracle at ${lz.address}`);
+
+    if (taskArgs.layerzeroTwo) {
+      const FluxLayerZeroOracle = await ethers.getContractFactory("FluxLayerZeroOracle");
+      const contract = await FluxLayerZeroOracle.attach(lz.address);
+
+      const tx = await contract.addLayerZero(taskArgs.layerzeroTwo);
+      console.log(`Added permissions for lz2 with tx hash: ${tx.hash}`);
+    }
   });

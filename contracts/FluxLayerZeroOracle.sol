@@ -48,6 +48,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     //
 
     constructor(address _admin, address _layerZero) {
+        _setupRole(0x00, _admin); // grant role admin permissions to _admin
         _setupRole(ADMIN_ROLE, _admin);
         _setupRole(LAYERZERO_ROLE, _layerZero);
         emit deployed(_admin, _layerZero);
@@ -148,6 +149,16 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
 
     function getPrice(uint16 dstChainId, uint16 _outboundProofType) external view returns (uint256 priceInWei) {
         return chainPriceLookup[dstChainId];
+    }
+
+    // Add layerZero Ultra Light Node permissions to new address that will be calling `notifyOracle`
+    function addLayerZero(address _newLayerZero) public {
+        grantRole(LAYERZERO_ROLE, _newLayerZero);
+    }
+
+    // Add layerZero Ultra Light Node permissions to new address that will be calling `notifyOracle`
+    function revokeLayerZero(address _newLayerZero) public {
+        revokeRole(LAYERZERO_ROLE, _newLayerZero);
     }
 
     /**

@@ -12,6 +12,7 @@ import "./tasks/transmit";
 import "./tasks/updatePrices";
 import "./tasks/notifyOracleOfBlock";
 import "./tasks/proceedUpdateBlockHeader";
+import "./tasks/addLayerZero";
 
 import { resolve } from "path";
 
