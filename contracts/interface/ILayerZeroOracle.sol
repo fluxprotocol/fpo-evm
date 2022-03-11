@@ -2,20 +2,23 @@
 
 pragma solidity ^0.8.10;
 
-// LayerZero oracle interface.
 interface ILayerZeroOracle {
-    // the qty of native gas token (on source) for initiating the oracle with notifyOracleOfBlock()
-    function getPrice(uint16 dstChainId, uint16 _outboundProofType) external view returns (uint256 priceInWei);
+    // @notice query the oracle price for relaying block information to the destination chain
+    // @param _dstChainId the destination endpoint identifier
+    // @param _outboundProofType the proof type identifier to specify the data to be relayed
+    function getPrice(uint16 _dstChainId, uint16 _outboundProofType) external view returns (uint256 price);
 
-    // initiates the offchain oracle to do its job
+    // @notice Ultra-Light Node notifies the Oracle of a new block information relaying request
+    // @param _dstChainId the destination endpoint identifier
+    // @param _outboundProofType the proof type identifier to specify the data to be relayed
+    // @param _outboundBlockConfirmations the number of source chain block confirmation needed
     function notifyOracle(
         uint16 _dstChainId,
         uint16 _outboundProofType,
-        bytes32 _remoteUlnAddress,
-        uint64 _outboundBlockConfirmations,
-        bytes32 _payloadHash
+        uint64 _outboundBlockConfirmations
     ) external;
 
-    // return true if the address is allowed to call updateBlockHeader()
-    function isApproved(address oracleSigner) external view returns (bool approved);
+    // @notice query if the address is an approved actor for privileges like data submission and fee withdrawal etc.
+    // @param _address the address to be checked
+    function isApproved(address _address) external view returns (bool approved);
 }

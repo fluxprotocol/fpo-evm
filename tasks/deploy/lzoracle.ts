@@ -9,6 +9,7 @@ import { LayerZeroNetwork__factory } from "../../src/types/factories/LayerZeroNe
 
 task("deploy:FluxLayerZeroOracle")
   .addOptionalParam("admin")
+  .addParam("ultralightnode")
   .addOptionalParam("layerzero")
   .addOptionalParam("layerzeroTwo")
   .addOptionalParam("deployNetwork")
@@ -40,7 +41,9 @@ task("deploy:FluxLayerZeroOracle")
     const lzFactory: FluxLayerZeroOracle__factory = <FluxLayerZeroOracle__factory>(
       await ethers.getContractFactory("FluxLayerZeroOracle")
     );
-    const lz: FluxLayerZeroOracle = <FluxLayerZeroOracle>await lzFactory.deploy(admin, layerzero);
+    const lz: FluxLayerZeroOracle = <FluxLayerZeroOracle>(
+      await lzFactory.deploy(admin, layerzero, taskArgs.ultralightnode)
+    );
     await lz.deployed();
     console.log(`Deployed FluxLayerZeroOracle at ${lz.address}`);
 
@@ -48,7 +51,7 @@ task("deploy:FluxLayerZeroOracle")
       const FluxLayerZeroOracle = await ethers.getContractFactory("FluxLayerZeroOracle");
       const contract = await FluxLayerZeroOracle.attach(lz.address);
 
-      const tx = await contract.addLayerZero(taskArgs.layerzeroTwo);
-      console.log(`Added permissions for lz2 with tx hash: ${tx.hash}`);
+      await contract.addLayerZero(taskArgs.layerzeroTwo);
+      await contract.addLayerZero(taskArgs.ultralightnode);
     }
   });

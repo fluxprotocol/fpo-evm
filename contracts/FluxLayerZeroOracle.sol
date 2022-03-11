@@ -16,6 +16,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant LAYERZERO_ROLE = keccak256("LAYERZERO_ROLE");
+    address public immutable ultraLightNode;
 
     mapping(uint16 => uint256) public chainPriceLookup;
 
@@ -28,9 +29,7 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     event NotifiedOracle(
         uint16 chainId,
         uint16 outboundProofType,
-        bytes32 layerZeroContract,
         uint256 requiredBlockConfirmations,
-        bytes32 payloadHash,
         uint256 requestedAtBlock
     );
     event NotifiedLayerZero(
@@ -47,11 +46,16 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     // CONSTRUCTOR
     //
 
-    constructor(address _admin, address _layerZero) {
+    constructor(
+        address _admin,
+        address _layerZero,
+        address _ultraLightNode
+    ) {
         _setupRole(0x00, _admin); // grant role admin permissions to _admin
         _setupRole(ADMIN_ROLE, _admin);
         _setupRole(LAYERZERO_ROLE, _layerZero);
         emit deployed(_admin, _layerZero);
+        ultraLightNode = _ultraLightNode;
     }
 
     //
@@ -61,43 +65,30 @@ contract FluxLayerZeroOracle is AccessControl, ILayerZeroOracle, ReentrancyGuard
     /// @notice called by LayerZero to initiate a request
     /// @param _dstChainId - chainId of source chain
     /// @param _outboundProofType -
-    /// @param _remoteUlnAddress - address of the LayerZero contract on the specified chain on which to call updateHash()
-    /// @param _outboundBlockConfirmations - number of blocks to wait for before calling updateHash() from this call's block.timestamp
-    /// @param _payloadHash - payload
+    /// @param _outboundBlockConfirmations - number of blocks to wait for before calling updateHash()
     function notifyOracle(
         uint16 _dstChainId,
         uint16 _outboundProofType,
-        bytes32 _remoteUlnAddress,
-        uint64 _outboundBlockConfirmations,
-        bytes32 _payloadHash
-    ) external override onlyRole(LAYERZERO_ROLE) {
-        emit NotifiedOracle(
-            _dstChainId,
-            _outboundProofType,
-            _remoteUlnAddress,
-            _outboundBlockConfirmations,
-            _payloadHash,
-            block.number
-        );
+        uint64 _outboundBlockConfirmations
+    ) external onlyRole(LAYERZERO_ROLE) {
+        emit NotifiedOracle(_dstChainId, _outboundProofType, _outboundBlockConfirmations, block.number);
     }
 
     /// @notice called by admin after LayerZero has notified us of a new hash via notifyOracle()
-    /// @param dstNetworkAddress - address of the LayerZero contract on the specified chain on which to call updateHash()
     /// @param _srcChainId - id of the source chain
     /// @param _blockHash - hash of the remote block header
     /// @param  _confirmations - number of confirmations waited
     /// @param _data - receiptsRoot (for EVMs) for the corresponding remote blockHash
     function updateHash(
-        address dstNetworkAddress,
         uint16 _srcChainId,
         bytes32 _blockHash,
         uint256 _confirmations,
         bytes32 _data
     ) external onlyRole(ADMIN_ROLE) {
         // make the call to LayerZero
-        ILayerZeroUltraLightNode(dstNetworkAddress).updateHash(_srcChainId, _blockHash, _confirmations, _data);
+        ILayerZeroUltraLightNode(ultraLightNode).updateHash(_srcChainId, _blockHash, _confirmations, _data);
 
-        emit NotifiedLayerZero(dstNetworkAddress, _srcChainId, _blockHash, _confirmations, _data);
+        emit NotifiedLayerZero(ultraLightNode, _srcChainId, _blockHash, _confirmations, _data);
     }
 
     // admin can approve a token spender
