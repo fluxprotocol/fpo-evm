@@ -10,7 +10,6 @@ import "./interface/CLV2V3Interface.sol";
  *     Chainlink V2 and V3 aggregator interface
  */
 contract FluxTimeBasedAggregator is CLV2V3Interface {
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     uint256 public constant DEFAULT_TIMEOUT = 10 minutes;
 
     address public immutable PRIMARY_PRICE_FEED;
