@@ -5,6 +5,7 @@ import "solidity-coverage";
 import "hardhat-gas-reporter";
 import "@nomiclabs/buidler/config";
 import "@nomiclabs/hardhat-etherscan";
+import "hardhat-deploy";
 
 import "./tasks/accounts";
 import "./tasks/deploy/";
@@ -62,6 +63,11 @@ const config: HardhatUserConfig = {
     coinmarketcap: process.env.COINMARKETCAP_API,
     excludeContracts: [],
     src: "./contracts",
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
   },
   networks: {
     hardhat: {
@@ -224,6 +230,8 @@ const config: HardhatUserConfig = {
     cache: "./cache",
     sources: "./contracts",
     tests: "./test",
+    deploy: "deploy",
+    deployments: "deployments",
   },
   solidity: {
     version: "0.8.12",

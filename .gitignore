@@ -29,3 +29,5 @@ src/types/*
 !src/types/common.ts
 !src/types/FluxPriceFeed.ts
 !src/types/factories/FluxPriceFeed__factory.ts
+
+contracts/flattened/*
