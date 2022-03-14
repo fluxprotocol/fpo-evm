@@ -18,7 +18,8 @@ import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
 import "./tasks/factoryValueFor";
-
+import "./tasks/timeBasedAggregatorLatestAnswer";
+import "./tasks/tbAggregatorlatestAnswerWithDelay";
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";
@@ -246,7 +247,15 @@ const config: HardhatUserConfig = {
     target: "ethers-v5",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      kovan: process.env.ETHERSCAN_API_KEY,
+      mainnet: process.env.ETHERSCAN_API_KEY,
+      ropsten: process.env.ETHERSCAN_API_KEY,
+      rinkeby: process.env.ETHERSCAN_API_KEY,
+      goerli: process.env.ETHERSCAN_API_KEY,
+      aurora: process.env.AURORA_API_KEY,
+      auroraTestnet: process.env.AURORA_API_KEY,
+    },
   },
 };
 

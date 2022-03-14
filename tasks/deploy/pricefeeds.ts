@@ -4,7 +4,8 @@ import { TaskArguments } from "hardhat/types";
 
 import { FluxPriceFeed } from "../../src/types/FluxPriceFeed";
 import { FluxPriceFeed__factory } from "../../src/types/factories/FluxPriceFeed__factory";
-
+// npx hardhat deploy:FluxPriceFeed --network aurora-testnet --decimals 8 --description "ETH/USD"
+// npx hardhat verify --network aurora-testnet 0x25C213D9b785416EA0244f4e4814a2600F147143 "0xE19E8d5346Ade8294ec07c5431E5f6A1bb7F8ab2" "8" "ETH/USD"
 task("deploy:FluxPriceFeed")
   .addParam("decimals", "The number of decimals in the value posted")
   .addParam("description", "The description of the contract")
