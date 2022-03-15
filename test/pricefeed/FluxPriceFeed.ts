@@ -28,10 +28,6 @@ describe("Unit tests", function () {
           description,
         ])
       );
-      const pricefeedconsumerArtifact: Artifact = await artifacts.readArtifact("ExamplePriceFeedConsumer");
-      this.pricefeedconsumer = <ExamplePriceFeedConsumer>(
-        await waffle.deployContract(this.signers.admin, pricefeedconsumerArtifact, [this.pricefeed.address])
-      );
     });
 
     shouldBehaveLikeFluxPriceFeed();

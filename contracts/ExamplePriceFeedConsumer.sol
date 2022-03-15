@@ -1,26 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interface/CLV2V3Interface.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract ExamplePriceFeedConsumer is AccessControl {
-    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+contract ExamplePriceFeedConsumer is Ownable {
     CLV2V3Interface public priceFeed;
+    int256 public cachedLatestPrice;
 
     constructor(address _priceFeed) {
-        _setupRole(OWNER_ROLE, msg.sender);
         priceFeed = CLV2V3Interface(_priceFeed);
     }
 
-    /// @notice Fetches the latest price from the price feed
-    function getLatestPrice() public view returns (int256) {
-        return priceFeed.latestAnswer();
+    /// @notice Fetches the latest price and stores it as `cachedLatestPrice`
+    function fetchLatestPrice() public onlyOwner {
+        cachedLatestPrice = priceFeed.latestAnswer();
     }
 
     /// @notice Changes price feed contract address
     /// @dev Only callable by the owner
-    function setPriceFeed(address _priceFeed) public onlyRole(OWNER_ROLE) {
+    function setPriceFeed(address _priceFeed) public onlyOwner {
         priceFeed = CLV2V3Interface(_priceFeed);
     }
 }
