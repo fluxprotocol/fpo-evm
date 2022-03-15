@@ -191,6 +191,16 @@ const config: HardhatUserConfig = {
       url: "https://proxy.devnet.neonlabs.org/solana",
       chainId: 245022926,
     },
+    oasis: {
+      accounts: { mnemonic },
+      url: "https://emerald.oasis.dev",
+      chainId: 42262,
+    },
+    "oasis-testnet": {
+      accounts: { mnemonic },
+      url: "https://testnet.emerald.oasis.dev",
+      chainId: 42261,
+    },
     polygon: {
       accounts: { mnemonic },
       url: `https://rpc-mainnet.maticvigil.com/`,
