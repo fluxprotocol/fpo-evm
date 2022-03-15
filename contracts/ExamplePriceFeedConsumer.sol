@@ -13,8 +13,9 @@ contract ExamplePriceFeedConsumer is Ownable {
     }
 
     /// @notice Fetches the latest price and stores it as `cachedLatestPrice`
-    function fetchLatestPrice() public onlyOwner {
+    function fetchLatestPrice() public onlyOwner returns (int256) {
         cachedLatestPrice = priceFeed.latestAnswer();
+        return cachedLatestPrice;
     }
 
     /// @notice Changes price feed contract address
