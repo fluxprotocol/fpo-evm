@@ -7,7 +7,7 @@ import { FluxPriceFeedFactory__factory } from "../../src/types/factories/FluxPri
 import sleep from "../../utils/sleep";
 const VERIFY_DELAY = 100000;
 
-// npx hardhat deploy:FluxPriceFeedFactory --network kovan --verify
+// npx hardhat deploy:FluxPriceFeedFactory --network kovan
 task("deploy:FluxPriceFeedFactory")
   .addOptionalParam("validator", "The validator allowed to post data to the contract")
   .addFlag("verify")

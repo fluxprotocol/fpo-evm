@@ -18,7 +18,7 @@ import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
 import "./tasks/factoryValueFor";
-
+import "./tasks/factoryTypeAndVersion";
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";
@@ -81,6 +81,11 @@ const config: HardhatUserConfig = {
       url: "https://kovan3.arbitrum.io/rpc",
       chainId: 79377087078960,
     },
+    "arbitrum-rinkeby-testnet": {
+      accounts: { mnemonic },
+      url: "https://rinkeby.arbitrum.io/rpc",
+      chainId: 421611,
+    },
     aurora: {
       accounts: {
         mnemonic,
@@ -113,8 +118,10 @@ const config: HardhatUserConfig = {
     },
     "bsc-testnet": {
       accounts: { mnemonic },
-      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      // url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
+      gasPrice: 20000000000,
     },
     celo: {
       accounts: { mnemonic },
@@ -205,6 +212,11 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       url: `https://rpc-mainnet.maticvigil.com/`,
       chainId: 137,
+    },
+    "polygon-mumbai-matic": {
+      accounts: { mnemonic },
+      url: `https://rpc-mumbai.matic.today`,
+      chainId: 80001,
     },
     gnosis: {
       accounts: { mnemonic },
