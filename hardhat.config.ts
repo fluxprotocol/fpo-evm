@@ -18,7 +18,6 @@ import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
 import "./tasks/factoryValueFor";
-import "./tasks/factoryTypeAndVersion";
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";
