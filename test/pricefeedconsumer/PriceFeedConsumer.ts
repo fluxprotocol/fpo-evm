@@ -22,8 +22,8 @@ describe("Unit tests", function () {
 
   describe("ExamplePriceFeedConsumer", function () {
     beforeEach(async function () {
-      // deploy two oracles
-      for (let i = 0; i < 2; i++) {
+      // deploy three oracles
+      for (let i = 0; i < 3; i++) {
         const decimals: number = 6;
         const description: string = "My description";
         const pricefeedArtifact: Artifact = await artifacts.readArtifact("FluxPriceFeed");
@@ -35,8 +35,6 @@ describe("Unit tests", function () {
           ])
         );
       }
-      console.log("oracle1 address = ", this.oracles[0].address);
-      console.log("oracle2 address = ", this.oracles[1].address);
 
       // deploy aggregator
       const decimals: number = 6;
@@ -44,24 +42,26 @@ describe("Unit tests", function () {
       const timeBasedAggregatorArtifact: Artifact = await artifacts.readArtifact("FluxTimeBasedAggregator");
       this.timeBasedAggregator = <FluxTimeBasedAggregator>(
         await waffle.deployContract(this.signers.admin, timeBasedAggregatorArtifact, [
-          this.oracles[0].address,
           this.oracles[1].address,
+          this.oracles[2].address,
           decimals,
           description,
         ])
       );
-      console.log("time-based aggregator address = ", this.timeBasedAggregator.address);
 
+      // deploy consumers
       const consumerArtifact: Artifact = await artifacts.readArtifact("ExamplePriceFeedConsumer");
       this.pricefeedconsumer = <ExamplePriceFeedConsumer>(
         await waffle.deployContract(this.signers.admin, consumerArtifact, [this.oracles[0].address])
       );
-      console.log("pricefeed-consumer address = ", this.pricefeedconsumer.address);
-
       this.aggregatorconsumer = <ExamplePriceFeedConsumer>(
         await waffle.deployContract(this.signers.admin, consumerArtifact, [this.timeBasedAggregator.address])
       );
-      console.log("aggregator-consumer address = ", this.aggregatorconsumer.address);
+
+      // submit initial prices
+      await this.oracles[0].connect(this.signers.admin).transmit(100);
+      await this.oracles[1].connect(this.signers.admin).transmit(100);
+      await this.oracles[2].connect(this.signers.admin).transmit(100);
     });
 
     shouldBehaveLikePriceFeedConsumer();

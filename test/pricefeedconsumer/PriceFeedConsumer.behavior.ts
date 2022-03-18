@@ -1,20 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prefer-const */
-// import { expect } from "chai";
-
-// import { ethers } from "hardhat";
-
 export function shouldBehaveLikePriceFeedConsumer(): void {
-  it("should fetch correct latest answer", async function () {
-    let tx1 = await this.oracles[0].connect(this.signers.admin).transmit(100);
-    let tx2 = await this.oracles[1].connect(this.signers.admin).transmit(150);
+  it("should compare gas price of fetching answer from FluxPriceFeed and FluxTimeBasedAggregator", async function () {
+    let pricefeedConsumerAvgGas = 0;
+    let aggregatorConsumerAvgGas = 0;
+    const loops = 10;
+    for (let i = 0; i < loops; i++) {
+      pricefeedConsumerAvgGas = Number(
+        (await this.pricefeedconsumer.connect(this.signers.admin).fetchLatestPrice()).gasPrice,
+      );
+      aggregatorConsumerAvgGas = Number(
+        (await this.aggregatorconsumer.connect(this.signers.admin).fetchLatestPrice()).gasPrice,
+      );
+    }
+    pricefeedConsumerAvgGas = Number(pricefeedConsumerAvgGas / loops);
+    aggregatorConsumerAvgGas = Number(aggregatorConsumerAvgGas / loops);
 
-    tx1 = await this.pricefeedconsumer.connect(this.signers.admin).fetchLatestPrice();
-    tx2 = await this.aggregatorconsumer.connect(this.signers.admin).fetchLatestPrice();
-    // let tx3 = await this.timeBasedAggregator.connect(this.signers.admin)["latestAnswer()"]();
-    // let tx4 = await this.oracles[0].connect(this.signers.admin)["latestAnswer()"]()
-
-    console.log("price feed consumer fetchLatestPrice cost: ", Number(tx1.gasPrice));
-    console.log("aggregator consumer fetchLatestPrice cost: ", Number(tx2.gasPrice));
+    // console.log("price feed consumer fetchLatestPrice cost: ", pricefeedConsumerAvgGas);
+    // console.log("aggregator consumer fetchLatestPrice cost: ", aggregatorConsumerAvgGas); // cheaper than price feed consumer
   });
 }
