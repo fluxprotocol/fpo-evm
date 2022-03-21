@@ -82,6 +82,11 @@ const config: HardhatUserConfig = {
       url: "https://kovan3.arbitrum.io/rpc",
       chainId: 79377087078960,
     },
+    "arbitrum-rinkeby-testnet": {
+      accounts: { mnemonic },
+      url: "https://rinkeby.arbitrum.io/rpc",
+      chainId: 421611,
+    },
     aurora: {
       accounts: {
         mnemonic,
@@ -114,8 +119,10 @@ const config: HardhatUserConfig = {
     },
     "bsc-testnet": {
       accounts: { mnemonic },
-      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      // url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
+      gasPrice: 20000000000,
     },
     celo: {
       accounts: { mnemonic },
@@ -192,10 +199,25 @@ const config: HardhatUserConfig = {
       url: "https://proxy.devnet.neonlabs.org/solana",
       chainId: 245022926,
     },
+    oasis: {
+      accounts: { mnemonic },
+      url: "https://emerald.oasis.dev",
+      chainId: 42262,
+    },
+    "oasis-testnet": {
+      accounts: { mnemonic },
+      url: "https://testnet.emerald.oasis.dev",
+      chainId: 42261,
+    },
     polygon: {
       accounts: { mnemonic },
       url: `https://rpc-mainnet.maticvigil.com/`,
       chainId: 137,
+    },
+    "polygon-mumbai-matic": {
+      accounts: { mnemonic },
+      url: `https://rpc-mumbai.matic.today`,
+      chainId: 80001,
     },
     gnosis: {
       accounts: { mnemonic },
@@ -246,16 +268,9 @@ const config: HardhatUserConfig = {
     outDir: "src/types",
     target: "ethers-v5",
   },
+
   etherscan: {
-    apiKey: {
-      kovan: process.env.ETHERSCAN_API_KEY,
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      ropsten: process.env.ETHERSCAN_API_KEY,
-      rinkeby: process.env.ETHERSCAN_API_KEY,
-      goerli: process.env.ETHERSCAN_API_KEY,
-      aurora: process.env.AURORA_API_KEY,
-      auroraTestnet: process.env.AURORA_API_KEY,
-    },
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
 
