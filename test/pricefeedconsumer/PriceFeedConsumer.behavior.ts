@@ -14,7 +14,7 @@ export function shouldBehaveLikePriceFeedConsumer(): void {
     pricefeedConsumerAvgGas = Number(pricefeedConsumerAvgGas / loops);
     aggregatorConsumerAvgGas = Number(aggregatorConsumerAvgGas / loops);
 
-    // console.log("price feed consumer fetchLatestPrice cost: ", pricefeedConsumerAvgGas);
-    // console.log("aggregator consumer fetchLatestPrice cost: ", aggregatorConsumerAvgGas); // cheaper than price feed consumer
+    console.log("price feed consumer fetchLatestPrice cost: ", pricefeedConsumerAvgGas);
+    console.log("aggregator consumer fetchLatestPrice cost: ", aggregatorConsumerAvgGas); // cheaper than price feed consumer
   });
 }

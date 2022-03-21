@@ -18,7 +18,6 @@ import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
 import "./tasks/factoryValueFor";
-import "./tasks/timeBasedAggregatorLatestAnswer";
 import "./tasks/tbAggregatorlatestAnswerWithDelay";
 import { resolve } from "path";
 

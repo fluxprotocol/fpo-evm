@@ -12,8 +12,10 @@ import "./interface/CLV2V3Interface.sol";
 contract FluxTimeBasedAggregator is CLV2V3Interface {
     uint256 public constant DEFAULT_TIMEOUT = 10 minutes;
 
+    /* solhint-disable var-name-mixedcase */
     address public immutable PRIMARY_PRICE_FEED;
     address public immutable SECONDARY_PRICE_FEED;
+    /* solhint-enable var-name-mixedcase */
 
     uint8 public immutable override decimals;
     uint256 public constant override version = 1;
