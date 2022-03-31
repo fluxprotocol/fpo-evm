@@ -17,4 +17,5 @@ export interface Signers {
   admin: SignerWithAddress;
   nonadmin: SignerWithAddress;
   lzn: SignerWithAddress;
+  uln: SignerWithAddress;
 }

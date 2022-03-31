@@ -17,6 +17,7 @@ describe("Unit tests", function () {
     this.signers.nonadmin = signers[1];
     this.fpo;
     this.signers.lzn = signers[2];
+    this.signers.uln = signers[3];
   });
 
   describe("FluxLayerZeroOracle", function () {
@@ -40,6 +41,7 @@ describe("Unit tests", function () {
         await waffle.deployContract(this.signers.admin, fluxLzOracleArtifact, [
           this.signers.admin.address,
           this.signers.lzn.address,
+          this.signers.uln.address,
         ])
       );
     });
