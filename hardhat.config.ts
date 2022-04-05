@@ -274,6 +274,7 @@ const config: HardhatUserConfig = {
       ropsten: process.env.ETHERSCAN_API_KEY,
       rinkeby: process.env.ETHERSCAN_API_KEY,
       goerli: process.env.ETHERSCAN_API_KEY,
+      auroraTestnet: process.env.AURORASCAN_API_KEY,
     },
   },
 };
