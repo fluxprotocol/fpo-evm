@@ -45,7 +45,7 @@ export function shouldBehaveLikeNewFluxPriceFeedFactory(): void {
     const answers = [3000, 37600];
     await expect(
       this.factory.connect(this.signers.admin).transmit(pricePairs, decimals, answers, this.provider1.address),
-    ).to.be.revertedWith("The provider you used doesn't exist, set it to ZERO to use msg.sender as provider");
+    ).to.be.revertedWith("Provider doesn't exist");
   });
 
   it("should revert if transmitted arrays aren't equal", async function () {
@@ -85,5 +85,32 @@ export function shouldBehaveLikeNewFluxPriceFeedFactory(): void {
   it("should return type and version", async function () {
     const typeAndVersion = await this.factory.connect(this.signers.admin).typeAndVersion();
     expect(typeAndVersion).to.equal("FluxFPO 1.0.0");
+  });
+
+  it("should allow adding new providers to existing price feeds", async function () {
+    console.log("+++fact", this.factory.address);
+
+    const pricePairs = [this.eth_usd_str];
+    const decimals = [3];
+    const answers = [3000];
+    const answers2 = [111];
+
+    // provider 1 can update the price feed to 3000
+    await this.factory.connect(this.provider1).transmit(pricePairs, decimals, answers, ethers.constants.AddressZero);
+    let [price] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_p1_id);
+    expect(price).to.equal(3000);
+
+    // provider 2 can't update provider1's price feed
+    await expect(
+      this.factory.connect(this.provider2).transmit(pricePairs, decimals, answers2, this.provider1.address),
+    ).to.be.revertedWith("Only validators can transmit");
+
+    // price remains at 3000
+    [price] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_p1_id);
+    expect(price).to.equal(3000);
+
+    // provider 1 grants provider 2 permission to update the price feed
+
+    // provider 2 can now update provider1's price feed
   });
 }
