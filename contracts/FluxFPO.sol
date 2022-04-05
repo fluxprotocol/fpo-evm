@@ -100,9 +100,11 @@ contract NewFluxPriceFeedFactory is IERC2362 {
                 _deployOracle(id, _pricePairs[i], _decimals[i]);
                 console.log("deployed oracle");
             }
-            if (address(fluxPriceFeeds[id]) == address(0x0)) {
-                revert("The provider you used doesn't exist, set it to ZERO to use msg.sender as provider");
-            }
+            require(
+                address(fluxPriceFeeds[id]) != address(0x0),
+                "The provider you used doesn't exist, set it to ZERO to use msg.sender as provider"
+            );
+
             // try transmitting values to the oracle
             /* solhint-disable-next-line no-empty-blocks */
             try fluxPriceFeeds[id].transmit(_answers[i]) {
