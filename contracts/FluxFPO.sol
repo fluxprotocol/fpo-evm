@@ -4,7 +4,6 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Flux first-party price feed factory
@@ -53,28 +52,14 @@ contract NewFluxPriceFeedFactory is IERC2362 {
 
         // Iterate through each transmitted price pair
         for (uint256 i = 0; i < _pricePairs.length; i++) {
-            // Find the price pair id
-            // Price-ETH/USD-3-0xblabla
-            // string memory str = string(
-            //     abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i]), "-",
-            //     Strings.toString(uint256(uint160(address(provider)))))
-            // );
-            // string memory str = string(
-            //     abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i]), "-",
-            //     Strings.toString(keccak256(abi.encodePacked(provider))) )
-            // );
-
             string memory str = string(
                 abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i]), "-", provider)
             );
-            console.log("+++str: ", str);
             bytes32 id = keccak256(bytes(str));
-            console.logBytes32(id);
 
             // deploy a new oracle if there's none previously deployed and this is the original provider
             if (address(fluxPriceFeeds[id]) == address(0x0) && msg.sender == provider) {
                 _deployOracle(id, _pricePairs[i], _decimals[i]);
-                console.log("deployed oracle");
             }
 
             require(address(fluxPriceFeeds[id]) != address(0x0), "Provider doesn't exist");
@@ -87,14 +72,9 @@ contract NewFluxPriceFeedFactory is IERC2362 {
             // try transmitting values to the oracle
             /* solhint-disable-next-line no-empty-blocks */
             try fluxPriceFeeds[id].transmit(_answers[i]) {
-                console.log("transmitted price to ");
-                console.log(address(fluxPriceFeeds[id]));
-                console.logBytes32(id);
-
                 // transmission is successful, nothing to do
             } catch Error(string memory reason) {
                 // catch failing revert() and require()
-                console.log("ERROR+");
                 emit Log(reason);
             }
         }
@@ -111,11 +91,8 @@ contract NewFluxPriceFeedFactory is IERC2362 {
     ) internal {
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
-        console.log("deploying newpricefeed:");
-        console.log(address(newPriceFeed));
-        // console.logbytes32(_id);
+
         fluxPriceFeeds[_id] = newPriceFeed;
-        console.logBytes32(_id);
 
         // grant the provider DEFAULT_ADMIN_ROLE and VALIDATOR_ROLE on the new FluxPriceFeed
         newPriceFeed.grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -138,8 +115,6 @@ contract NewFluxPriceFeedFactory is IERC2362 {
             uint256
         )
     {
-        console.log("Query ID");
-        console.logBytes32(_id);
         // if oracle exists then fetch values
         if (address(fluxPriceFeeds[_id]) != address(0x0)) {
             // fetch the price feed contract and read its latest answer and timestamp
