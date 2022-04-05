@@ -113,4 +113,6 @@ export function shouldBehaveLikeNewFluxPriceFeedFactory(): void {
 
     // provider 2 can now update provider1's price feed
   });
+
+  it("getId() helper function should work", async function () {});
 }
