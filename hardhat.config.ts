@@ -85,6 +85,11 @@ const config: HardhatUserConfig = {
       chainId: 43113,
       accounts: { mnemonic },
     },
+    aurora: {
+      url: `https://mainnet.aurora.dev/${process.env.AURORA_API_KEY}`,
+      chainId: 1313161554,
+      accounts: { mnemonic },
+    },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com/",
       chainId: 80001,

@@ -13,11 +13,9 @@ task("notifyOracle")
     const contract = await FluxLayerZeroOracle.attach(_taskArgs.contract);
 
     const tx = await contract.notifyOracle(
-      _taskArgs.dstChainId,
       1,
       ethers.utils.hexZeroPad(_taskArgs.dstNetworkAddress, 32),
       _taskArgs.blockConfirmations,
-      ethers.constants.HashZero,
     );
     console.log(`Tx hash: ${tx.hash}`);
   });
