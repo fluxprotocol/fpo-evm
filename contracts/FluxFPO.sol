@@ -32,30 +32,6 @@ contract NewFluxPriceFeedFactory is IERC2362 {
     event Log(string message);
 
     /**
-     * @notice internal function to create a new FluxPriceFeed
-     * @dev only a validator should be able to call this function
-     */
-    function _deployOracle(
-        bytes32 _id,
-        string calldata _pricePair,
-        uint8 _decimals
-    ) internal {
-        // deploy the new contract and store it in the mapping
-        FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
-        console.log("deploying newpricefeed:");
-        console.log(address(newPriceFeed));
-        // console.logbytes32(_id);
-        fluxPriceFeeds[_id] = newPriceFeed;
-        console.logBytes32(_id);
-
-        // grant the provider DEFAULT_ADMIN_ROLE and VALIDATOR_ROLE on the new FluxPriceFeed
-        newPriceFeed.grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
-
-        emit FluxPriceFeedCreated(_id, address(newPriceFeed));
-    }
-
-    /**
      * @notice transmit submits an answer to a price feed or creates a new one if it does not exist
      * @param _pricePairs array of price pairs strings (e.g. ETH/USD)
      * @param _decimals array of decimals for associated price pairs (e.g. 3)
@@ -100,10 +76,13 @@ contract NewFluxPriceFeedFactory is IERC2362 {
                 _deployOracle(id, _pricePairs[i], _decimals[i]);
                 console.log("deployed oracle");
             }
-            require(
-                address(fluxPriceFeeds[id]) != address(0x0),
-                "The provider you used doesn't exist, set it to ZERO to use msg.sender as provider"
-            );
+
+            require(address(fluxPriceFeeds[id]) != address(0x0), "Provider doesn't exist");
+
+            // if this is not the original provider, make sure the caller has the VALIDATOR_ROLE on the oracle
+            if (msg.sender != provider) {
+                require(fluxPriceFeeds[id].hasRole(VALIDATOR_ROLE, msg.sender), "Only validators can transmit");
+            }
 
             // try transmitting values to the oracle
             /* solhint-disable-next-line no-empty-blocks */
@@ -119,6 +98,30 @@ contract NewFluxPriceFeedFactory is IERC2362 {
                 emit Log(reason);
             }
         }
+    }
+
+    /**
+     * @notice internal function to create a new FluxPriceFeed
+     * @dev only a validator should be able to call this function
+     */
+    function _deployOracle(
+        bytes32 _id,
+        string calldata _pricePair,
+        uint8 _decimals
+    ) internal {
+        // deploy the new contract and store it in the mapping
+        FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
+        console.log("deploying newpricefeed:");
+        console.log(address(newPriceFeed));
+        // console.logbytes32(_id);
+        fluxPriceFeeds[_id] = newPriceFeed;
+        console.logBytes32(_id);
+
+        // grant the provider DEFAULT_ADMIN_ROLE and VALIDATOR_ROLE on the new FluxPriceFeed
+        newPriceFeed.grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
+
+        emit FluxPriceFeedCreated(_id, address(newPriceFeed));
     }
 
     /**
@@ -168,39 +171,27 @@ contract NewFluxPriceFeedFactory is IERC2362 {
     }
 
     /**
+     * @notice returns the hash of a price pair
+     * @param _pricePair ETH/USD
+     * @param _decimals decimal of the price pair
+     * @param _provider original provider of the price pair
+     */
+    function getId(
+        string calldata _pricePair,
+        uint8 _decimals,
+        address _provider
+    ) external pure returns (bytes32) {
+        string memory str = string(
+            abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals), "-", _provider)
+        );
+        bytes32 id = keccak256(bytes(str));
+        return id;
+    }
+
+    /**
      * @notice returns factory's type and version
      */
     function typeAndVersion() external pure virtual returns (string memory) {
         return "FluxFPO 1.0.0";
-    }
-
-    function toAsciiString(address x) internal pure returns (string memory) {
-        bytes memory s = new bytes(40);
-        for (uint256 i = 0; i < 20; i++) {
-            bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2**(8 * (19 - i)))));
-            bytes1 hi = bytes1(uint8(b) / 16);
-            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
-            s[2 * i] = char(hi);
-            s[2 * i + 1] = char(lo);
-        }
-        return string(s);
-    }
-
-    function char(bytes1 b) internal pure returns (bytes1 c) {
-        if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
-        else return bytes1(uint8(b) + 0x57);
-    }
-
-    function addressToString(address _address) internal pure returns (string memory) {
-        bytes32 _bytes = bytes32(uint256(uint160(_address)));
-        bytes memory HEX = "0123456789abcdef";
-        bytes memory _string = new bytes(42);
-        _string[0] = "0";
-        _string[1] = "x";
-        for (uint256 i = 0; i < 20; i++) {
-            _string[2 + i * 2] = HEX[uint8(_bytes[i + 12] >> 4)];
-            _string[3 + i * 2] = HEX[uint8(_bytes[i + 12] & 0x0f)];
-        }
-        return string(_string);
     }
 }
