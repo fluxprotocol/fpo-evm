@@ -27,7 +27,6 @@ describe("Unit tests", function () {
         await waffle.deployContract(this.signers.admin, factoryArtifact, [this.signers.admin.address])
       );
     });
-
     shouldBehaveLikeFluxPriceFeedFactory();
   });
 });
