@@ -12,35 +12,30 @@ import "hardhat/console.sol";
  * @author fluxprotocol.org
  */
 contract FluxP2PFactory is AccessControl, IERC2362 {
+    /// @notice signatures from addresses submitted in `transmit()` must have this role
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
 
-    // mapping of id to FluxPriceFeed
+    /// @notice mapping of id to FluxPriceFeed
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
-    address public immutable PROVIDER;
-    /**
-     * @notice indicates that a new oracle was created
-     * @param id hash of the price pair of the deployed oracle
-     * @param oracle address of the deployed oracle
-     */
+
+    /// @notice indicates that a new oracle was created
+    /// @param id hash of the price pair of the deployed oracle
+    /// @param oracle address of the deployed oracle
     event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle);
 
-    /**
-     * @notice to log error messages
-     * @param message the logged message
-     */
+    /// @notice to log error messages
+    /// @param message the log message
     event Log(string message);
 
-    constructor(address _provider) {
-        // _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // _setupRole(VALIDATOR_ROLE, _validator);
-        PROVIDER = _provider;
-        console.log("PROVIDER = ", PROVIDER);
+    constructor(address[] memory _validators) {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        for (uint256 i = 0; i < _validators.length; i++) {
+            _setupRole(VALIDATOR_ROLE, _validators[i]);
+        }
     }
 
-    /**
-     * @notice internal function to create a new FluxPriceFeed
-     * @dev only a validator should be able to call this function
-     */
+    /// @notice internal function to create a new FluxPriceFeed
+    /// @dev only a validator should be able to call this function
     function _deployOracle(
         bytes32 _id,
         string calldata _pricePair,
@@ -55,53 +50,48 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
     }
 
-    /**
-     * @notice transmit submits an answer to a price feed or creates a new one if it does not exist
-     * @param _pricePairs array of price pairs strings (e.g. ETH/USD)
-     * @param _decimals array of decimals for associated price pairs (e.g. 3)
-     * @param _answers array of prices for associated price pairs
-     */
+    /// @notice leader submits an array of signatures and answers along with associated price pair and decimals
     function transmit(
         bytes[] calldata signatures,
-        string[] calldata _pricePairs,
-        uint8[] calldata _decimals,
+        string calldata _pricePair,
+        uint8 _decimals,
         int192[] calldata _answers
     ) external {
-        require(
-            (_pricePairs.length == _decimals.length) &&
-                (_pricePairs.length == _answers.length) &&
-                (_pricePairs.length == signatures.length),
-            "Transmitted arrays must be equal"
-        );
+        require(signatures.length == _answers.length, "Number of answers must match signatures");
+
+        // verify the signatures
         for (uint256 i = 0; i < signatures.length; i++) {
+            address recoveredSigner = _getSigner(_pricePair, _decimals, _answers[i], signatures[i]);
+            require(hasRole(VALIDATOR_ROLE, recoveredSigner), "Signer must be a validator");
             require(
-                verify(PROVIDER, _pricePairs[i], _decimals[i], _answers[i], signatures[i]) == true,
+                _verify(recoveredSigner, _pricePair, _decimals, _answers[i], signatures[i]) == true,
                 "SIGNATURE FAILED"
             );
+        }
 
-            // Find the price pair id
-            string memory str = string(abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i])));
-            bytes32 id = keccak256(bytes(str));
+        // TODO: calculate median of _answers
+        int192 answer = _answers[0];
 
-            // deploy a new oracle if there's none previously deployed
-            if (address(fluxPriceFeeds[id]) == address(0x0)) {
-                _deployOracle(id, _pricePairs[i], _decimals[i]);
-            }
-            // try transmitting values to the oracle
-            /* solhint-disable-next-line no-empty-blocks */
-            try fluxPriceFeeds[id].transmit(_answers[i]) {
-                // transmission is successful, nothing to do
-            } catch Error(string memory reason) {
-                // catch failing revert() and require()
-                emit Log(reason);
-            }
+        // Find the price pair id
+        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
+        bytes32 id = keccak256(bytes(str));
+
+        // deploy a new oracle if there's none previously deployed
+        if (address(fluxPriceFeeds[id]) == address(0x0)) {
+            _deployOracle(id, _pricePair, _decimals);
+        }
+        // try transmitting values to the oracle
+        /* solhint-disable-next-line no-empty-blocks */
+        try fluxPriceFeeds[id].transmit(answer) {
+            // transmission is successful, nothing to do
+        } catch Error(string memory reason) {
+            // catch failing revert() and require()
+            emit Log(reason);
         }
     }
 
-    /**
-     * @notice answer from the most recent report of a certain price pair from factory
-     * @param _id hash of the price pair string to query
-     */
+    /// @notice answer from the most recent report of a certain price pair from factory
+    /// @param _id hash of the price pair string to query
     function valueFor(bytes32 _id)
         external
         view
@@ -134,30 +124,56 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         }
     }
 
-    /**
-     * @notice returns address of a price feed id
-     * @param _id hash of the price pair string to query
-     */
+    /// @notice returns address of a price feed id
+    /// @param _id hash of the price pair string to query
     function addressOfPricePair(bytes32 _id) external view returns (address) {
         return address(fluxPriceFeeds[_id]);
     }
 
-    /**
-     * @notice returns factory's type and version
-     */
+    /// @notice returns factory's type and version
     function typeAndVersion() external view virtual returns (string memory) {
         return "FluxP2PFactory 1.0.0";
     }
 
-    function getMessageHash(
+    function _getSigner(
+        string memory _pricePair,
+        uint8 _decimal,
+        int192 _answer,
+        bytes memory signature
+    ) internal view returns (address) {
+        console.log("Hello from verify fn");
+        bytes32 messageHash = _getMessageHash(_pricePair, _decimal, _answer);
+        bytes32 ethSignedMessageHash = _getEthSignedMessageHash(messageHash);
+        console.log("----messageHash");
+        console.logBytes32(messageHash);
+        console.log("----ethSignedMessageHash");
+
+        console.logBytes32(ethSignedMessageHash);
+        address recoveredSigner = _recoverSigner(ethSignedMessageHash, signature);
+        console.log("recoveredSigner", recoveredSigner);
+
+        return recoveredSigner;
+    }
+
+    function _verify(
+        address _signer,
+        string memory _pricePair,
+        uint8 _decimal,
+        int192 _answer,
+        bytes memory signature
+    ) internal view returns (bool) {
+        return _getSigner(_pricePair, _decimal, _answer, signature) == _signer;
+    }
+
+    function _getMessageHash(
         string memory _pricePair,
         uint8 _decimal,
         int192 _answer
-    ) public view returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_pricePair, _decimal, _answer));
     }
 
-    function getEthSignedMessageHash(bytes32 _messageHash) public view returns (bytes32) {
+    function _getEthSignedMessageHash(bytes32 _messageHash) internal pure returns (bytes32) {
         /*
         Signature is produced by signing a keccak256 hash with the following format:
         "\x19Ethereum Signed Message\n" + len(msg) + msg
@@ -165,35 +181,15 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash));
     }
 
-    function verify(
-        address _signer,
-        string memory _pricePair,
-        uint8 _decimal,
-        int192 _answer,
-        bytes memory signature
-    ) public view returns (bool) {
-        console.log("Hello from verify fn");
-        bytes32 messageHash = getMessageHash(_pricePair, _decimal, _answer);
-        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
-        console.log("----messageHash");
-        console.logBytes32(messageHash);
-        console.log("----ethSignedMessageHash");
-
-        console.logBytes32(ethSignedMessageHash);
-        address recoverdSigner = recoverSigner(ethSignedMessageHash, signature);
-        console.log("recoverdSigner", recoverdSigner);
-        return recoverSigner(ethSignedMessageHash, signature) == _signer;
-    }
-
-    function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature) public view returns (address) {
-        (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
+    function _recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature) internal pure returns (address) {
+        (bytes32 r, bytes32 s, uint8 v) = _splitSignature(_signature);
 
         return ecrecover(_ethSignedMessageHash, v, r, s);
     }
 
-    function splitSignature(bytes memory sig)
-        public
-        view
+    function _splitSignature(bytes memory sig)
+        internal
+        pure
         returns (
             bytes32 r,
             bytes32 s,

@@ -21,13 +21,16 @@ describe("Unit tests", function () {
 
     this.provider1 = signers[2];
     this.provider2 = signers[3];
+    this.nonprovider = signers[4];
   });
 
   describe("FluxP2PFactory", function () {
     beforeEach(async function () {
       const factoryArtifact: Artifact = await artifacts.readArtifact("FluxP2PFactory");
       this.factory = <FluxP2PFactory>(
-        await waffle.deployContract(this.signers.admin, factoryArtifact, [this.provider1.address])
+        await waffle.deployContract(this.signers.admin, factoryArtifact, [
+          [this.provider1.address, this.provider2.address],
+        ])
       );
     });
     shouldBehaveLikeFluxP2PFactory();
