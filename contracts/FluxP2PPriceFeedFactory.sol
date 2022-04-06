@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-import "./VerifSig.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Flux first-party price feed factory
@@ -16,7 +16,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
     // mapping of id to FluxPriceFeed
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
-
+    address public immutable PROVIDER;
     /**
      * @notice indicates that a new oracle was created
      * @param id hash of the price pair of the deployed oracle
@@ -30,9 +30,11 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
      */
     event Log(string message);
 
-    constructor(address _validator) {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(VALIDATOR_ROLE, _validator);
+    constructor(address _provider) {
+        // _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        // _setupRole(VALIDATOR_ROLE, _validator);
+        PROVIDER = _provider;
+        console.log("PROVIDER = ", PROVIDER);
     }
 
     /**
@@ -60,37 +62,39 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
      * @param _answers array of prices for associated price pairs
      */
     function transmit(
-        bytes32[] calldata sigs,
+        bytes[] calldata signatures,
         string[] calldata _pricePairs,
         uint8[] calldata _decimals,
         int192[] calldata _answers
-    ) external onlyRole(VALIDATOR_ROLE) {
+    ) external {
         require(
-            (_pricePairs.length == _decimals.length) && (_pricePairs.length == _answers.length),
+            (_pricePairs.length == _decimals.length) &&
+                (_pricePairs.length == _answers.length) &&
+                (_pricePairs.length == signatures.length),
             "Transmitted arrays must be equal"
         );
-        // // Iterate through each transmitted price pair
-        // for (uint256 i = 0; i < _pricePairs.length; i++) {
-        //     // Find the price pair id
-        //     string memory str = string(abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i])));
-        //     bytes32 id = keccak256(bytes(str));
+        for (uint256 i = 0; i < signatures.length; i++) {
+            require(
+                verify(PROVIDER, _pricePairs[i], _decimals[i], _answers[i], signatures[i]) == true,
+                "SIGNATURE FAILED"
+            );
 
-        //     // deploy a new oracle if there's none previously deployed
-        //     if (address(fluxPriceFeeds[id]) == address(0x0)) {
-        //         _deployOracle(id, _pricePairs[i], _decimals[i]);
-        //     }
-        //     // try transmitting values to the oracle
-        //     /* solhint-disable-next-line no-empty-blocks */
-        //     try fluxPriceFeeds[id].transmit(_answers[i]) {
-        //         // transmission is successful, nothing to do
-        //     } catch Error(string memory reason) {
-        //         // catch failing revert() and require()
-        //         emit Log(reason);
-        //     }
-        // }
+            // Find the price pair id
+            string memory str = string(abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i])));
+            bytes32 id = keccak256(bytes(str));
 
-        for (uint256 i = 0; i < sigs.length; i++) {
-            (bytes32 r, bytes32 s, uint8 v) = splitSignature(sigs[i]);
+            // deploy a new oracle if there's none previously deployed
+            if (address(fluxPriceFeeds[id]) == address(0x0)) {
+                _deployOracle(id, _pricePairs[i], _decimals[i]);
+            }
+            // try transmitting values to the oracle
+            /* solhint-disable-next-line no-empty-blocks */
+            try fluxPriceFeeds[id].transmit(_answers[i]) {
+                // transmission is successful, nothing to do
+            } catch Error(string memory reason) {
+                // catch failing revert() and require()
+                emit Log(reason);
+            }
         }
     }
 
@@ -141,7 +145,81 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     /**
      * @notice returns factory's type and version
      */
-    function typeAndVersion() external pure virtual returns (string memory) {
+    function typeAndVersion() external view virtual returns (string memory) {
         return "FluxP2PFactory 1.0.0";
+    }
+
+    function getMessageHash(
+        string memory _pricePair,
+        uint8 _decimal,
+        int192 _answer
+    ) public view returns (bytes32) {
+        return keccak256(abi.encodePacked(_pricePair, _decimal, _answer));
+    }
+
+    function getEthSignedMessageHash(bytes32 _messageHash) public view returns (bytes32) {
+        /*
+        Signature is produced by signing a keccak256 hash with the following format:
+        "\x19Ethereum Signed Message\n" + len(msg) + msg
+        */
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash));
+    }
+
+    function verify(
+        address _signer,
+        string memory _pricePair,
+        uint8 _decimal,
+        int192 _answer,
+        bytes memory signature
+    ) public view returns (bool) {
+        console.log("Hello from verify fn");
+        bytes32 messageHash = getMessageHash(_pricePair, _decimal, _answer);
+        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
+        console.log("----messageHash");
+        console.logBytes32(messageHash);
+        console.log("----ethSignedMessageHash");
+
+        console.logBytes32(ethSignedMessageHash);
+        address recoverdSigner = recoverSigner(ethSignedMessageHash, signature);
+        console.log("recoverdSigner", recoverdSigner);
+        return recoverSigner(ethSignedMessageHash, signature) == _signer;
+    }
+
+    function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature) public view returns (address) {
+        (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
+
+        return ecrecover(_ethSignedMessageHash, v, r, s);
+    }
+
+    function splitSignature(bytes memory sig)
+        public
+        view
+        returns (
+            bytes32 r,
+            bytes32 s,
+            uint8 v
+        )
+    {
+        require(sig.length == 65, "invalid signature length");
+
+        assembly {
+            /*
+            First 32 bytes stores the length of the signature
+
+            add(sig, 32) = pointer of sig + 32
+            effectively, skips first 32 bytes of signature
+
+            mload(p) loads next 32 bytes starting at the memory address p into memory
+            */
+
+            // first 32 bytes, after the length prefix
+            r := mload(add(sig, 32))
+            // second 32 bytes
+            s := mload(add(sig, 64))
+            // final byte (first byte of the next 32 bytes)
+            v := byte(0, mload(add(sig, 96)))
+        }
+
+        // implicitly return (r, s, v)
     }
 }

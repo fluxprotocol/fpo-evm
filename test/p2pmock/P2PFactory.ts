@@ -18,13 +18,16 @@ describe("Unit tests", function () {
     this.btc_usd_id = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("Price-BTC/USD-3"));
     this.eth_usd_str = "ETH/USD";
     this.btc_usd_str = "BTC/USD";
+
+    this.provider1 = signers[2];
+    this.provider2 = signers[3];
   });
 
   describe("FluxP2PFactory", function () {
     beforeEach(async function () {
       const factoryArtifact: Artifact = await artifacts.readArtifact("FluxP2PFactory");
       this.factory = <FluxP2PFactory>(
-        await waffle.deployContract(this.signers.admin, factoryArtifact, [this.signers.admin.address])
+        await waffle.deployContract(this.signers.admin, factoryArtifact, [this.provider1.address])
       );
     });
     shouldBehaveLikeFluxP2PFactory();
