@@ -22,6 +22,7 @@ describe("Unit tests", function () {
     this.provider1 = signers[2];
     this.provider2 = signers[3];
     this.nonprovider = signers[4];
+    this.provider3tobe = signers[5];
   });
 
   describe("FluxP2PFactory", function () {

@@ -69,8 +69,14 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             );
         }
 
-        // TODO: calculate median of _answers
-        int192 answer = _answers[0];
+        // calculate median of _answers assuming they're already sorted
+        // int192 answer = _answers[0];
+        int192 answer;
+        if (_answers.length % 2 == 0) {
+            answer = ((_answers[(_answers.length / 2) - 1] + _answers[_answers.length / 2]) / 2);
+        } else {
+            answer = _answers[_answers.length / 2];
+        }
 
         // Find the price pair id
         string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
@@ -133,6 +139,16 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     /// @notice returns factory's type and version
     function typeAndVersion() external view virtual returns (string memory) {
         return "FluxP2PFactory 1.0.0";
+    }
+
+    function addProvider(address _newProvider) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NOT AN ADMIN, CANT ADD PROVIDER");
+        _setupRole(VALIDATOR_ROLE, _newProvider);
+    }
+
+    function revokeProvider(address _provider) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NOT AN ADMIN, CANT REVOKE PROVIDER");
+        revokeRole(VALIDATOR_ROLE, _provider);
     }
 
     function _getSigner(
