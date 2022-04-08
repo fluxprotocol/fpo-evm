@@ -147,6 +147,11 @@ const config: HardhatUserConfig = {
       url: "https://cronos-testnet-3.crypto.org:8545",
       chainId: 338,
     },
+    "evmos-testnet": {
+      accounts: { mnemonic },
+      url: "https://eth.bd.evmos.dev:8545",
+      chainId: 9000,
+    },
     fantom: {
       accounts: { mnemonic },
       url: "https://rpcapi.fantom.network",
