@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Flux first-party price feed factory
@@ -63,10 +62,6 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         for (uint256 i = 0; i < signatures.length; i++) {
             address recoveredSigner = _getSigner(_pricePair, _decimals, _answers[i], signatures[i]);
             require(hasRole(VALIDATOR_ROLE, recoveredSigner), "Signer must be a validator");
-            require(
-                _verify(recoveredSigner, _pricePair, _decimals, _answers[i], signatures[i]) == true,
-                "SIGNATURE FAILED"
-            );
         }
 
         // calculate median of _answers assuming they're already sorted
@@ -143,7 +138,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
     function addProvider(address _newProvider) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NOT AN ADMIN, CANT ADD PROVIDER");
-        _setupRole(VALIDATOR_ROLE, _newProvider);
+        grantRole(VALIDATOR_ROLE, _newProvider);
     }
 
     function revokeProvider(address _provider) external {
@@ -156,17 +151,11 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         uint8 _decimal,
         int192 _answer,
         bytes memory signature
-    ) internal view returns (address) {
-        console.log("Hello from verify fn");
+    ) internal pure returns (address) {
         bytes32 messageHash = _getMessageHash(_pricePair, _decimal, _answer);
         bytes32 ethSignedMessageHash = _getEthSignedMessageHash(messageHash);
-        console.log("----messageHash");
-        console.logBytes32(messageHash);
-        console.log("----ethSignedMessageHash");
 
-        console.logBytes32(ethSignedMessageHash);
         address recoveredSigner = _recoverSigner(ethSignedMessageHash, signature);
-        console.log("recoveredSigner", recoveredSigner);
 
         return recoveredSigner;
     }
@@ -177,7 +166,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         uint8 _decimal,
         int192 _answer,
         bytes memory signature
-    ) internal view returns (bool) {
+    ) internal pure returns (bool) {
         return _getSigner(_pricePair, _decimal, _answer, signature) == _signer;
     }
 
