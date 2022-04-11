@@ -136,16 +136,6 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         return "FluxP2PFactory 1.0.0";
     }
 
-    function addProvider(address _newProvider) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NOT AN ADMIN, CANT ADD PROVIDER");
-        grantRole(VALIDATOR_ROLE, _newProvider);
-    }
-
-    function revokeProvider(address _provider) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NOT AN ADMIN, CANT REVOKE PROVIDER");
-        revokeRole(VALIDATOR_ROLE, _provider);
-    }
-
     function _getSigner(
         string memory _pricePair,
         uint8 _decimal,
