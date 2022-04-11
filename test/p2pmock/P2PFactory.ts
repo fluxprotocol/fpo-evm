@@ -23,6 +23,7 @@ describe("Unit tests", function () {
     this.provider2 = signers[3];
     this.nonprovider = signers[4];
     this.provider3tobe = signers[5];
+    // this.validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR"));
   });
 
   describe("FluxP2PFactory", function () {
