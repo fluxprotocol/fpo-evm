@@ -3,9 +3,9 @@ import { ethers } from "ethers";
 
 import { task } from "hardhat/config";
 
-// npx hardhat newFactoryTransmit --network aurora-testnet --contract 0xb4eeDAfccb9C403f12D66D2795b61703f13939EB --pricepairs "ETH/USD BTC/USD" --decimals "6 6" --answers "3000 37000"
+// npx hardhat newfpoTransmit --network aurora-testnet --contract 0xb4eeDAfccb9C403f12D66D2795b61703f13939EB --pricepairs "ETH/USD BTC/USD" --decimals "6 6" --answers "3000 37000"
 
-task("newFactoryTransmit", "Submits an answer to factoryPriceFeed")
+task("newfpoTransmit", "Submits an answer to factoryPriceFeed")
   .addParam("contract", "The price feed contract to post to")
   .addParam("pricepairs", "The prices posted")
   .addParam("decimals", "Price pairs decimals")
