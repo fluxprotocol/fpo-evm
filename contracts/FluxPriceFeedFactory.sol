@@ -12,7 +12,6 @@ import "./FluxPriceFeed.sol";
 contract FluxPriceFeedFactory is IERC2362 {
     // roles
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
-    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
     // mapping of id to FluxPriceFeed
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
@@ -95,7 +94,7 @@ contract FluxPriceFeedFactory is IERC2362 {
         fluxPriceFeeds[_id] = newPriceFeed;
 
         // grant the provider DEFAULT_ADMIN_ROLE and VALIDATOR_ROLE on the new FluxPriceFeed
-        newPriceFeed.grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        newPriceFeed.grantRole(0x00, msg.sender);
         newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
 
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
@@ -141,7 +140,7 @@ contract FluxPriceFeedFactory is IERC2362 {
      * @notice returns address of a price feed id
      * @param _id hash of the price pair string to query
      */
-    function addressOfPricePair(bytes32 _id) external view returns (address) {
+    function addressOfPricePairId(bytes32 _id) external view returns (address) {
         return address(fluxPriceFeeds[_id]);
     }
 
@@ -161,6 +160,21 @@ contract FluxPriceFeedFactory is IERC2362 {
         );
         bytes32 id = keccak256(bytes(str));
         return id;
+    }
+
+    /**
+     * @notice returns address of a price feed id
+     * @param _pricePair ETH/USD
+     * @param _decimals decimal of the price pair
+     * @param _provider original provider of the price pair
+     */
+    function addressOfPricePair(
+        string calldata _pricePair,
+        uint8 _decimals,
+        address _provider
+    ) external view returns (address) {
+        bytes32 id = this.getId(_pricePair, _decimals, _provider);
+        return address(fluxPriceFeeds[id]);
     }
 
     /**
