@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
@@ -10,8 +9,10 @@ import "./FluxPriceFeed.sol";
  * @title Flux first-party price feed factory
  * @author fluxprotocol.org
  */
-contract FluxPriceFeedFactory is AccessControl, IERC2362 {
+contract FluxPriceFeedFactory is IERC2362 {
+    // roles
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
+    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
     // mapping of id to FluxPriceFeed
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
@@ -29,9 +30,54 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
      */
     event Log(string message);
 
-    constructor(address _validator) {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(VALIDATOR_ROLE, _validator);
+    /**
+     * @notice transmit submits an answer to a price feed or creates a new one if it does not exist
+     * @param _pricePairs array of price pairs strings (e.g. ETH/USD)
+     * @param _decimals array of decimals for associated price pairs (e.g. 3)
+     * @param _answers array of prices for associated price pairs
+     * @param _provider optional address of the provider, if different from msg.sender
+     */
+    function transmit(
+        string[] calldata _pricePairs,
+        uint8[] calldata _decimals,
+        int192[] calldata _answers,
+        address _provider
+    ) external {
+        require(
+            (_pricePairs.length == _decimals.length) && (_pricePairs.length == _answers.length),
+            "Transmitted arrays must be equal"
+        );
+        // if no provider is provided, use the msg.sender
+        address provider = (_provider == address(0)) ? msg.sender : _provider;
+
+        // Iterate through each transmitted price pair
+        for (uint256 i = 0; i < _pricePairs.length; i++) {
+            string memory str = string(
+                abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i]), "-", provider)
+            );
+            bytes32 id = keccak256(bytes(str));
+
+            // deploy a new oracle if there's none previously deployed and this is the original provider
+            if (address(fluxPriceFeeds[id]) == address(0x0) && msg.sender == provider) {
+                _deployOracle(id, _pricePairs[i], _decimals[i]);
+            }
+
+            require(address(fluxPriceFeeds[id]) != address(0x0), "Provider doesn't exist");
+
+            // if this is not the original provider, make sure the caller has the VALIDATOR_ROLE on the oracle
+            if (msg.sender != provider) {
+                require(fluxPriceFeeds[id].hasRole(VALIDATOR_ROLE, msg.sender), "Only validators can transmit");
+            }
+
+            // try transmitting values to the oracle
+            /* solhint-disable-next-line no-empty-blocks */
+            try fluxPriceFeeds[id].transmit(_answers[i]) {
+                // transmission is successful, nothing to do
+            } catch Error(string memory reason) {
+                // catch failing revert() and require()
+                emit Log(reason);
+            }
+        }
     }
 
     /**
@@ -45,47 +91,14 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
     ) internal {
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
+
         fluxPriceFeeds[_id] = newPriceFeed;
 
-        // also grant this contract's admin VALIDATOR_ROLE on the new FluxPriceFeed
+        // grant the provider DEFAULT_ADMIN_ROLE and VALIDATOR_ROLE on the new FluxPriceFeed
+        newPriceFeed.grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
+
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
-    }
-
-    /**
-     * @notice transmit submits an answer to a price feed or creates a new one if it does not exist
-     * @param _pricePairs array of price pairs strings (e.g. ETH/USD)
-     * @param _decimals array of decimals for associated price pairs (e.g. 3)
-     * @param _answers array of prices for associated price pairs
-     */
-    function transmit(
-        string[] calldata _pricePairs,
-        uint8[] calldata _decimals,
-        int192[] calldata _answers
-    ) external onlyRole(VALIDATOR_ROLE) {
-        require(
-            (_pricePairs.length == _decimals.length) && (_pricePairs.length == _answers.length),
-            "Transmitted arrays must be equal"
-        );
-        // Iterate through each transmitted price pair
-        for (uint256 i = 0; i < _pricePairs.length; i++) {
-            // Find the price pair id
-            string memory str = string(abi.encodePacked("Price-", _pricePairs[i], "-", Strings.toString(_decimals[i])));
-            bytes32 id = keccak256(bytes(str));
-
-            // deploy a new oracle if there's none previously deployed
-            if (address(fluxPriceFeeds[id]) == address(0x0)) {
-                _deployOracle(id, _pricePairs[i], _decimals[i]);
-            }
-            // try transmitting values to the oracle
-            /* solhint-disable-next-line no-empty-blocks */
-            try fluxPriceFeeds[id].transmit(_answers[i]) {
-                // transmission is successful, nothing to do
-            } catch Error(string memory reason) {
-                // catch failing revert() and require()
-                emit Log(reason);
-            }
-        }
     }
 
     /**
@@ -133,9 +146,27 @@ contract FluxPriceFeedFactory is AccessControl, IERC2362 {
     }
 
     /**
+     * @notice returns the hash of a price pair
+     * @param _pricePair ETH/USD
+     * @param _decimals decimal of the price pair
+     * @param _provider original provider of the price pair
+     */
+    function getId(
+        string calldata _pricePair,
+        uint8 _decimals,
+        address _provider
+    ) external pure returns (bytes32) {
+        string memory str = string(
+            abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals), "-", _provider)
+        );
+        bytes32 id = keccak256(bytes(str));
+        return id;
+    }
+
+    /**
      * @notice returns factory's type and version
      */
     function typeAndVersion() external pure virtual returns (string memory) {
-        return "FluxPriceFeedFactory 1.2.0";
+        return "FluxPriceFeedFactory 2.0.0";
     }
 }
