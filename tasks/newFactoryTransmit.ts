@@ -28,15 +28,25 @@ task("newFactoryTransmit", "Submits an answer to factoryPriceFeed")
     console.log(received_answers);
     console.log(received_decimals);
 
+    const provider = _taskArgs.provider ? _taskArgs.provider : ethers.constants.AddressZero;
+
     const pairsIds = [];
     let pair;
+    let pairId;
+    let retrievedId;
     for (const key in received_pairs) {
-      pair = "Price-" + received_pairs[key] + "-" + received_decimals[key];
-      console.log(pair);
-      pairsIds.push(ethers.utils.keccak256(ethers.utils.toUtf8Bytes(pair)));
+      pair = "Price-" + received_pairs[key] + "-" + received_decimals[key] + "-";
+      console.log("pair = ", pair);
+      console.log("receivedpair = ", received_pairs[key]);
+      console.log("received_decimal = ", received_decimals[key]);
+
+      pairId = ethers.utils.solidityKeccak256(["string", "address"], [pair, provider]);
+      console.log("pairId = ", pairId);
+      retrievedId = await contract.connect(validator).getId(received_pairs[key], received_decimals[key], provider);
+      console.log("retrievedId = ", retrievedId);
+      pairsIds.push(pairId);
     }
     console.log("pairIds = ", pairsIds);
-    const provider = _taskArgs.provider ? _taskArgs.provider : ethers.constants.AddressZero;
     console.log("provider = ", provider);
     let tx = await contract.connect(validator).transmit(received_pairs, received_decimals, received_answers, provider);
     console.log("Transaction hash:", tx.hash);
