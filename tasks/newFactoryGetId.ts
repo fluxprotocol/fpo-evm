@@ -19,6 +19,6 @@ task("newFactoryGetId", "Get pricepair Id")
     );
     const contract = await NewFluxPriceFeedFactory.attach(_taskArgs.contract);
 
-    const tx = await contract.connect(validator).getId(_taskArgs.pricepair, _taskArgs.decimal, _taskArgs.provider);
-    console.log("Transaction hash:", tx.hash);
+    const id = await contract.connect(validator).getId(_taskArgs.pricepair, _taskArgs.decimal, _taskArgs.provider);
+    console.log("retrieved id:", id);
   });
