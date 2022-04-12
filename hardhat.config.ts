@@ -18,9 +18,8 @@ import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
 import "./tasks/factoryValueFor";
-import "./tasks/newfpoTransmit";
-import "./tasks/newfpoGetId";
-import "./tasks/newfpoAddressOfPricePairs";
+import "./tasks/factoryGetId";
+import "./tasks/factoryAddressOfPricePairs";
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";
