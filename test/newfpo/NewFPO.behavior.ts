@@ -130,19 +130,33 @@ export function shouldBehaveLikeNewFluxPriceFeedFactory(): void {
     const pricePairs = [this.eth_usd_str];
     const decimals = [3];
     let answers = [3000];
-    let price1 = Number(
-      (await this.factory.connect(this.provider1).transmit(pricePairs, decimals, answers, ethers.constants.AddressZero))
-        .gasPrice,
-    );
-    console.log("gasCost at creation = ", price1);
+    // let price1 = Number(
+    //   (await this.factory.connect(this.provider1).transmit(pricePairs, decimals, answers, ethers.constants.AddressZero))
+    //     .gasPrice,
+    // );
+    // console.log("gasCost at creation = ", price1);
 
+    let tx = await this.factory
+      .connect(this.provider1)
+      .transmit(pricePairs, decimals, answers, ethers.constants.AddressZero);
+    let gasUsed = (await tx.wait()).gasUsed;
+    console.log("gasUsed at creation = ", gasUsed);
     answers = [2500];
 
-    let price2 = Number(
-      (await this.factory.connect(this.provider1).transmit(pricePairs, decimals, answers, ethers.constants.AddressZero))
-        .gasPrice,
-    );
+    // let price2 = Number(
+    //   (await this.factory.connect(this.provider1).transmit(pricePairs, decimals, answers, ethers.constants.AddressZero))
+    //     .gasPrice,
+    // );
+    // console.log("gasCost while updating = ", price2);
 
-    console.log("gasCost while updating = ", price2);
+    tx = await this.factory
+      .connect(this.provider1)
+      .transmit(pricePairs, decimals, answers, ethers.constants.AddressZero);
+    gasUsed = (await tx.wait()).gasUsed;
+    console.log("gasUsed while updating and using address(0) = ", gasUsed);
+
+    tx = await this.factory.connect(this.provider1).transmit(pricePairs, decimals, answers, this.provider1.address);
+    gasUsed = (await tx.wait()).gasUsed;
+    console.log("gasUsed while updating and setting provider address = ", gasUsed);
   });
 }
