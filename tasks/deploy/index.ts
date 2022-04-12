@@ -5,3 +5,4 @@ import "./examplepricefeedconsumer";
 import "./multipricefeed";
 import "./pricefeedfactory";
 import "./newfpo";
+import "./p2pfactory";

@@ -18,6 +18,13 @@ import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
 import "./tasks/factoryValueFor";
+import "./tasks/newFactoryTransmit";
+import "./tasks/signMessage";
+import "./tasks/p2pTransmit";
+import "./tasks/p2pAddressOfPricePair";
+import "./tasks/p2pAddProvider";
+import "./tasks/p2pRevokeProvider";
+
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";

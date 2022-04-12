@@ -7,7 +7,7 @@ import { NewFluxPriceFeedFactory__factory } from "../../src/types/factories/NewF
 import sleep from "../../utils/sleep";
 const VERIFY_DELAY = 100000;
 
-// npx hardhat deploy:NewFluxPriceFeedFactory --network kovan
+// npx hardhat deploy:NewFluxPriceFeedFactory --network aurora-testnet --verify
 task("deploy:NewFluxPriceFeedFactory")
   .addOptionalParam("validator", "The validator allowed to post data to the contract")
   .addFlag("verify")

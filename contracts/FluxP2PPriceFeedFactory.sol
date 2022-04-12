@@ -43,9 +43,6 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
         fluxPriceFeeds[_id] = newPriceFeed;
-
-        // also grant this contract's admin VALIDATOR_ROLE on the new FluxPriceFeed
-        newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
     }
 

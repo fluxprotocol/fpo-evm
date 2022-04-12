@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { task } from "hardhat/config";
 
 // npx hardhat factoryValueFor --network kovan --contract 0x508086f87681A0724cA1a1C7a50ABFB79E7d2F64 --pricepairs "Price-ETH/USD-3 Price-BTC/USD-3"
-
+// npx hardhat factoryValueFor --network aurora-testnet --contract 0xb4eeDAfccb9C403f12D66D2795b61703f13939EB --pricepairs "Price-ETH/USD-6"
 task("factoryValueFor", "fetches oracle address")
   .addParam("contract", "The factory contract address")
   .addParam("pricepairs", "Price pair to query")
