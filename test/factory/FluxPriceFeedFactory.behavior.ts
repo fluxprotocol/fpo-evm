@@ -63,8 +63,8 @@ export function shouldBehaveLikeFluxPriceFeedFactory(): void {
       .connect(this.provider1)
       .transmit(pricePairs, decimals, answers, ethers.constants.AddressZero);
 
-    const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_p1_id);
-    const btc_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.btc_usd_p1_id);
+    const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePairId(this.eth_usd_p1_id);
+    const btc_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePairId(this.btc_usd_p1_id);
 
     const receipt = await tx.wait();
     const fluxPriceFeedCreatedEvents = receipt.events?.filter((x: { event: string }) => {
@@ -107,7 +107,7 @@ export function shouldBehaveLikeFluxPriceFeedFactory(): void {
 
     const VALIDATOR_ROLE = keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
     // provider 1 grants provider 2 permission to update the price feed
-    let eth_usd_p1_address = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_p1_id);
+    let eth_usd_p1_address = await this.factory.connect(this.signers.admin).addressOfPricePairId(this.eth_usd_p1_id);
     const pf = await ethers.getContractAt("FluxPriceFeed", eth_usd_p1_address);
 
     await pf.connect(this.provider1).grantRole(VALIDATOR_ROLE, this.provider2.address);
