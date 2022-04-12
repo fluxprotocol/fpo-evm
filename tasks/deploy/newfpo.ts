@@ -7,20 +7,12 @@ import { NewFluxPriceFeedFactory__factory } from "../../src/types/factories/NewF
 import sleep from "../../utils/sleep";
 const VERIFY_DELAY = 100000;
 
-// npx hardhat deploy:NewFluxPriceFeedFactory --network kovan
+// npx hardhat deploy:NewFluxPriceFeedFactory --network aurora-testnet
+// npx hardhat verify 0xb4eeDAfccb9C403f12D66D2795b61703f13939EB --network aurora-testnet
 task("deploy:NewFluxPriceFeedFactory")
   .addOptionalParam("validator", "The validator allowed to post data to the contract")
   .addFlag("verify")
   .setAction(async function (taskArgs: TaskArguments, { run, ethers }) {
-    // const accounts: Signer[] = await ethers.getSigners();
-
-    // let validator;
-    // if (taskArgs.validator) {
-    //   validator = taskArgs.validator;
-    // } else {
-    //   validator = await accounts[0].getAddress();
-    // }
-    // console.log("validator = ", validator);
     const pricefeedFactory: NewFluxPriceFeedFactory__factory = <NewFluxPriceFeedFactory__factory>(
       await ethers.getContractFactory("NewFluxPriceFeedFactory")
     );
