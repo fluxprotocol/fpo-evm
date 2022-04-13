@@ -17,11 +17,12 @@ import "./tasks/multiPriceFeedValueFor";
 import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
-import "./tasks/oldfactoryValueFor";
 import "./tasks/factoryGetId";
 import "./tasks/factoryAddressOfPricePair";
 import "./tasks/factoryAddressOfPricePairId";
 import "./tasks/factoryValueFor";
+import "./tasks/priceFeedGrantRole";
+import "./tasks/priceFeedRevokeRole";
 
 import { resolve } from "path";
 

@@ -40,7 +40,11 @@ task("factoryTransmit", "Submits an answer to factoryPriceFeed")
       console.log("receivedpair = ", received_pairs[key]);
       console.log("received_decimal = ", received_decimals[key]);
 
-      pairId = ethers.utils.solidityKeccak256(["string", "address"], [pair, await validator.getAddress()]);
+      if (provider == ethers.constants.AddressZero) {
+        pairId = ethers.utils.solidityKeccak256(["string", "address"], [pair, await validator.getAddress()]);
+      } else {
+        pairId = ethers.utils.solidityKeccak256(["string", "address"], [pair, provider]);
+      }
       console.log("pairId = ", pairId);
       retrievedId = await contract.connect(validator).getId(received_pairs[key], received_decimals[key], provider);
       console.log("retrievedId = ", retrievedId);
