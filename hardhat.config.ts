@@ -17,9 +17,11 @@ import "./tasks/multiPriceFeedValueFor";
 import "./tasks/typeAndVersion";
 import "./tasks/factoryTransmit";
 import "./tasks/fetchFactoryPricePairAddress";
-import "./tasks/factoryValueFor";
+import "./tasks/oldfactoryValueFor";
 import "./tasks/factoryGetId";
-import "./tasks/factoryAddressOfPricePairs";
+import "./tasks/factoryAddressOfPricePair";
+import "./tasks/factoryAddressOfPricePairId";
+
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";

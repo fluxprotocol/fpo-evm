@@ -55,7 +55,7 @@ export function shouldBehaveLikeFluxPriceFeedFactory(): void {
     ).to.be.revertedWith("Transmitted arrays must be equal");
   });
 
-  it("should fetch adress of price pair", async function () {
+  it("should fetch adress of price pair id", async function () {
     const pricePairs = [this.eth_usd_str, this.btc_usd_str];
     const decimals = [3, 3];
     const answers = [3000, 37600];
@@ -65,6 +65,35 @@ export function shouldBehaveLikeFluxPriceFeedFactory(): void {
 
     const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePairId(this.eth_usd_p1_id);
     const btc_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePairId(this.btc_usd_p1_id);
+
+    const receipt = await tx.wait();
+    const fluxPriceFeedCreatedEvents = receipt.events?.filter((x: { event: string }) => {
+      return x.event == "FluxPriceFeedCreated";
+    });
+    const createdOraclesIds = [];
+    const createdOraclesAddresses = [];
+    for (let i = 0; i < fluxPriceFeedCreatedEvents.length; i++) {
+      createdOraclesIds.push(fluxPriceFeedCreatedEvents[i].args["id"]);
+      createdOraclesAddresses.push(fluxPriceFeedCreatedEvents[i].args["oracle"]);
+    }
+    expect(createdOraclesAddresses[0]).to.equal(eth_usd_addr);
+    expect(createdOraclesAddresses[1]).to.equal(btc_usd_addr);
+  });
+
+  it("should fetch adress of price pair", async function () {
+    const pricePairs = [this.eth_usd_str, this.btc_usd_str];
+    const decimals = [3, 3];
+    const answers = [3000, 37600];
+    const tx = await this.factory
+      .connect(this.provider1)
+      .transmit(pricePairs, decimals, answers, ethers.constants.AddressZero);
+
+    const eth_usd_addr = await this.factory
+      .connect(this.signers.admin)
+      .addressOfPricePair(pricePairs[0], decimals[0], this.provider1.address);
+    const btc_usd_addr = await this.factory
+      .connect(this.signers.admin)
+      .addressOfPricePair(pricePairs[1], decimals[1], this.provider1.address);
 
     const receipt = await tx.wait();
     const fluxPriceFeedCreatedEvents = receipt.events?.filter((x: { event: string }) => {
