@@ -4,7 +4,7 @@ import { task } from "hardhat/config";
 
 // npx hardhat factoryValueFor --network kovan --contract 0x508086f87681A0724cA1a1C7a50ABFB79E7d2F64 --pricepairs "Price-ETH/USD-3 Price-BTC/USD-3"
 
-task("factoryValueFor", "fetches oracle address")
+task("oldfactoryValueFor", "fetches oracle address")
   .addParam("contract", "The factory contract address")
   .addParam("pricepairs", "Price pair to query")
   .setAction(async (_taskArgs, hre) => {

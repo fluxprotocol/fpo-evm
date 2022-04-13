@@ -21,6 +21,7 @@ import "./tasks/oldfactoryValueFor";
 import "./tasks/factoryGetId";
 import "./tasks/factoryAddressOfPricePair";
 import "./tasks/factoryAddressOfPricePairId";
+import "./tasks/factoryValueFor";
 
 import { resolve } from "path";
 
