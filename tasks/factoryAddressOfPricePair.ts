@@ -1,5 +1,4 @@
 import { Signer } from "@ethersproject/abstract-signer";
-import { ethers } from "ethers";
 
 import { task } from "hardhat/config";
 
@@ -19,14 +18,19 @@ task("factoryAddressOfPricePair", "Submits an answer to factoryPriceFeed")
     );
     const contract = await FluxPriceFeedFactory.attach(_taskArgs.contract);
 
-    const received_pair = _taskArgs.pricepair;
-    const received_decimal = _taskArgs.decimal;
-    const provider = _taskArgs.provider;
+    // const received_pair = _taskArgs.pricepair;
+    // const received_decimal = _taskArgs.decimal;
+    // const provider = _taskArgs.provider;
 
-    const pair = "Price-" + received_pair + "-" + received_decimal + "-";
+    // const pair = "Price-" + received_pair + "-" + received_decimal + "-";
 
-    const pairId = ethers.utils.solidityKeccak256(["string", "address"], [pair, provider]);
+    // const pairId = ethers.utils.solidityKeccak256(["string", "address"], [pair, provider]);
 
-    const retrieved_addr = await contract.connect(validator).addressOfPricePair(pairId);
+    // // const retrieved_addr = await contract.connect(validator).addressOfPricePairId(pairId);
+    // // console.log("Pricepair address:", retrieved_addr);
+
+    const retrieved_addr = await contract
+      .connect(validator)
+      .addressOfPricePair(_taskArgs.pricepair, _taskArgs.decimal, _taskArgs.provider);
     console.log("Pricepair address:", retrieved_addr);
   });
