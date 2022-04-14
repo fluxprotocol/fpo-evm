@@ -1,48 +1,61 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+// import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Flux first-party price feed factory
  * @author fluxprotocol.org
  */
-contract FluxP2PFactory is AccessControl, IERC2362 {
-    /// @notice signatures from addresses submitted in `transmit()` must have this role
+contract FluxP2PFactory is IERC2362 {
+    // roles
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
 
-    /// @notice mapping of id to FluxPriceFeed
+    // mapping of id to FluxPriceFeed
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
 
-    /// @notice indicates that a new oracle was created
-    /// @param id hash of the price pair of the deployed oracle
-    /// @param oracle address of the deployed oracle
+    /**
+     * @notice indicates that a new oracle was created
+     * @param id hash of the price pair of the deployed oracle
+     * @param oracle address of the deployed oracle
+     */
     event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle);
 
-    /// @notice to log error messages
-    /// @param message the log message
+    /**
+     * @notice to log error messages
+     * @param message the logged message
+     */
     event Log(string message);
 
-    constructor(address[] memory _validators) {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        for (uint256 i = 0; i < _validators.length; i++) {
-            _setupRole(VALIDATOR_ROLE, _validators[i]);
-        }
-    }
-
-    /// @notice internal function to create a new FluxPriceFeed
-    /// @dev only a validator should be able to call this function
+    /**
+     * @notice internal function to create a new FluxPriceFeed
+     * @dev only a validator should be able to call this function
+     */
     function _deployOracle(
         bytes32 _id,
         string calldata _pricePair,
-        uint8 _decimals
+        uint8 _decimals,
+        address[] memory validators
     ) internal {
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
+
         fluxPriceFeeds[_id] = newPriceFeed;
+
+        // grant the provider DEFAULT_ADMIN_ROLE and VALIDATOR_ROLE on the new FluxPriceFeed
+        // console.log("_deploy oracle SENDER = ", msg.sender);
+        newPriceFeed.grantRole(0x00, msg.sender);
+        // newPriceFeed.grantRole(VALIDATOR_ROLE, msg.sender);
+        for (uint256 i = 0; i < validators.length; i++) {
+            // grant the provider VALIDATOR_ROLE on the new FluxPriceFeed
+            // newPriceFeed.grantRole(0x00, validators[i]);
+            newPriceFeed.grantRole(VALIDATOR_ROLE, validators[i]);
+        }
+
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
     }
 
@@ -54,15 +67,15 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         int192[] calldata _answers
     ) external {
         require(signatures.length == _answers.length, "Number of answers must match signatures");
-
-        // verify the signatures
+        address[] memory recoveredSigners = new address[](signatures.length);
+        // recover signatures
         for (uint256 i = 0; i < signatures.length; i++) {
             address recoveredSigner = _getSigner(_pricePair, _decimals, _answers[i], signatures[i]);
-            require(hasRole(VALIDATOR_ROLE, recoveredSigner), "Signer must be a validator");
+            console.log("recoveredSigner", recoveredSigner);
+            recoveredSigners[i] = recoveredSigner;
         }
 
         // calculate median of _answers assuming they're already sorted
-        // int192 answer = _answers[0];
         int192 answer;
         if (_answers.length % 2 == 0) {
             answer = ((_answers[(_answers.length / 2) - 1] + _answers[_answers.length / 2]) / 2);
@@ -76,8 +89,14 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
         // deploy a new oracle if there's none previously deployed
         if (address(fluxPriceFeeds[id]) == address(0x0)) {
-            _deployOracle(id, _pricePair, _decimals);
+            _deployOracle(id, _pricePair, _decimals, recoveredSigners);
         }
+
+        // verify signatures
+        for (uint256 i = 0; i < recoveredSigners.length; i++) {
+            require(fluxPriceFeeds[id].hasRole(VALIDATOR_ROLE, recoveredSigners[i]), "Signer must be a validator");
+        }
+
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
         try fluxPriceFeeds[id].transmit(answer) {
