@@ -146,11 +146,11 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     }
 
     function addSigner(bytes32 _id, address _signer) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        return fluxPriceFeeds[_id].grantRole(SIGNER_ROLE, _signer);
+        fluxPriceFeeds[_id].grantRole(SIGNER_ROLE, _signer);
     }
 
     function revokeSigner(bytes32 _id, address _signer) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        return fluxPriceFeeds[_id].revokeRole(SIGNER_ROLE, _signer);
+        fluxPriceFeeds[_id].revokeRole(SIGNER_ROLE, _signer);
     }
 
     /// @notice returns factory's type and version
