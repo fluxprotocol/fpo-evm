@@ -23,15 +23,12 @@ describe("Unit tests", function () {
     this.provider2 = signers[3];
     this.nonprovider = signers[4];
     this.provider3tobe = signers[5];
-    console.log("PROVIDER1 = ", this.provider1.address);
-    console.log("PROVIDER2 = ", this.provider2.address);
   });
 
   describe("FluxP2PFactory", function () {
     beforeEach(async function () {
       const factoryArtifact: Artifact = await artifacts.readArtifact("FluxP2PFactory");
       this.factory = <FluxP2PFactory>await waffle.deployContract(this.signers.admin, factoryArtifact, []);
-      // console.log("DEPLOYED P2P ORACLE= ", this.factory.address);
     });
     shouldBehaveLikeFluxP2PFactory();
   });

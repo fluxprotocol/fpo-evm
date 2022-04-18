@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Flux first-party price feed factory
@@ -64,12 +63,12 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         uint8 _decimals,
         int192[] calldata _answers
     ) external {
+        require(signatures.length > 1, "Needs at least 2 signatures");
         require(signatures.length == _answers.length, "Number of answers must match signatures");
         address[] memory recoveredSigners = new address[](signatures.length);
         // recover signatures
         for (uint256 i = 0; i < signatures.length; i++) {
             address recoveredSigner = _getSigner(_pricePair, _decimals, _answers[i], signatures[i]);
-            console.log("recoveredSigner", recoveredSigner);
             recoveredSigners[i] = recoveredSigner;
         }
 
@@ -145,10 +144,18 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         return address(fluxPriceFeeds[_id]);
     }
 
+    /// @notice add signers to deployed pricefeed
+    /// @param _id hash of the price pair string to add role to
+    /// @param _signer address of the signer to be granted SIGNER_ROLE
+    /// @dev only factory's deployer (DEFAULT_ADMIN_ROLE) should be able to call this function
     function addSigner(bytes32 _id, address _signer) external onlyRole(DEFAULT_ADMIN_ROLE) {
         fluxPriceFeeds[_id].grantRole(SIGNER_ROLE, _signer);
     }
 
+    /// @notice revoke signers from deployed pricefeed
+    /// @param _id hash of the price pair string to revoke role from
+    /// @param _signer address of the signer to be revoked SIGNER_ROLE
+    /// @dev only factory's deployer (DEFAULT_ADMIN_ROLE) should be able to call this function
     function revokeSigner(bytes32 _id, address _signer) external onlyRole(DEFAULT_ADMIN_ROLE) {
         fluxPriceFeeds[_id].revokeRole(SIGNER_ROLE, _signer);
     }

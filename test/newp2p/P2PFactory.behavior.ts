@@ -3,7 +3,6 @@
 import { arrayify } from "@ethersproject/bytes";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-// import type { FluxPriceFeed } from "../../src/types/FluxPriceFeed";
 
 export function shouldBehaveLikeFluxP2PFactory(): void {
   it("should transmit and calculate median", async function () {
@@ -41,20 +40,26 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
   it("should revert if signer isn't a validator", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000];
+    let answers = [3000, 4000, 5000];
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
-    let sigs = [p1_sig];
-    // First deploying signatures are the validators of the initially deployed oracle
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
-
-    answers = [3000, 4000];
     let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
+    let p3tobe_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "int192"],
+      [pricePair, decimals, answers[2]],
+    );
+
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
-    sigs = [p1_sig, p2_sig];
-    // p2 cannot transmit
+    let p3tobe_sig = await this.provider3tobe.signMessage(arrayify(p3tobe_msgHash));
+    let sigs = [p1_sig, p2_sig];
+    answers = [3000, 4000];
+    this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+
+    sigs = [p1_sig, p2_sig, p3tobe_sig];
+    answers = [3000, 4000, 5000];
+
     await expect(
       this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
     ).to.be.revertedWith("Signer must be a validator");
@@ -78,6 +83,18 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     ).to.be.revertedWith("Signer must be a validator");
   });
 
+  it("should revert if it received only one signature", async function () {
+    const pricePair = this.eth_usd_str;
+    const decimals = 3;
+    let answers = [3000];
+    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
+    let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
+    let sigs = [p1_sig];
+    await expect(
+      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
+    ).to.be.revertedWith("Needs at least 2 signatures");
+  });
+
   it("should revert if transmitted arrays aren't equal", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
@@ -95,10 +112,10 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     let [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3500);
     expect(status).to.equal(200);
-
-    let sigs_slice = [sigs[0]];
+    sigs.push(5000);
+    let invalid_sigs = sigs;
     await expect(
-      this.factory.connect(this.signers.admin).transmit(sigs_slice, pricePair, decimals, answers),
+      this.factory.connect(this.signers.admin).transmit(invalid_sigs, pricePair, decimals, answers),
     ).to.be.revertedWith("Number of answers must match signatures");
   });
 
@@ -117,7 +134,6 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     let tx = await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
 
     const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
-    console.log("eth_usd_addr", eth_usd_addr);
     const receipt = await tx.wait();
     const fluxPriceFeedCreatedEvents = receipt.events?.filter((x: { event: string }) => {
       return x.event == "FluxPriceFeedCreated";
@@ -183,11 +199,6 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
     ).to.be.revertedWith("Signer must be a validator");
 
-    let signerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("SIGNER_ROLE"));
-
-    // const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
-    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
-    // await priceFeedContract.connect(this.signers.admin).grantRole(signerRole, this.provider3tobe.address);
     await this.factory.connect(this.signers.admin).addSigner(this.eth_usd_id, this.provider3tobe.address);
     await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
 
@@ -223,12 +234,6 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
     ).to.be.revertedWith("Signer must be a validator");
 
-    // let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
-
-    // const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
-    // console.log("eth_usd_addr", eth_usd_addr);
-    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
-
     await expect(this.factory.connect(this.signers.nonadmin).addSigner(this.eth_usd_id, this.provider3tobe.address)).to
       .be.reverted;
   });
@@ -245,14 +250,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    let tx = await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
-
-    const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
-    console.log("eth_usd_addr", eth_usd_addr);
-
-    // let signerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("SIGNER_ROLE"));
-
-    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
 
     await this.factory.connect(this.signers.admin).revokeSigner(this.eth_usd_id, this.provider2.address);
 
@@ -273,14 +271,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    let tx = await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
-
-    const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
-    console.log("eth_usd_addr", eth_usd_addr);
-
-    // let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
-
-    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
 
     await expect(this.factory.connect(this.signers.nonadmin).revokeRole(this.eth_usd_id, this.provider2.address)).to.be
       .reverted;
