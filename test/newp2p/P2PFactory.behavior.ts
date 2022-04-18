@@ -183,12 +183,12 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
     ).to.be.revertedWith("Signer must be a validator");
 
-    let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
+    let signerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("SIGNER_ROLE"));
 
-    const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
-    const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
-    await priceFeedContract.connect(this.signers.admin).grantRole(validatorRole, this.provider3tobe.address);
-
+    // const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
+    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
+    // await priceFeedContract.connect(this.signers.admin).grantRole(signerRole, this.provider3tobe.address);
+    await this.factory.connect(this.signers.admin).addSigner(this.eth_usd_id, this.provider3tobe.address);
     await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
 
     let [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
@@ -223,14 +223,14 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
     ).to.be.revertedWith("Signer must be a validator");
 
-    let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
+    // let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
 
-    const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
-    console.log("eth_usd_addr", eth_usd_addr);
-    const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
+    // const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
+    // console.log("eth_usd_addr", eth_usd_addr);
+    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
 
-    await expect(priceFeedContract.connect(this.signers.nonadmin).grantRole(validatorRole, this.provider3tobe.address))
-      .to.be.reverted;
+    await expect(this.factory.connect(this.signers.nonadmin).addSigner(this.eth_usd_id, this.provider3tobe.address)).to
+      .be.reverted;
   });
 
   it("should let admin remove providers", async function () {
@@ -250,11 +250,11 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
     console.log("eth_usd_addr", eth_usd_addr);
 
-    let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
+    // let signerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("SIGNER_ROLE"));
 
-    const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
+    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
 
-    await priceFeedContract.connect(this.signers.admin).revokeRole(validatorRole, this.provider2.address);
+    await this.factory.connect(this.signers.admin).revokeSigner(this.eth_usd_id, this.provider2.address);
 
     await expect(
       this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
@@ -278,11 +278,11 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
     console.log("eth_usd_addr", eth_usd_addr);
 
-    let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
+    // let validatorRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
 
-    const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
+    // const priceFeedContract = await ethers.getContractAt("FluxPriceFeed", eth_usd_addr);
 
-    await expect(priceFeedContract.connect(this.signers.nonadmin).revokeRole(validatorRole, this.provider2.address)).to
-      .be.reverted;
+    await expect(this.factory.connect(this.signers.nonadmin).revokeRole(this.eth_usd_id, this.provider2.address)).to.be
+      .reverted;
   });
 }
