@@ -11,7 +11,7 @@ import "hardhat/console.sol";
  * @title Flux first-party price feed factory
  * @author fluxprotocol.org
  */
-contract FluxP2PFactory is AccessControl, IERC2362 {
+contract FluxP2PFactory_old is AccessControl, IERC2362 {
     // roles
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
@@ -39,18 +39,17 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
      * @notice internal function to create a new FluxPriceFeed
      * @dev only a validator should be able to call this function
      */
-
-    // Gas Used in Deployment =  930721
-    function deployOracle(
+    function _deployOracle(
         bytes32 _id,
         string calldata _pricePair,
         uint8 _decimals,
         address[] memory validators
-    ) external {
+    ) internal {
         uint256 startGas = gasleft();
 
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
+
         fluxPriceFeeds[_id] = newPriceFeed;
         for (uint256 i = 0; i < validators.length; i++) {
             // grant the provider SIGNER_ROLE on the new FluxPriceFeed
@@ -61,8 +60,8 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         console.log("Gas Used in Deployment = ", startGas - gasleft());
     }
 
-    // Gas Used in Transmitting =  74510
-    // Gas Used in Transmitting =  57410
+    // Gas Used =  994722
+    // Gas Used =  57410
     /// @notice leader submits an array of signatures and answers along with associated price pair and decimals
     function transmit(
         bytes[] calldata signatures,
@@ -91,11 +90,11 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         // Find the price pair id
         string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
         bytes32 id = keccak256(bytes(str));
-        // // deploy a new oracle if there's none previously deployed
-        // if (address(fluxPriceFeeds[id]) == address(0x0)) {
-        //     _deployOracle(id, _pricePair, _decimals, recoveredSigners);
-        // }
-        require(address(fluxPriceFeeds[id]) != address(0x0), "No deployed oracle");
+
+        // deploy a new oracle if there's none previously deployed
+        if (address(fluxPriceFeeds[id]) == address(0x0)) {
+            _deployOracle(id, _pricePair, _decimals, recoveredSigners);
+        }
 
         // verify signatures
         for (uint256 i = 0; i < recoveredSigners.length; i++) {
@@ -110,7 +109,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             // catch failing revert() and require()
             emit Log(reason);
         }
-        console.log("Gas Used in  Transmitting = ", startGas - gasleft());
+        console.log("Gas Used in Transmitting = ", startGas - gasleft());
     }
 
     /// @notice answer from the most recent report of a certain price pair from factory
