@@ -24,7 +24,7 @@ import "./tasks/p2pTransmit";
 import "./tasks/p2pAddressOfPricePair";
 import "./tasks/p2pAddProvider";
 import "./tasks/p2pRevokeProvider";
-
+import "./tasks/p2pDeployOracle";
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";

@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
+import { Verification } from "./Verification.sol";
 import "hardhat/console.sol";
 
 /**
@@ -40,15 +41,16 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
      * @dev only a validator should be able to call this function
      */
 
-    // Gas Used in Deployment =  930721
     function deployOracle(
-        bytes32 _id,
         string calldata _pricePair,
         uint8 _decimals,
         address[] memory validators
     ) external {
-        uint256 startGas = gasleft();
-
+        require(validators.length > 1, "Needs at least 2 validators");
+        // Find the price pair id
+        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
+        bytes32 _id = keccak256(bytes(str));
+        require(address(fluxPriceFeeds[_id]) == address(0x0), "Oracle already deployed");
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
         fluxPriceFeeds[_id] = newPriceFeed;
@@ -58,11 +60,8 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         }
 
         emit FluxPriceFeedCreated(_id, address(newPriceFeed));
-        console.log("Gas Used in Deployment = ", startGas - gasleft());
     }
 
-    // Gas Used in Transmitting =  74510
-    // Gas Used in Transmitting =  57410
     /// @notice leader submits an array of signatures and answers along with associated price pair and decimals
     function transmit(
         bytes[] calldata signatures,
@@ -70,13 +69,18 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         uint8 _decimals,
         int192[] calldata _answers
     ) external {
-        uint256 startGas = gasleft();
         require(signatures.length > 1, "Needs at least 2 signatures");
         require(signatures.length == _answers.length, "Number of answers must match signatures");
         address[] memory recoveredSigners = new address[](signatures.length);
+
+        // Make sure transmitted answers are sorted ascendingly
+        for (uint256 i = 0; i < _answers.length - 1; i++) {
+            require(_answers[i] <= _answers[i + 1], "Transmitted answers are not sorted");
+        }
+
         // recover signatures
         for (uint256 i = 0; i < signatures.length; i++) {
-            address recoveredSigner = _getSigner(_pricePair, _decimals, _answers[i], signatures[i]);
+            address recoveredSigner = Verification._getSigner(_pricePair, _decimals, _answers[i], signatures[i]);
             recoveredSigners[i] = recoveredSigner;
         }
 
@@ -91,11 +95,6 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         // Find the price pair id
         string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
         bytes32 id = keccak256(bytes(str));
-        // // deploy a new oracle if there's none previously deployed
-        // if (address(fluxPriceFeeds[id]) == address(0x0)) {
-        //     _deployOracle(id, _pricePair, _decimals, recoveredSigners);
-        // }
-        require(address(fluxPriceFeeds[id]) != address(0x0), "No deployed oracle");
 
         // verify signatures
         for (uint256 i = 0; i < recoveredSigners.length; i++) {
@@ -110,7 +109,6 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             // catch failing revert() and require()
             emit Log(reason);
         }
-        console.log("Gas Used in  Transmitting = ", startGas - gasleft());
     }
 
     /// @notice answer from the most recent report of a certain price pair from factory
@@ -172,83 +170,5 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     /// @notice returns factory's type and version
     function typeAndVersion() external view virtual returns (string memory) {
         return "FluxP2PFactory 1.0.0";
-    }
-
-    function _getSigner(
-        string memory _pricePair,
-        uint8 _decimal,
-        int192 _answer,
-        bytes memory signature
-    ) internal pure returns (address) {
-        bytes32 messageHash = _getMessageHash(_pricePair, _decimal, _answer);
-        bytes32 ethSignedMessageHash = _getEthSignedMessageHash(messageHash);
-
-        address recoveredSigner = _recoverSigner(ethSignedMessageHash, signature);
-
-        return recoveredSigner;
-    }
-
-    function _verify(
-        address _signer,
-        string memory _pricePair,
-        uint8 _decimal,
-        int192 _answer,
-        bytes memory signature
-    ) internal pure returns (bool) {
-        return _getSigner(_pricePair, _decimal, _answer, signature) == _signer;
-    }
-
-    function _getMessageHash(
-        string memory _pricePair,
-        uint8 _decimal,
-        int192 _answer
-    ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_pricePair, _decimal, _answer));
-    }
-
-    function _getEthSignedMessageHash(bytes32 _messageHash) internal pure returns (bytes32) {
-        /*
-        Signature is produced by signing a keccak256 hash with the following format:
-        "\x19Ethereum Signed Message\n" + len(msg) + msg
-        */
-        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash));
-    }
-
-    function _recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature) internal pure returns (address) {
-        (bytes32 r, bytes32 s, uint8 v) = _splitSignature(_signature);
-
-        return ecrecover(_ethSignedMessageHash, v, r, s);
-    }
-
-    function _splitSignature(bytes memory sig)
-        internal
-        pure
-        returns (
-            bytes32 r,
-            bytes32 s,
-            uint8 v
-        )
-    {
-        require(sig.length == 65, "invalid signature length");
-
-        assembly {
-            /*
-            First 32 bytes stores the length of the signature
-
-            add(sig, 32) = pointer of sig + 32
-            effectively, skips first 32 bytes of signature
-
-            mload(p) loads next 32 bytes starting at the memory address p into memory
-            */
-
-            // first 32 bytes, after the length prefix
-            r := mload(add(sig, 32))
-            // second 32 bytes
-            s := mload(add(sig, 64))
-            // final byte (first byte of the next 32 bytes)
-            v := byte(0, mload(add(sig, 96)))
-        }
-
-        // implicitly return (r, s, v)
     }
 }

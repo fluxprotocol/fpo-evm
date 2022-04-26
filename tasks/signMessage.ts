@@ -11,7 +11,7 @@ task("signMessage", "Submits an answer to factoryPriceFeed")
   .addParam("answer", "The prices posted")
   .setAction(async (_taskArgs, hre) => {
     const accounts: Signer[] = await hre.ethers.getSigners();
-    const provider = accounts[0];
+    const provider = accounts[1];
     console.log("provider address: ", await provider.getAddress());
     const msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "int192"],
