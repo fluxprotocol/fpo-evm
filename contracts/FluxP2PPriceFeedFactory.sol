@@ -167,6 +167,14 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         fluxPriceFeeds[_id].revokeRole(SIGNER_ROLE, _signer);
     }
 
+    /// @notice grants a new DEFAULT_ADMIN_ROLE to a given pricefeed
+    /// @param _id hash of the pricepair string to grant role to
+    /// @param newAdmin address of the pricefeed new admin
+    /// @dev only factory's deployer (DEFAULT_ADMIN_ROLE) should be able to call this function
+    function transferOwner(bytes32 _id, address newAdmin) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        fluxPriceFeeds[_id].grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
+    }
+
     /// @notice returns factory's type and version
     function typeAndVersion() external view virtual returns (string memory) {
         return "FluxP2PFactory 1.0.0";
