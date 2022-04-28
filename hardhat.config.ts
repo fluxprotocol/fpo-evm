@@ -5,7 +5,8 @@ import "solidity-coverage";
 import "hardhat-gas-reporter";
 import "@nomiclabs/buidler/config";
 import "@nomiclabs/hardhat-etherscan";
-
+import "@nomiclabs/hardhat-ethers";
+import "@openzeppelin/hardhat-upgrades";
 import "./tasks/accounts";
 import "./tasks/deploy/";
 import "./tasks/derivePrivateKey";
@@ -25,6 +26,7 @@ import "./tasks/p2pAddressOfPricePair";
 import "./tasks/p2pAddProvider";
 import "./tasks/p2pRevokeProvider";
 import "./tasks/p2pDeployOracle";
+import "./tasks/upgradeP2P";
 import { resolve } from "path";
 
 import { config as dotenvConfig } from "dotenv";
@@ -264,7 +266,7 @@ const config: HardhatUserConfig = {
       // Disable the optimizer when debugging
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
-        enabled: true,
+        enabled: false,
         runs: 800,
       },
     },

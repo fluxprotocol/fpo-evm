@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * @title Flux first-party price feed factory
  * @author fluxprotocol.org
  */
-contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
+contract FluxP2PFactory_v2 is AccessControl, IERC2362, Initializable {
     // roles
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
@@ -181,6 +181,6 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
     /// @notice returns factory's type and version
     function typeAndVersion() external view virtual returns (string memory) {
-        return "FluxP2PFactory 1.0.0";
+        return "FluxP2PFactory 2.0.0";
     }
 }

@@ -1,4 +1,5 @@
 import { Signer } from "@ethersproject/abstract-signer";
+import { ethers } from "ethers";
 
 import { task } from "hardhat/config";
 
@@ -20,4 +21,9 @@ task("p2pDeployOracle", "Submits an answer to factoryPriceFeed")
 
     const tx = await contract.connect(admin).deployOracle(_taskArgs.pricepair, _taskArgs.decimal, validators);
     console.log("Tx hash:", tx.hash);
+
+    const str = "Price-" + _taskArgs.pricepair + "-" + _taskArgs.decimal;
+    const id = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(str));
+    const retrieved_addr = await contract.connect(admin).addressOfPricePair(id);
+    console.log("Deployed oracle address:", retrieved_addr);
   });

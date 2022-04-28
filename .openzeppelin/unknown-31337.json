@@ -1,0 +1,302 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0xCAB27ed8Fe307Cdd0F11b22cda42D0D2E46128Cc",
+    "txHash": "0x69edb3177fc890b2be54c0dcd37a75f53c2b423a4c6fd867dff69b26f14a1cb1"
+  },
+  "proxies": [
+    {
+      "address": "0xf72c30D7c945f7Fbc659631D775D9a3402d61dC9",
+      "txHash": "0xa8bde80fe1b576638dfff572f130566b6994de4df18834da65062e559c31de14",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x81334602B8823935C93BECa3e291e0b5b9576f5D",
+      "txHash": "0x9447e940ec97358011f3dfd77643f452bd71f344c46a5069f2c98b88e458c4ae",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x7E434E8bcb2659Bb4AaEd7A6F91c44d75c10D73b",
+      "txHash": "0x2e0b4fccf82aed1839ce6dd82835e371d6fd7c5c889b2f909ca4cc57cbcdda8f",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x18dA63Bf288Ac9D693aB63E0b320b5E17ca59D61",
+      "txHash": "0xecbb1b90e96674550a81955e7b8dffcfc03ccf32258dffc91d52f8dd9e0d4ccd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xccA604e334471675cE294c2f68B3B158e29EfB86",
+      "txHash": "0xb56228198c7015cc52d8baaf47e9fdf29a2791fc0aea61c2f3d91a3d0edaa583",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x508086f87681A0724cA1a1C7a50ABFB79E7d2F64",
+      "txHash": "0x2ece484f503348b597e677a33d4df62f112b6f7df6f84b982a32d086ba8bff94",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3a6D931C25d83b53b27E88a613915161A7e5C9D4",
+      "txHash": "0x2995dc6f30725545ea68e083587d94e0833f71c7126fd495288297320ea03630",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x083DbFcC929c307535f57cac71edE0dC34ED1ae1",
+      "txHash": "0xf881c4bc21f3beb9fc9df8415f30a6008732e3d74890088583ecab4ef340b8ae",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xB699CC3B17FD123fC5F6270838C00EC1EeBd67Ac",
+      "txHash": "0xeedffd1797641fd553b7378bf3d78a67d2ff078cec8765b90578a3a0094c45d0",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xdA7b6087B678e4bdFf0ee8e53C4ad33b11508BAa",
+      "txHash": "0xf9ed7deaf9e885fff411622ffdcc832cc5f7b11ed84936ccc826fa11e8ad152a",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x25C213D9b785416EA0244f4e4814a2600F147143",
+      "txHash": "0x00a6678a73897bb0b5c4d5c1bb41879648d029f39c8ae97f9b5815a16ba81589",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x8e724052BD539532722F5dC0C38447477305Dcc9",
+      "txHash": "0x900e4bb97fcd0d320f2c41e2115940e2829bbb3d023e3b22676569269e331519",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x145cf0120a7092b02E09E9a59C4B7Ef857710592",
+      "txHash": "0x905311cf4b2a36309d1ef99db1717ee98f5e0a31a7dbe4bc0bf3e04dea841d98",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xb2aC6C46A15620EB0786EF04F09E243725575F69",
+      "txHash": "0x21322446e59023eb0481920cf4f1eb977b7e683df5d92ca9f08b1542233be056",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x44AAaD7Ab25eA77692586c6227d6Df67b7E7d85e",
+      "txHash": "0x50f195d9fdbd0a772137bc3f09c92eadbed4a54dffe92638f9a6015528538460",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x41c09D71874490AC5800998598be7623493Ce529",
+      "txHash": "0x9fb767ff7e4e42e9ed141baaccd3d68180654deee0ad1252425fc38fecf371ff",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x722adda730091cBb5e139cE6C4dbb1B2B4CF6484",
+      "txHash": "0x1ecc04eb5b7e7520d6535c73216559fafcb660d5911fbf390e481f1cfdcdaaf3",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x01be1fCd83D8468B34c79e0d08B9f81A4749baD4",
+      "txHash": "0x9cdadc1a55b2d558ba707c408bf95b5194a7417e13c65c466331c79ab6c1f06e",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xCFe3F92C32D7e3b3b21b7F8721E543DBC147D28a",
+      "txHash": "0xdbdc94ae8efffc90b1a24ec3df2c9dbf57a747fce6adf7cd674898e9f6f49cfa",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x55d8B2F524771A93e44F9dFd2C7B8d12793e4427",
+      "txHash": "0xdc3d8f5359a813b377e05e8a0c3bf3406008db272084558b81d02730c67696f4",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xED7bf61A9CcDadd970E7F589A80b7CF89497687e",
+      "txHash": "0x94bc543df42e1094353be114fb532fa215955f09a45216593b92aca32de0264d",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2F35ed6A005f9eb4B8BcCFb738BD6c30f4925F01",
+      "txHash": "0x2fb106ac09bff2ccda2c0cdb76d083db1d4adccc8f40cc973d5e3b567bccf417",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x027F2f25EaD8f560b6afB36aC15b003bCD3321B4",
+      "txHash": "0x97b136d1af50e9153a39d7a3fffb0f880568f9eb6f0206ff58e52a90d59a6673",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "873813e6d835369b93229c5c0e229eaaaa3ad87cb4a7c59c998d4f4875e8cce8": {
+      "address": "0xE915434e53993bc999B3BEC3f2E14B586492e764",
+      "txHash": "0xea38e60996beb057e64f856394cef21f740b92062accaf257b6e6e352af341ef",
+      "layout": {
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)336_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "fluxPriceFeeds",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1820)",
+            "contract": "FluxP2PFactory",
+            "src": "contracts/FluxP2PPriceFeedFactory.sol:21"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FluxPriceFeed)1820": {
+            "label": "contract FluxPriceFeed",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1820)": {
+            "label": "mapping(bytes32 => contract FluxPriceFeed)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)336_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)336_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          }
+        }
+      }
+    },
+    "ff266f2d05e2bd094a83692b7d789bcfec2ebaa9f0be7cf8e807412165b98732": {
+      "address": "0x18dA63Bf288Ac9D693aB63E0b320b5E17ca59D61",
+      "txHash": "0x0297626f245ec36947eec7a0a9ca8799e5dbf842c8dd2bee32250309900944cc",
+      "layout": {
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)336_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "fluxPriceFeeds",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1820)",
+            "contract": "FluxP2PFactory_v2",
+            "src": "contracts/FluxP2PPriceFeedFactory_v2.sol:21"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FluxPriceFeed)1820": {
+            "label": "contract FluxPriceFeed",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1820)": {
+            "label": "mapping(bytes32 => contract FluxPriceFeed)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)336_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)336_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          }
+        }
+      }
+    }
+  }
+}

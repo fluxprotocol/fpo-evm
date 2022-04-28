@@ -1,0 +1,407 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0xE763604D9783426cF7188e3dc8aBCEB136c09A04",
+    "txHash": "0x97dccece35b677b85d405a2c7cb1998fecf77cd987b92d93623756c54bc85d9c"
+  },
+  "proxies": [
+    {
+      "address": "0x8315143799bcf2A5cB7dCcD2332F2C8A63f328c8",
+      "txHash": "0x9b690068094495176d1fd101942a828eedaef57f279a29b74c5353761b3d8406",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xc27351B2e6C8376Dd79fdfefeC51EaE39BebEB80",
+      "txHash": "0x9e81e5a77ebffa91f5f55f10b1bbb0fcd2483393855017e6071beed7ba4ff91b",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x6ecF3526721F534fA1656900401E33f6a759Bb2e",
+      "txHash": "0x54b993a31c35042e384ab310fdc79723fb3a7182916c756455d0d39b668e39df",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x000970D45A880ef0dC0B8b5fBbeC8417060e3816",
+      "txHash": "0x56ce411bcedba6c732edf7e2eb932f8e0b628679f30c42baf2e0eeb867eaf814",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xA03EC60d133021fc05a72314F42D102b2142a965",
+      "txHash": "0x7133fbe22f49023c1f9d89e1175cba469e90bcecd20e9061eae7ff7064fa140c",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x130F04300Ba7c4BF02e6bC73F25eDe4EB24CF4B2",
+      "txHash": "0x9f44ebb9fcec51908fe16590aef8cef92afc7b6f38897886ddf298a8313bdd58",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3B5C0184cA8e056D4367221400Ae5b7C625bf5cc",
+      "txHash": "0xeb6b3be6a94f4ce31401ba9cd73a1373ec90163ab0ccab2ebe1520cbdfe2ae83",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2854a3c0C5e8dB4E991616371341a15a5A5dCCc1",
+      "txHash": "0x50ea833eb9df4aa398a4bcb3373bc44a5bbd940ee0671959a683084ed9233bbd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xf4f6E2aD080CDC61F5AefE513cC6fbf932C84C45",
+      "txHash": "0x467a049fa6596cda24ddcc61df628cf75976e841d05a4fba7f9a19b49b316ea6",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x49896cE03594ce4543110E90d5f2AaA777C63873",
+      "txHash": "0x7e8cfc2f77a951ce1c48bdcd920cdceff0ba81b3443ebb57a6bf31a50528ea17",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x7dB283782F1aa4191A51ae8326DCB51F53364fDB",
+      "txHash": "0x5a418d6ce731442b14bd016740961a50c0761ddd12721b8cdba033c5f4b6129c",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xF213bcC5DD666C8DC55803C017d653B78A56e056",
+      "txHash": "0x7836f38b15e374299018772aa61f0989ead3e59884a1ddbc6ddacc0381186069",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "c7800d35a3a05cdadd112cf6ed85decd39d35fb0a0491b4bbc44a40b7630a56a": {
+      "address": "0x83E9d398d74Dc694032cA446b62A03b2c6f39F74",
+      "txHash": "0x51f3d93af2c5e6f0e5e4745f6a927ec97210f643919ce1bf2d9e8f1d06a163d0",
+      "layout": {
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)19_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
+          },
+          {
+            "label": "fluxPriceFeeds",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_contract(FluxPriceFeed)4567)",
+            "contract": "FluxP2PFactory",
+            "src": "contracts/FluxP2PPriceFeedFactory.sol:20"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FluxPriceFeed)4567": {
+            "label": "contract FluxPriceFeed",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_contract(FluxPriceFeed)4567)": {
+            "label": "mapping(bytes32 => contract FluxPriceFeed)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)19_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)19_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          }
+        }
+      }
+    },
+    "873813e6d835369b93229c5c0e229eaaaa3ad87cb4a7c59c998d4f4875e8cce8": {
+      "address": "0xE64a5dFE4859095FF6CBb4516C379eE58617b116",
+      "txHash": "0x2876a1789b8afeff44a2814b07e746527080be64b2ecfc5e642a4a96c16b9d93",
+      "layout": {
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)336_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "fluxPriceFeeds",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1820)",
+            "contract": "FluxP2PFactory",
+            "src": "contracts/FluxP2PPriceFeedFactory.sol:21"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FluxPriceFeed)1820": {
+            "label": "contract FluxPriceFeed",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1820)": {
+            "label": "mapping(bytes32 => contract FluxPriceFeed)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)336_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)336_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          }
+        }
+      }
+    },
+    "ff266f2d05e2bd094a83692b7d789bcfec2ebaa9f0be7cf8e807412165b98732": {
+      "address": "0x0fAf8787937aaA92c286C6C8fd103c69Dc607615",
+      "txHash": "0xeaac7cd72f6439f17d99692282e5305100b1ea8067d19068274e9cae36e75bc2",
+      "layout": {
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)336_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "fluxPriceFeeds",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_contract(FluxPriceFeed)2349)",
+            "contract": "FluxP2PFactory_v2",
+            "src": "contracts/FluxP2PPriceFeedFactory_v2.sol:21"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FluxPriceFeed)2349": {
+            "label": "contract FluxPriceFeed",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_contract(FluxPriceFeed)2349)": {
+            "label": "mapping(bytes32 => contract FluxPriceFeed)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)336_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)336_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          }
+        }
+      }
+    },
+    "4cac60864a7b2d086d7dbb8f1d5371fdb5163dc752876dd8ec148ae9bd6718a7": {
+      "address": "0xe98CC0e2F356Cff6A6D55a6fB6608b0596ec3a4c",
+      "txHash": "0xc70483da06c076e88ccc5b3bb1117e684bac7fbb2ff26e3deac0272e9825716b",
+      "layout": {
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)336_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "fluxPriceFeeds",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1827)",
+            "contract": "FluxP2PFactory",
+            "src": "contracts/FluxP2PPriceFeedFactory.sol:21"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FluxPriceFeed)1827": {
+            "label": "contract FluxPriceFeed",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_contract(FluxPriceFeed)1827)": {
+            "label": "mapping(bytes32 => contract FluxPriceFeed)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)336_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)336_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          }
+        }
+      }
+    }
+  }
+}
