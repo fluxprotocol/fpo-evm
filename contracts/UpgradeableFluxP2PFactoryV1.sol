@@ -6,12 +6,14 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
 import { Verification } from "./Verification.sol";
+import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title Flux first-party price feed factory
  * @author fluxprotocol.org
  */
-contract FluxP2PFactory is AccessControl, IERC2362 {
+contract UpgradeableFluxP2PFactoryV1 is AccessControl, IERC2362, Initializable {
     // roles
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
@@ -31,7 +33,10 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
      */
     event Log(string message);
 
-    constructor() {
+    // constructor() {
+    //     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    // }
+    function initialize() public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 

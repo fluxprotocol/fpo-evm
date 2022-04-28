@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * @title Flux first-party price feed factory
  * @author fluxprotocol.org
  */
-contract FluxP2PFactory_v2 is AccessControl, IERC2362, Initializable {
+contract UpgradeableFluxP2PFactoryV2 is AccessControl, IERC2362, Initializable {
     // roles
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
