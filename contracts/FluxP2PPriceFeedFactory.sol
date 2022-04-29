@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-import { Verification } from "./Verification.sol";
+// import { Verification } from "./Verification.sol";
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @title Flux first-party price feed factory
@@ -66,34 +67,29 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     function transmit(
         bytes[] calldata signatures,
         string calldata _pricePair,
-        uint8 _decimals,
-        int192[] calldata _answers
+        uint8 _decimal,
+        int192 _answer
     ) external {
         require(signatures.length > 1, "Needs at least 2 signatures");
-        require(signatures.length == _answers.length, "Number of answers must match signatures");
         address[] memory recoveredSigners = new address[](signatures.length);
-
-        // Make sure transmitted answers are sorted ascendingly
-        for (uint256 i = 0; i < _answers.length - 1; i++) {
-            require(_answers[i] <= _answers[i + 1], "Transmitted answers are not sorted");
-        }
+        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_pricePair, _decimal, _answer)));
 
         // recover signatures
         for (uint256 i = 0; i < signatures.length; i++) {
-            address recoveredSigner = Verification._getSigner(_pricePair, _decimals, _answers[i], signatures[i]);
+            // address recoveredSigner = Verification._getSigner(_pricePair, _decimal, _answer, signatures[i]);
+            address recoveredSigner = ECDSA.recover(hashedMsg, signatures[i]);
             recoveredSigners[i] = recoveredSigner;
-        }
-
-        // calculate median of _answers assuming they're already sorted
-        int192 answer;
-        if (_answers.length % 2 == 0) {
-            answer = ((_answers[(_answers.length / 2) - 1] + _answers[_answers.length / 2]) / 2);
-        } else {
-            answer = _answers[_answers.length / 2];
+            // (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, signatures[i]);
+            // if (error == ECDSA.RecoverError.NoError){
+            //     console.log(recoveredSigner);
+            //     recoveredSigners[i] = recoveredSigner;
+            // }else{
+            //     revert("RECOVER ERRROR");
+            // }
         }
 
         // Find the price pair id
-        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
+        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimal)));
         bytes32 id = keccak256(bytes(str));
 
         // verify signatures
@@ -103,7 +99,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
-        try fluxPriceFeeds[id].transmit(answer) {
+        try fluxPriceFeeds[id].transmit(_answer) {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()

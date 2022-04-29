@@ -4,55 +4,45 @@ import { arrayify } from "@ethersproject/bytes";
 import { expect } from "chai";
 import { keccak256 } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import type { FluxPriceFeed } from "../../src/types/FluxPriceFeed";
 
 export function shouldBehaveLikeFluxP2PFactory(): void {
-  it("should transmit and calculate median", async function () {
+  it("should transmit median and overwrite value", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let sigs = [p1_sig, p2_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     let [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
-    expect(price).to.equal(3500);
+    expect(price).to.equal(3000);
     expect(status).to.equal(200);
 
-    answers = [4000, 5000];
-    p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    answer = 4000;
+    msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+    p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     sigs = [p1_sig, p2_sig];
 
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
-    expect(price).to.equal(4500);
+    expect(price).to.equal(4000);
     expect(status).to.equal(200);
   });
 
   it("should revert when same oracle is redeployed", async function () {
-    const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000];
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
-    let sigs = [p1_sig, p2_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
@@ -67,18 +57,15 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
   it("should revert if signer isn't a validator", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000, 5000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "int192"],
-      [pricePair, decimals, answers[2]],
-    );
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
 
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let p3tobe_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let p3tobe_sig = await this.provider3tobe.signMessage(arrayify(p3tobe_msgHash));
 
     await this.factory
@@ -86,75 +73,46 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
     let sigs = [p1_sig, p2_sig, p3tobe_sig];
-    answers = [3000, 4000, 5000];
-
     await expect(
-      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
+      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer),
     ).to.be.revertedWith("Signer must be a validator");
   });
 
-  it("should revert if answers aren't valid", async function () {
+  it("should revert if answer aren't valid", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.nonprovider.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let sigs = [p1_sig, p2_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    let invalid_answers = [4000, 4000];
+    let invalid_answer = 4000;
     await expect(
-      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, invalid_answers),
+      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, invalid_answer),
     ).to.be.revertedWith("Signer must be a validator");
   });
 
   it("should revert if it received only one signature", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000];
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
+    let answer = 3000;
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+    let p1_sig = await this.nonprovider.signMessage(arrayify(msgHash));
     let sigs = [p1_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
     await expect(
-      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
+      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer),
     ).to.be.revertedWith("Needs at least 2 signatures");
-  });
-
-  it("should revert if transmitted arrays aren't equal", async function () {
-    const pricePair = this.eth_usd_str;
-    const decimals = 3;
-    let answers = [3000, 4000];
-
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
-    let sigs = [p1_sig, p2_sig];
-    await this.factory
-      .connect(this.signers.admin)
-      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
-
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
-
-    let [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
-    expect(price).to.equal(3500);
-    expect(status).to.equal(200);
-    sigs.push(5000);
-    let invalid_sigs = sigs;
-    await expect(
-      this.factory.connect(this.signers.admin).transmit(invalid_sigs, pricePair, decimals, answers),
-    ).to.be.revertedWith("Number of answers must match signatures");
   });
 
   it("should fetch adress of price pair", async function () {
@@ -186,94 +144,84 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
   it("should transmit providers with diff orders", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [2000, 4000];
+    let answer = 2000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     // let sigs = [p1_sig, p2_sig];
     let sigs = [p2_sig, p1_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     let [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
-    expect(price).to.equal(3000);
+    expect(price).to.equal(2000);
     expect(status).to.equal(200);
   });
 
   it("should let admin add providers", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000, 5000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "int192"],
-      [pricePair, decimals, answers[2]],
-    );
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
 
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let p3tobe_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let p3tobe_sig = await this.provider3tobe.signMessage(arrayify(p3tobe_msgHash));
     let sigs = [p1_sig, p2_sig];
-    answers = [3000, 4000];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     sigs = [p1_sig, p2_sig, p3tobe_sig];
-    answers = [3000, 4000, 5000];
 
     await expect(
-      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
+      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer),
     ).to.be.revertedWith("Signer must be a validator");
 
     await this.factory.connect(this.signers.admin).addSigner(this.eth_usd_id, this.provider3tobe.address);
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     let [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
-    expect(price).to.equal(4000);
+    expect(price).to.equal(3000);
     expect(status).to.equal(200);
   });
 
   it("doesn't let nonadmin add providers", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000, 5000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "int192"],
-      [pricePair, decimals, answers[2]],
-    );
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
 
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let p3tobe_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let p3tobe_sig = await this.provider3tobe.signMessage(arrayify(p3tobe_msgHash));
     let sigs = [p1_sig, p2_sig];
-    answers = [3000, 4000];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     sigs = [p1_sig, p2_sig, p3tobe_sig];
-    answers = [3000, 4000, 5000];
 
     await expect(
-      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
+      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer),
     ).to.be.revertedWith("Signer must be a validator");
 
     await expect(this.factory.connect(this.signers.nonadmin).addSigner(this.eth_usd_id, this.provider3tobe.address)).to
@@ -283,43 +231,43 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
   it("should let admin remove providers", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let sigs = [p1_sig, p2_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     await this.factory.connect(this.signers.admin).revokeSigner(this.eth_usd_id, this.provider2.address);
 
     await expect(
-      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers),
+      this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer),
     ).to.be.revertedWith("Signer must be a validator");
   });
 
   it("doesn't let nonadmin remove providers", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let sigs = [p1_sig, p2_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
 
     await expect(this.factory.connect(this.signers.nonadmin).revokeRole(this.eth_usd_id, this.provider2.address)).to.be
       .reverted;
@@ -329,28 +277,28 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     const VALIDATOR_ROLE = keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
     const pricePair = this.eth_usd_str;
     const decimals = 3;
-    let answers = [3000, 4000];
+    let answer = 3000;
 
-    // sign answer 0 by provider1 and answer 1 by provider2
-    let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[0]]);
-    let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answers[1]]);
-    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    // sign answer by provider1 and provider2
+    let msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+
+    let p1_sig = await this.provider1.signMessage(arrayify(msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(msgHash));
     let sigs = [p1_sig, p2_sig];
     await this.factory
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answers);
+    await this.factory.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
     await this.factory.connect(this.signers.admin).transferOwner(this.eth_usd_id, this.provider3tobe.address);
 
     const eth_usd_addr = await this.factory.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
     const PriceFeedContract = await ethers.getContractFactory("FluxPriceFeed");
     const pricefeed = await PriceFeedContract.attach(eth_usd_addr);
     await pricefeed.connect(this.provider3tobe).grantRole(VALIDATOR_ROLE, this.provider3tobe.address);
-    await pricefeed.connect(this.provider3tobe).transmit(answers[0]);
+    await pricefeed.connect(this.provider3tobe).transmit(answer);
 
     let latestAnswer = await pricefeed.connect(this.provider3tobe).latestAnswer();
-    expect(latestAnswer).to.equal(answers[0]);
+    expect(latestAnswer).to.equal(answer);
   });
 }
