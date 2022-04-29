@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
-    "@openzeppelin/contracts": "^4.3.3",
+    "@openzeppelin/contracts": "^4.6.0",
     "@openzeppelin/contracts-upgradeable": "^4.5.2",
     "@openzeppelin/truffle-upgrades": "^1.15.0"
   }

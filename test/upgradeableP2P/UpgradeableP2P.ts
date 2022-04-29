@@ -32,10 +32,10 @@ describe("Unit tests", function () {
 
       this.proxy = await upgrades.deployProxy(p2pFactory);
       await this.proxy.deployed();
-      console.log("proxy deployed to:", this.proxy.address);
+      // console.log("proxy deployed to:", this.proxy.address);
 
-      const implementationAddress = await upgrades.erc1967.getImplementationAddress(this.proxy.address);
-      console.log("implementationAddress: ", implementationAddress); // p2pFactory address
+      // const implementationAddress = await upgrades.erc1967.getImplementationAddress(this.proxy.address);
+      // console.log("implementationAddress: ", implementationAddress); // p2pFactory address
     });
     shouldBehaveLikeUpgradeableFluxP2PFactory();
   });
