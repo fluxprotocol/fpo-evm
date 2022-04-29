@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-// import { Verification } from "./Verification.sol";
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
@@ -76,16 +74,12 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
         // recover signatures
         for (uint256 i = 0; i < signatures.length; i++) {
-            // address recoveredSigner = Verification._getSigner(_pricePair, _decimal, _answer, signatures[i]);
-            address recoveredSigner = ECDSA.recover(hashedMsg, signatures[i]);
-            recoveredSigners[i] = recoveredSigner;
-            // (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, signatures[i]);
-            // if (error == ECDSA.RecoverError.NoError){
-            //     console.log(recoveredSigner);
-            //     recoveredSigners[i] = recoveredSigner;
-            // }else{
-            //     revert("RECOVER ERRROR");
-            // }
+            (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, signatures[i]);
+            if (error == ECDSA.RecoverError.NoError) {
+                recoveredSigners[i] = recoveredSigner;
+            } else {
+                revert("Couldn't recover signer");
+            }
         }
 
         // Find the price pair id
