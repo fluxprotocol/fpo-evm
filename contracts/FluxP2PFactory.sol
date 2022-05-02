@@ -31,7 +31,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    /// @notice publicly callable function to create a new FluxPriceFeed
+    /// @notice admin-callable function to create a new FluxPriceFeed
     /// @param _pricePair e.g. ETH/USD
     /// @param _decimals e.g. 8
     /// @param _signers signed messages of most recent median by all signers
@@ -75,32 +75,26 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     ) external {
         require(_signatures.length > 1, "Needs at least 2 signatures");
 
+        // format the price pair id
+        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
+        bytes32 id = keccak256(bytes(str));
+
+        // verify the roundId
+        uint256 roundId = fluxPriceFeeds[id].latestRound();
+        require(roundId == _roundId, "Wrong roundId");
+
         // recover signatures and verify them
-        address[] memory recoveredSigners = new address[](_signatures.length);
         bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
             keccak256(abi.encodePacked(_pricePair, _decimals, _roundId, _answer))
         );
         for (uint256 i = 0; i < _signatures.length; i++) {
             (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, _signatures[i]);
             if (error == ECDSA.RecoverError.NoError) {
-                recoveredSigners[i] = recoveredSigner;
+                require(fluxPriceFeeds[id].hasRole(SIGNER_ROLE, recoveredSigner), "Invalid signed message");
             } else {
                 revert("Couldn't recover signer");
             }
         }
-
-        // format the price pair id
-        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
-        bytes32 id = keccak256(bytes(str));
-
-        // verify signatures
-        for (uint256 i = 0; i < recoveredSigners.length; i++) {
-            require(fluxPriceFeeds[id].hasRole(SIGNER_ROLE, recoveredSigners[i]), "Invalid signed message");
-        }
-
-        // verify the roundId
-        uint256 roundId = fluxPriceFeeds[id].latestRound();
-        require(roundId == _roundId, "Wrong roundId");
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */

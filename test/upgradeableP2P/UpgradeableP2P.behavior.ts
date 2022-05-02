@@ -409,7 +409,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let sigs = [p1_sig, p2_sig];
     answer = 3000;
 
-    this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answer);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answer);
 
     // format signatures for new round
     round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
