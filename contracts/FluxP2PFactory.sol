@@ -1,23 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "hardhat/console.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @title Flux first-party price feed factory
+ * @title Flux first-party price feed factory and p2p controller
  * @author fluxprotocol.org
  */
 contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
-    // roles
+    /// @dev used to determine if signature is valid; stored on FluxPriceFeed contract
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
-    // mapping of id to FluxPriceFeed
+    /// @dev mapping of id to FluxPriceFeed (e.g. `Price-ETH/USD-8`)
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
 
     /**
@@ -28,8 +27,8 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle, address[] signers);
 
     /**
-     * @notice to log error messages
-     * @param message the logged message
+     * @notice logs error messages
+     * @param message the error message
      */
     event Log(string message);
 
@@ -71,12 +70,18 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         emit FluxPriceFeedCreated(_id, address(newPriceFeed), _signers);
     }
 
-    /// @notice leader submits an array of signatures and answers along with associated price pair and decimals
+    /// @notice leader submits signed messages of median answer for associated price pair and round
+    /// @param _signatures array of signed messages of the four following arguments
+    /// @param _pricePair e.g. ETH/USD
+    /// @param _decimals e.g. 8
+    /// @param _roundId latest round of the FluxPriceFeed
+    /// @param _answer median answer
+
     function transmit(
         bytes[] calldata _signatures,
         string calldata _pricePair,
-        uint8 _decimal,
-        uint80 _roundId,
+        uint8 _decimals,
+        uint32 _roundId,
         int192 _answer
     ) external {
         require(_signatures.length > 1, "Needs at least 2 signatures");
@@ -84,7 +89,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         // recover signatures and verify them
         address[] memory recoveredSigners = new address[](_signatures.length);
         bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
-            keccak256(abi.encodePacked(_pricePair, _decimal, _roundId, _answer))
+            keccak256(abi.encodePacked(_pricePair, _decimals, _roundId, _answer))
         );
         for (uint256 i = 0; i < _signatures.length; i++) {
             (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, _signatures[i]);
@@ -96,7 +101,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         }
 
         // format the price pair id
-        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimal)));
+        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
         bytes32 id = keccak256(bytes(str));
 
         // verify signatures
@@ -105,7 +110,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         }
 
         // verify the roundId
-        (uint80 roundId, , , , ) = fluxPriceFeeds[id].latestRoundData();
+        uint256 roundId = fluxPriceFeeds[id].latestRound();
         require(roundId == _roundId, "Wrong roundId");
 
         // try transmitting values to the oracle
@@ -156,6 +161,12 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @param _id hash of the price pair string to query
     function addressOfPricePair(bytes32 _id) external view returns (address) {
         return address(fluxPriceFeeds[_id]);
+    }
+
+    /// @notice returns the latest round of a price pair
+    /// @dev _id hash of the price pair string to query
+    function latestRoundOfPricePair(bytes32 _id) external view returns (uint256) {
+        return fluxPriceFeeds[_id].latestRound();
     }
 
     /// @notice add signers to deployed pricefeed

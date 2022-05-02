@@ -83,11 +83,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
     let round;
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -102,11 +102,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // answer = [4000, 5000];
     p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -141,15 +141,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
 
@@ -176,11 +176,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
@@ -201,7 +201,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     const decimals = 3;
     let answer = 3000;
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
@@ -248,11 +248,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -277,15 +277,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
 
@@ -303,15 +303,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // format signatures for new round
     answer = 3000;
     p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -338,15 +338,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
 
@@ -363,15 +363,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // format signatures for new round
     p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p3tobe_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -394,11 +394,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -414,11 +414,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // format signatures for new round
     p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 1, answer],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -437,11 +437,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -465,11 +465,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
-      ["string", "uint8", "uint80", "int192"],
+      ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, 0, answer],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
