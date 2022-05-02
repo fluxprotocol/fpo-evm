@@ -52,7 +52,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     expect(typeAndVersion).to.equal("FluxP2PFactory 1.0.0");
 
     // upgrade proxy
-    const p2pFactory_v2 = await ethers.getContractFactory("UpgradeableFluxP2PFactoryV2");
+    const p2pFactory_v2 = await ethers.getContractFactory("FluxP2PFactoryV2");
     const upgradedProxy = await upgrades.upgradeProxy(this.proxy, p2pFactory_v2);
     const implementationAddress = await upgrades.erc1967.getImplementationAddress(upgradedProxy.address);
     // console.log("new implementationAddress: ", implementationAddress);

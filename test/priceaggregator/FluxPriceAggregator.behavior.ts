@@ -54,7 +54,7 @@ export function shouldBehaveLikeFluxPriceAggregator(): void {
       expect(await this.priceaggregator.connect(this.signers.admin).oracles(2)).to.equal(this.oracles[2].address);
     } catch (e: unknown) {
       if (e instanceof Error) {
-        expect(e.message).to.equal(`Transaction reverted without a reason string`);
+        expect(e.message).to.contain(`Transaction reverted without a reason string`);
       }
     }
   });

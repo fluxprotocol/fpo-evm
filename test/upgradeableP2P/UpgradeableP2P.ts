@@ -3,7 +3,7 @@ import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signe
 
 import { Signers } from "../types";
 import { shouldBehaveLikeUpgradeableFluxP2PFactory } from "./UpgradeableP2P.behavior";
-import { UpgradeableFluxP2PFactoryV1__factory } from "../../src/types/factories/UpgradeableFluxP2PFactoryV1__factory";
+import { FluxP2PFactory__factory } from "../../src/types/factories/FluxP2PFactory__factory";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -26,8 +26,8 @@ describe("Unit tests", function () {
 
   describe("UpgradeableFluxP2PFactoryV1", function () {
     beforeEach(async function () {
-      const p2pFactory: UpgradeableFluxP2PFactoryV1__factory = <UpgradeableFluxP2PFactoryV1__factory>(
-        await ethers.getContractFactory("UpgradeableFluxP2PFactoryV1")
+      const p2pFactory: FluxP2PFactory__factory = <FluxP2PFactory__factory>(
+        await ethers.getContractFactory("FluxP2PFactory")
       );
 
       this.proxy = await upgrades.deployProxy(p2pFactory);

@@ -6,12 +6,14 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title Flux first-party price feed factory
  * @author fluxprotocol.org
  */
-contract FluxP2PFactory is AccessControl, IERC2362 {
+contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     // roles
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
@@ -23,7 +25,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
      * @param id hash of the price pair of the deployed oracle
      * @param oracle address of the deployed oracle
      */
-    event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle);
+    event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle, address[] signers);
 
     /**
      * @notice to log error messages
@@ -31,50 +33,58 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
      */
     event Log(string message);
 
-    constructor() {
+    /**
+     * @notice initializes this contract (in replacement of constructor for OZ Initializable)
+     */
+    function initialize() public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
-     * @notice internal function to create a new FluxPriceFeed
-     * @dev only a validator should be able to call this function
+     * @notice publicly callable function to create a new FluxPriceFeed
+     * @param _pricePair e.g. ETH/USD
+     * @param _decimals e.g. 8
+     * @param _signers signed messages of most recent median by all signers
      */
-
     function deployOracle(
         string calldata _pricePair,
         uint8 _decimals,
-        address[] memory validators
-    ) external {
-        require(validators.length > 1, "Needs at least 2 validators");
-        // Find the price pair id
+        address[] memory _signers
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_signers.length > 1, "Needs at least 2 signers");
+
+        // format the price pair id and require it to be unique
         string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
         bytes32 _id = keccak256(bytes(str));
         require(address(fluxPriceFeeds[_id]) == address(0x0), "Oracle already deployed");
+
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
         fluxPriceFeeds[_id] = newPriceFeed;
-        for (uint256 i = 0; i < validators.length; i++) {
+
+        // set the signers
+        for (uint256 i = 0; i < _signers.length; i++) {
             // grant the provider SIGNER_ROLE on the new FluxPriceFeed
-            newPriceFeed.grantRole(SIGNER_ROLE, validators[i]);
+            newPriceFeed.grantRole(SIGNER_ROLE, _signers[i]);
         }
 
-        emit FluxPriceFeedCreated(_id, address(newPriceFeed));
+        emit FluxPriceFeedCreated(_id, address(newPriceFeed), _signers);
     }
 
     /// @notice leader submits an array of signatures and answers along with associated price pair and decimals
     function transmit(
-        bytes[] calldata signatures,
+        bytes[] calldata _signatures,
         string calldata _pricePair,
         uint8 _decimal,
         int192 _answer
     ) external {
-        require(signatures.length > 1, "Needs at least 2 signatures");
-        address[] memory recoveredSigners = new address[](signatures.length);
-        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_pricePair, _decimal, _answer)));
+        require(_signatures.length > 1, "Needs at least 2 signatures");
 
-        // recover signatures
-        for (uint256 i = 0; i < signatures.length; i++) {
-            (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, signatures[i]);
+        // recover signatures and verify them
+        address[] memory recoveredSigners = new address[](_signatures.length);
+        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_pricePair, _decimal, _answer)));
+        for (uint256 i = 0; i < _signatures.length; i++) {
+            (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, _signatures[i]);
             if (error == ECDSA.RecoverError.NoError) {
                 recoveredSigners[i] = recoveredSigner;
             } else {
@@ -82,7 +92,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             }
         }
 
-        // Find the price pair id
+        // format the price pair id
         string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimal)));
         bytes32 id = keccak256(bytes(str));
 
@@ -159,10 +169,10 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
     /// @notice grants a new DEFAULT_ADMIN_ROLE to a given pricefeed
     /// @param _id hash of the pricepair string to grant role to
-    /// @param newAdmin address of the pricefeed new admin
+    /// @param _newAdmin address of the pricefeed new admin
     /// @dev only factory's deployer (DEFAULT_ADMIN_ROLE) should be able to call this function
-    function transferOwner(bytes32 _id, address newAdmin) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        fluxPriceFeeds[_id].grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
+    function transferOwner(bytes32 _id, address _newAdmin) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        fluxPriceFeeds[_id].grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
     }
 
     /// @notice returns factory's type and version
