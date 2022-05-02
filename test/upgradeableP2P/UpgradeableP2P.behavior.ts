@@ -236,6 +236,34 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     expect(createdOraclesAddresses[0]).to.equal(eth_usd_addr);
   });
 
+  it("should fetch latest roundId of price pair", async function () {
+    const decimals = 3;
+    const pricePair = this.eth_usd_str;
+    let answer = 3000;
+
+    let tx = await this.proxy
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+
+    let p1_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, 0, answer],
+    );
+    let p2_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, 0, answer],
+    );
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let sigs = [p1_sig, p2_sig];
+
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, 0, answer);
+
+    const latestId = await this.proxy.connect(this.signers.admin).latestRoundOfPricePair(this.eth_usd_id);
+
+    expect(latestId).to.equal(1);
+  });
+
   it("should return type and version", async function () {
     const typeAndVersion = await this.proxy.connect(this.signers.admin).typeAndVersion();
     expect(typeAndVersion).to.equal("FluxP2PFactory 1.0.0");
