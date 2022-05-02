@@ -76,13 +76,16 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         bytes[] calldata _signatures,
         string calldata _pricePair,
         uint8 _decimal,
+        uint80 _roundId,
         int192 _answer
     ) external {
         require(_signatures.length > 1, "Needs at least 2 signatures");
 
         // recover signatures and verify them
         address[] memory recoveredSigners = new address[](_signatures.length);
-        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_pricePair, _decimal, _answer)));
+        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
+            keccak256(abi.encodePacked(_pricePair, _decimal, _roundId, _answer))
+        );
         for (uint256 i = 0; i < _signatures.length; i++) {
             (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, _signatures[i]);
             if (error == ECDSA.RecoverError.NoError) {
@@ -98,8 +101,12 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
         // verify signatures
         for (uint256 i = 0; i < recoveredSigners.length; i++) {
-            require(fluxPriceFeeds[id].hasRole(SIGNER_ROLE, recoveredSigners[i]), "Signer must be a validator");
+            require(fluxPriceFeeds[id].hasRole(SIGNER_ROLE, recoveredSigners[i]), "Invalid signed message");
         }
+
+        // verify the roundId
+        (uint80 roundId, , , , ) = fluxPriceFeeds[id].latestRoundData();
+        require(roundId == _roundId, "Wrong roundId");
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
