@@ -35,7 +35,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @notice admin-callable function to create a new FluxPriceFeed
     /// @param _pricePair e.g. ETH/USD
     /// @param _decimals e.g. 8
-    /// @param _signers signed messages of most recent median by all signers
+    /// @param _signers array of initial allowed signatures for `transmit()`
     function deployOracle(
         string calldata _pricePair,
         uint8 _decimals,
