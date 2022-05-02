@@ -20,6 +20,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @notice indicates that a new oracle was created
     /// @param id hash of the price pair of the deployed oracle
     /// @param oracle address of the deployed oracle
+    /// @param signers addresses of the intitial signers
     event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle, address[] signers);
 
     /// @notice logs error messages
