@@ -8,10 +8,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
 
-/**
- * @title Flux first-party price feed factory and p2p controller
- * @author fluxprotocol.org
- */
+/// @title Flux first-party price feed factory and p2p controller
+/// @author fluxprotocol.org
 contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @dev used to determine if signature is valid; stored on FluxPriceFeed contract
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
@@ -19,32 +17,24 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @dev mapping of id to FluxPriceFeed (e.g. `Price-ETH/USD-8`)
     mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
 
-    /**
-     * @notice indicates that a new oracle was created
-     * @param id hash of the price pair of the deployed oracle
-     * @param oracle address of the deployed oracle
-     */
+    /// @notice indicates that a new oracle was created
+    /// @param id hash of the price pair of the deployed oracle
+    /// @param oracle address of the deployed oracle
     event FluxPriceFeedCreated(bytes32 indexed id, address indexed oracle, address[] signers);
 
-    /**
-     * @notice logs error messages
-     * @param message the error message
-     */
+    /// @notice logs error messages
+    /// @param message the error message
     event Log(string message);
 
-    /**
-     * @notice initializes this contract (in replacement of constructor for OZ Initializable)
-     */
+    /// @notice initializes this contract (in replacement of constructor for OZ Initializable)
     function initialize() public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    /**
-     * @notice publicly callable function to create a new FluxPriceFeed
-     * @param _pricePair e.g. ETH/USD
-     * @param _decimals e.g. 8
-     * @param _signers signed messages of most recent median by all signers
-     */
+    /// @notice publicly callable function to create a new FluxPriceFeed
+    /// @param _pricePair e.g. ETH/USD
+    /// @param _decimals e.g. 8
+    /// @param _signers signed messages of most recent median by all signers
     function deployOracle(
         string calldata _pricePair,
         uint8 _decimals,
@@ -76,7 +66,6 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @param _decimals e.g. 8
     /// @param _roundId latest round of the FluxPriceFeed
     /// @param _answer median answer
-
     function transmit(
         bytes[] calldata _signatures,
         string calldata _pricePair,
