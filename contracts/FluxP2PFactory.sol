@@ -32,6 +32,15 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    /// @notice returns a hash of the price pair string
+    /// @param _pricePair e.g. ETH/USD
+    /// @param _decimals e.g. 8
+    /// @return hash of the price pair string
+    function hashPricePairId(string calldata _pricePair, uint8 _decimals) public view returns (bytes32) {
+        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
+        return keccak256(bytes(str));
+    }
+
     /// @notice admin-callable function to create a new FluxPriceFeed
     /// @param _pricePair e.g. ETH/USD
     /// @param _decimals e.g. 8
@@ -44,8 +53,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         require(_signers.length > 1, "Needs at least 2 signers");
 
         // format the price pair id and require it to be unique
-        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
-        bytes32 _id = keccak256(bytes(str));
+        bytes32 _id = hashPricePairId(_pricePair, _decimals);
         require(address(fluxPriceFeeds[_id]) == address(0x0), "Oracle already deployed");
 
         // deploy the new contract and store it in the mapping
@@ -77,8 +85,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         require(_signatures.length > 1, "Needs at least 2 signatures");
 
         // format the price pair id
-        string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
-        bytes32 id = keccak256(bytes(str));
+        bytes32 id = hashPricePairId(_pricePair, _decimals);
 
         // verify the roundId
         uint256 roundId = fluxPriceFeeds[id].latestRound();
