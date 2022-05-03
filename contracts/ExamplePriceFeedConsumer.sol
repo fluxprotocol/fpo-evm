@@ -4,10 +4,14 @@ pragma solidity ^0.8.12;
 import "./interface/CLV2V3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
+/// @title Flux example FluxPriceFeed consumer
+/// @author fluxprotocol.org
 contract ExamplePriceFeedConsumer is AccessControl {
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     CLV2V3Interface public priceFeed;
 
+    /// @notice creates the contract and initializes priceFeed
+    /// @param _priceFeed address of a deployed FluxPriceFeed
     constructor(address _priceFeed) {
         _setupRole(OWNER_ROLE, msg.sender);
         priceFeed = CLV2V3Interface(_priceFeed);

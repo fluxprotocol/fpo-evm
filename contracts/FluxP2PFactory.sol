@@ -11,11 +11,17 @@ import "./FluxPriceFeed.sol";
 /// @title Flux first-party price feed factory and p2p controller
 /// @author fluxprotocol.org
 contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
-    /// @dev used to determine if signature is valid; stored on FluxPriceFeed contract
+    /// @dev used to determine if signature is valid; roles are stored on FluxPriceFeed contract
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
-    /// @dev mapping of id to FluxPriceFeed (e.g. `Price-ETH/USD-8`)
-    mapping(bytes32 => FluxPriceFeed) public fluxPriceFeeds;
+    /// @dev struct containing FluxPriceFeed along with minimum signers required to update the feed
+    struct FluxPriceFeedData {
+        address priceFeed;
+        uint256 minSigners;
+    }
+
+    /// @dev mapping of id (e.g. `Price-ETH/USD-8`) to FluxPriceFeedData
+    mapping(bytes32 => FluxPriceFeedData) public fluxPriceFeeds;
 
     /// @notice indicates that a new oracle was created
     /// @param id hash of the price pair of the deployed oracle
@@ -26,6 +32,11 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @notice logs error messages
     /// @param message the error message
     event Log(string message);
+
+    /// @notice indicates that the minimum signers for a FluxPriceFeed has been updated
+    /// @param id hash of the price pair of the deployed oracle
+    /// @param minSigners new minimum signers
+    event MinSignersSet(bytes32 indexed id, uint256 minSigners);
 
     /// @notice initializes this contract (in replacement of constructor for OZ Initializable)
     function initialize() public initializer {
@@ -41,24 +52,25 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         return keccak256(bytes(str));
     }
 
-    /// @notice admin-callable function to create a new FluxPriceFeed
+    /// @notice creates a new FluxPriceFeed
     /// @param _pricePair e.g. ETH/USD
     /// @param _decimals e.g. 8
     /// @param _signers array of initial allowed signatures for `transmit()`
+    /// @dev only admin (DEFAULT_ADMIN_ROLE) should be able to call this function
     function deployOracle(
         string calldata _pricePair,
         uint8 _decimals,
         address[] memory _signers
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_signers.length > 1, "Needs at least 2 signers");
+        require(_signers.length > 1, "Need at least 2 signers");
 
         // format the price pair id and require it to be unique
         bytes32 id = hashFeedId(_pricePair, _decimals);
-        require(address(fluxPriceFeeds[id]) == address(0x0), "Oracle already deployed");
+        require(address(fluxPriceFeeds[id].priceFeed) == address(0x0), "Oracle already deployed");
 
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
-        fluxPriceFeeds[id] = newPriceFeed;
+        fluxPriceFeeds[id] = FluxPriceFeedData(address(newPriceFeed), 2);
 
         // set the signers
         for (uint256 i = 0; i < _signers.length; i++) {
@@ -82,13 +94,14 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         uint32 _roundId,
         int192 _answer
     ) external {
-        require(_signatures.length > 1, "Needs at least 2 signatures");
-
         // format the price pair id
         bytes32 id = hashFeedId(_pricePair, _decimals);
 
+        require(_signatures.length >= fluxPriceFeeds[id].minSigners, "Not enough signatures");
+
         // verify the roundId
-        uint256 roundId = fluxPriceFeeds[id].latestRound();
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[id].priceFeed);
+        uint256 roundId = priceFeed.latestRound();
         require(roundId == _roundId, "Wrong roundId");
 
         // recover signatures and verify them
@@ -98,7 +111,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         for (uint256 i = 0; i < _signatures.length; i++) {
             (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, _signatures[i]);
             if (error == ECDSA.RecoverError.NoError) {
-                require(fluxPriceFeeds[id].hasRole(SIGNER_ROLE, recoveredSigner), "Invalid signed message");
+                require(priceFeed.hasRole(SIGNER_ROLE, recoveredSigner), "Invalid signed message");
             } else {
                 revert("Couldn't recover signer");
             }
@@ -106,7 +119,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
-        try fluxPriceFeeds[id].transmit(_answer) {
+        try priceFeed.transmit(_answer) {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()
@@ -128,15 +141,10 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         )
     {
         // if oracle exists then fetch values
-        if (address(fluxPriceFeeds[_id]) != address(0x0)) {
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+        if (address(priceFeed) != address(0x0)) {
             // fetch the price feed contract and read its latest answer and timestamp
-            try fluxPriceFeeds[_id].latestRoundData() returns (
-                uint80,
-                int256 answer,
-                uint256,
-                uint256 updatedAt,
-                uint80
-            ) {
+            try priceFeed.latestRoundData() returns (uint80, int256 answer, uint256, uint256 updatedAt, uint80) {
                 return (answer, updatedAt, 200);
             } catch {
                 // catch failing revert() and require()
@@ -153,38 +161,52 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @param _id hash of the price pair string to query
     /// @return address of the FluxPriceFeed
     function addressOfPricePair(bytes32 _id) external view returns (address) {
-        return address(fluxPriceFeeds[_id]);
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+        return address(priceFeed);
     }
 
     /// @notice returns the latest round of a price pair
-    /// @dev _id hash of the price pair string to query
+    /// @param _id hash of the price pair string to query
     /// @return latestRound of the FluxPriceFeed
     function latestRoundOfPricePair(bytes32 _id) external view returns (uint256) {
-        return fluxPriceFeeds[_id].latestRound();
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+        return priceFeed.latestRound();
     }
 
-    /// @notice add signers to deployed pricefeed
+    /// @notice add signers to deployed FluxPriceFeed
     /// @param _id hash of the price pair string to add role to
     /// @param _signer address of the signer to be granted SIGNER_ROLE
-    /// @dev only factory's deployer (DEFAULT_ADMIN_ROLE) should be able to call this function
+    /// @dev only admin (DEFAULT_ADMIN_ROLE) should be able to call this function
     function addSigner(bytes32 _id, address _signer) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        fluxPriceFeeds[_id].grantRole(SIGNER_ROLE, _signer);
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+        priceFeed.grantRole(SIGNER_ROLE, _signer);
     }
 
-    /// @notice revoke signers from deployed pricefeed
+    /// @notice revoke signers from deployed FluxPriceFeed
     /// @param _id hash of the price pair string to revoke role from
     /// @param _signer address of the signer to be revoked SIGNER_ROLE
-    /// @dev only factory's deployer (DEFAULT_ADMIN_ROLE) should be able to call this function
+    /// @dev only admin (DEFAULT_ADMIN_ROLE) should be able to call this function
     function revokeSigner(bytes32 _id, address _signer) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        fluxPriceFeeds[_id].revokeRole(SIGNER_ROLE, _signer);
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+        priceFeed.revokeRole(SIGNER_ROLE, _signer);
     }
 
-    /// @notice grants a new DEFAULT_ADMIN_ROLE to a given pricefeed
-    /// @param _id hash of the pricepair string to grant role to
-    /// @param _newAdmin address of the pricefeed new admin
-    /// @dev only factory's deployer (DEFAULT_ADMIN_ROLE) should be able to call this function
+    /// @notice grants a new DEFAULT_ADMIN_ROLE to a given FluxPriceFeed
+    /// @param _id hash of the price pair string to grant role to
+    /// @param _newAdmin address of the FluxPriceFeed new admin
+    /// @dev only admin (DEFAULT_ADMIN_ROLE) should be able to call this function
     function transferOwner(bytes32 _id, address _newAdmin) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        fluxPriceFeeds[_id].grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+        priceFeed.grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
+    }
+
+    /// @notice sets `minSigners`
+    /// @param _id hash of the price pair string to set the minimum signers on
+    /// @param _minSigners minimum number of signers required to submit a new answer
+    /// @dev only admin (DEFAULT_ADMIN_ROLE) should be able to call this function
+    function setMinSigners(bytes32 _id, uint256 _minSigners) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        fluxPriceFeeds[_id].minSigners = _minSigners;
+        emit MinSignersSet(_id, _minSigners);
     }
 
     /// @notice returns factory's type and version

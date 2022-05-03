@@ -218,12 +218,18 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
       ["string", "uint8", "uint32", "int192"],
       [pricePair, decimals, round, answer],
     );
-    let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let sigs = [p1_sig];
 
     await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answer),
-    ).to.be.revertedWith("Needs at least 2 signatures");
+    ).to.be.revertedWith("Not enough signatures");
+
+    // lower the threshold
+    await this.proxy.connect(this.signers.admin).setMinSigners(this.eth_usd_id, 1);
+
+    // should work now
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answer);
   });
 
   it("should fetch adress of price pair", async function () {
