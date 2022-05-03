@@ -36,7 +36,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @param _pricePair e.g. ETH/USD
     /// @param _decimals e.g. 8
     /// @return hash of the price pair string
-    function hashPricePairId(string calldata _pricePair, uint8 _decimals) public view returns (bytes32) {
+    function hashFeedId(string calldata _pricePair, uint8 _decimals) public pure returns (bytes32) {
         string memory str = string(abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals)));
         return keccak256(bytes(str));
     }
@@ -53,12 +53,12 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         require(_signers.length > 1, "Needs at least 2 signers");
 
         // format the price pair id and require it to be unique
-        bytes32 _id = hashPricePairId(_pricePair, _decimals);
-        require(address(fluxPriceFeeds[_id]) == address(0x0), "Oracle already deployed");
+        bytes32 id = hashFeedId(_pricePair, _decimals);
+        require(address(fluxPriceFeeds[id]) == address(0x0), "Oracle already deployed");
 
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
-        fluxPriceFeeds[_id] = newPriceFeed;
+        fluxPriceFeeds[id] = newPriceFeed;
 
         // set the signers
         for (uint256 i = 0; i < _signers.length; i++) {
@@ -66,7 +66,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
             newPriceFeed.grantRole(SIGNER_ROLE, _signers[i]);
         }
 
-        emit FluxPriceFeedCreated(_id, address(newPriceFeed), _signers);
+        emit FluxPriceFeedCreated(id, address(newPriceFeed), _signers);
     }
 
     /// @notice leader submits signed messages of median answer for associated price pair and round
@@ -85,7 +85,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         require(_signatures.length > 1, "Needs at least 2 signatures");
 
         // format the price pair id
-        bytes32 id = hashPricePairId(_pricePair, _decimals);
+        bytes32 id = hashFeedId(_pricePair, _decimals);
 
         // verify the roundId
         uint256 roundId = fluxPriceFeeds[id].latestRound();
@@ -116,6 +116,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
     /// @notice answer from the most recent report of a certain price pair from factory
     /// @param _id hash of the price pair string to query
+    /// @return tuple containing answer, updatedAt, and status message (200 for success; 404 for not found)
     function valueFor(bytes32 _id)
         external
         view
@@ -150,12 +151,14 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
     /// @notice returns address of a price feed id
     /// @param _id hash of the price pair string to query
+    /// @return address of the FluxPriceFeed
     function addressOfPricePair(bytes32 _id) external view returns (address) {
         return address(fluxPriceFeeds[_id]);
     }
 
     /// @notice returns the latest round of a price pair
     /// @dev _id hash of the price pair string to query
+    /// @return latestRound of the FluxPriceFeed
     function latestRoundOfPricePair(bytes32 _id) external view returns (uint256) {
         return fluxPriceFeeds[_id].latestRound();
     }
@@ -185,6 +188,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     }
 
     /// @notice returns factory's type and version
+    /// @return string containing factory's type and version
     function typeAndVersion() external view virtual returns (string memory) {
         return "FluxP2PFactory 1.0.0";
     }
