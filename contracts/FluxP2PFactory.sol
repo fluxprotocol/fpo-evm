@@ -81,19 +81,21 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         emit FluxPriceFeedCreated(id, address(newPriceFeed), _signers);
     }
 
-    /// @notice leader submits signed messages of median answer for associated price pair and round
+    /// @notice leader submits signed messages of answers for associated price pair and round
     /// @param _signatures array of signed messages of the four following arguments
     /// @param _pricePair e.g. ETH/USD
     /// @param _decimals e.g. 8
     /// @param _roundId latest round of the FluxPriceFeed
-    /// @param _answer median answer
+    /// @param _answers array of answers from associated signers
     function transmit(
         bytes[] calldata _signatures,
         string calldata _pricePair,
         uint8 _decimals,
         uint32 _roundId,
-        int192 _answer
+        int192[] calldata _answers
     ) external {
+        require(_signatures.length == _answers.length, "Length of answers must match signatures");
+
         // format the price pair id
         bytes32 id = hashFeedId(_pricePair, _decimals);
 
@@ -101,25 +103,37 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
         // verify the roundId
         FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[id].priceFeed);
-        uint256 roundId = priceFeed.latestRound();
-        require(roundId == _roundId, "Wrong roundId");
+        require(priceFeed.latestRound() == _roundId, "Wrong roundId");
 
         // recover signatures and verify them
-        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
-            keccak256(abi.encodePacked(_pricePair, _decimals, _roundId, _answer))
-        );
         for (uint256 i = 0; i < _signatures.length; i++) {
+            bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
+                keccak256(abi.encodePacked(_pricePair, _decimals, _roundId, _answers[i]))
+            );
             (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, _signatures[i]);
             if (error == ECDSA.RecoverError.NoError) {
                 require(priceFeed.hasRole(SIGNER_ROLE, recoveredSigner), "Invalid signed message");
             } else {
                 revert("Couldn't recover signer");
             }
+
+            // require transmitted answers to be sorted in ascending order
+            if (i < _signatures.length - 1) {
+                require(_answers[i] <= _answers[i + 1], "Answers are not sorted");
+            }
+        }
+
+        // calculate median of _answers
+        int192 answer;
+        if (_answers.length % 2 == 0) {
+            answer = ((_answers[(_answers.length / 2) - 1] + _answers[_answers.length / 2]) / 2);
+        } else {
+            answer = _answers[_answers.length / 2];
         }
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
-        try priceFeed.transmit(_answer) {
+        try priceFeed.transmit(answer) {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()
