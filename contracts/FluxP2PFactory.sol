@@ -18,6 +18,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     struct FluxPriceFeedData {
         address priceFeed;
         uint256 minSigners;
+        mapping(address => uint256) lastSignedRound; // required to check for duplicate signatures
     }
 
     /// @dev mapping of id (e.g. `Price-ETH/USD-8`) to FluxPriceFeedData
@@ -62,15 +63,16 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         uint8 _decimals,
         address[] memory _signers
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_signers.length > 1, "Need at least 2 signers");
+        require(_signers.length > 1, "Need more signers");
 
         // format the price pair id and require it to be unique
         bytes32 id = hashFeedId(_pricePair, _decimals);
-        require(address(fluxPriceFeeds[id].priceFeed) == address(0x0), "Oracle already deployed");
+        require(address(fluxPriceFeeds[id].priceFeed) == address(0x0), "Already deployed");
 
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
-        fluxPriceFeeds[id] = FluxPriceFeedData(address(newPriceFeed), 2);
+        fluxPriceFeeds[id].priceFeed = address(newPriceFeed);
+        fluxPriceFeeds[id].minSigners = 2;
 
         // set the signers
         for (uint256 i = 0; i < _signers.length; i++) {
@@ -94,12 +96,12 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         uint32 _roundId,
         int192[] calldata _answers
     ) external {
-        require(_signatures.length == _answers.length, "Length of answers must match signatures");
+        require(_signatures.length == _answers.length, "Lengths mismatch");
 
         // format the price pair id
         bytes32 id = hashFeedId(_pricePair, _decimals);
 
-        require(_signatures.length >= fluxPriceFeeds[id].minSigners, "Not enough signatures");
+        require(_signatures.length >= fluxPriceFeeds[id].minSigners, "Too few signatures");
 
         // verify the roundId
         FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[id].priceFeed);
@@ -112,15 +114,21 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
             );
             (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(hashedMsg, _signatures[i]);
             if (error == ECDSA.RecoverError.NoError) {
-                require(priceFeed.hasRole(SIGNER_ROLE, recoveredSigner), "Invalid signed message");
+                require(priceFeed.hasRole(SIGNER_ROLE, recoveredSigner), "Invalid signature");
             } else {
-                revert("Couldn't recover signer");
+                revert();
             }
 
             // require transmitted answers to be sorted in ascending order
             if (i < _signatures.length - 1) {
-                require(_answers[i] <= _answers[i + 1], "Answers are not sorted");
+                require(_answers[i] <= _answers[i + 1], "Not sorted");
             }
+
+            // require the signer only submits an answer once for this round
+            if (_roundId > 0) {
+                require(fluxPriceFeeds[id].lastSignedRound[recoveredSigner] < _roundId, "Duplicate signature");
+            }
+            fluxPriceFeeds[id].lastSignedRound[recoveredSigner] = _roundId;
         }
 
         // calculate median of _answers

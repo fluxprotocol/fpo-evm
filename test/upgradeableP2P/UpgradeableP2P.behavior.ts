@@ -134,7 +134,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
       this.proxy
         .connect(this.signers.admin)
         .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]),
-    ).to.be.revertedWith("Oracle already deployed");
+    ).to.be.revertedWith("Already deployed");
   });
 
   it("should revert if signer isn't a validator", async function () {
@@ -170,7 +170,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
-    ).to.be.revertedWith("Invalid signed message");
+    ).to.be.revertedWith("Invalid signature");
   });
 
   it("should revert if answers aren't valid", async function () {
@@ -200,7 +200,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let invalid_answers = [4000, 4000];
     await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, invalid_answers),
-    ).to.be.revertedWith("Invalid signed message");
+    ).to.be.revertedWith("Invalid signature");
   });
 
   it("should revert if it received only one signature", async function () {
@@ -223,7 +223,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
-    ).to.be.revertedWith("Not enough signatures");
+    ).to.be.revertedWith("Too few signatures");
 
     // lower the threshold
     await this.proxy.connect(this.signers.admin).setMinSigners(this.eth_usd_id, 1);
@@ -373,7 +373,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
-    ).to.be.revertedWith("Invalid signed message");
+    ).to.be.revertedWith("Invalid signature");
 
     await this.proxy.connect(this.signers.admin).addSigner(this.eth_usd_id, this.provider3tobe.address);
     await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
@@ -439,7 +439,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
-    ).to.be.revertedWith("Invalid signed message");
+    ).to.be.revertedWith("Invalid signature");
 
     await expect(this.proxy.connect(this.signers.nonadmin).addSigner(this.eth_usd_id, this.provider3tobe.address)).to.be
       .reverted;
@@ -490,7 +490,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
-    ).to.be.revertedWith("Invalid signed message");
+    ).to.be.revertedWith("Invalid signature");
   });
 
   it("doesn't let nonadmin remove providers", async function () {
@@ -587,8 +587,53 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await await expect(
+    await expect(
       this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
-    ).to.be.revertedWith("Answers are not sorted");
+    ).to.be.revertedWith("Not sorted");
+  });
+
+  it("should disallow multiple signatures from the same signer", async function () {
+    const pricePair = this.eth_usd_str;
+    const decimals = 3;
+    let answers = [3000, 4000];
+
+    // deploy oracle
+    await this.proxy
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+
+    // run a normal round. signatures are only checked for uniqueness after the 0th round
+    let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+    let p1_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, round, answers[0]],
+    );
+    let p2_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, round, answers[1]],
+    );
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let sigs = [p1_sig, p2_sig];
+
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+
+    // sign answers by the same provider
+    round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+    p1_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, round, answers[0]],
+    );
+    let p1_2_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, round, answers[1]],
+    );
+    p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p1_2_sig = await this.provider1.signMessage(arrayify(p1_2_msgHash));
+    sigs = [p1_sig, p1_2_sig];
+
+    await expect(
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
+    ).to.be.revertedWith("Duplicate signature");
   });
 }
