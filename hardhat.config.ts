@@ -5,6 +5,7 @@ import "solidity-coverage";
 import "hardhat-gas-reporter";
 import "@nomiclabs/buidler/config";
 import "@nomiclabs/hardhat-etherscan";
+import "hardhat-sourcify";
 
 import "./tasks/accounts";
 import "./tasks/deploy/";
