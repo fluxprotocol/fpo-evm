@@ -38,7 +38,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
   //   let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
   //   let sigs = [p1_sig, p2_sig];
 
-  //   await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+  //   await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
   //   let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
   //   expect(price).to.equal(3500);
@@ -60,7 +60,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
   //   p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
   //   sigs = [p1_sig, p2_sig];
 
-  //   await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+  //   await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
   //   [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
   //   expect(price).to.equal(3500);
@@ -113,7 +113,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3500);
@@ -134,7 +134,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4500);
@@ -186,9 +186,9 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let sigs = [p1_sig, p2_sig, p3tobe_sig];
     answers = [3000, 4000, 5000];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Invalid signature");
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Invalid signature",
+    );
   });
 
   it("should revert if answers aren't valid", async function () {
@@ -217,7 +217,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     let invalid_answers = [4000, 4000];
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, invalid_answers),
+      this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, invalid_answers),
     ).to.be.revertedWith("Invalid signature");
   });
 
@@ -239,15 +239,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let sigs = [p1_sig];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Too few signatures");
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Too few signatures",
+    );
 
     // lower the threshold
     await this.proxy.connect(this.signers.admin).setMinSigners(this.eth_usd_id, 1);
 
     // should work now
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
   });
 
   it("should fetch adress of price pair", async function () {
@@ -293,7 +293,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     const latestId = await this.proxy.connect(this.signers.admin).latestRoundOfPricePair(this.eth_usd_id);
 
@@ -330,7 +330,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // let sigs = [p1_sig, p2_sig];
     let sigs = [p2_sig, p1_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3000);
@@ -368,7 +368,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let sigs = [p1_sig, p2_sig];
     answers = [3000, 4000];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     // format signatures for new round
     answers = [3000, 4000, 5000];
@@ -390,12 +390,12 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     p3tobe_sig = await this.provider3tobe.signMessage(arrayify(p3tobe_msgHash));
     sigs = [p1_sig, p2_sig, p3tobe_sig];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Invalid signature");
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Invalid signature",
+    );
 
     await this.proxy.connect(this.signers.admin).addSigner(this.eth_usd_id, this.provider3tobe.address);
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4000);
@@ -434,7 +434,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let sigs = [p1_sig, p2_sig];
     answers = [3000, 4000];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     // format signatures for new round
     round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
@@ -456,9 +456,9 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     p3tobe_sig = await this.provider3tobe.signMessage(arrayify(p3tobe_msgHash));
     sigs = [p1_sig, p2_sig, p3tobe_sig];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Invalid signature");
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Invalid signature",
+    );
 
     await expect(this.proxy.connect(this.signers.nonadmin).addSigner(this.eth_usd_id, this.provider3tobe.address)).to.be
       .reverted;
@@ -489,7 +489,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     await this.proxy.connect(this.signers.admin).revokeSigner(this.eth_usd_id, this.provider2.address);
 
@@ -507,9 +507,9 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     sigs = [p1_sig, p2_sig];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Invalid signature");
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Invalid signature",
+    );
   });
 
   it("doesn't let nonadmin remove providers", async function () {
@@ -537,7 +537,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     await expect(this.proxy.connect(this.signers.nonadmin).revokeRole(this.eth_usd_id, this.provider2.address)).to.be
       .reverted;
@@ -569,7 +569,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
     await this.proxy.connect(this.signers.admin).transferOwner(this.eth_usd_id, this.provider3tobe.address);
 
     const eth_usd_addr = await this.proxy.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
@@ -606,9 +606,9 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Not sorted");
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Not sorted",
+    );
   });
 
   it("should disallow multiple signatures from the same signer", async function () {
@@ -635,9 +635,9 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let p1_2_sig = await this.provider1.signMessage(arrayify(p1_2_msgHash));
     let sigs = [p1_sig, p1_2_sig];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Duplicate signature");
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Duplicate signature",
+    );
   });
 
   it("will have providers be unable to sign current round after failed transmission", async function () {
@@ -676,10 +676,10 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // step 1: revoke proxy's VALIDATOR_ROLE from price feed
     await pricefeed.connect(this.signers.admin).revokeRole(VALIDATOR_ROLE, this.proxy.address);
     // step 2: attempt transmission, will not revert but price feed would not have updated
-    // await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
-    ).to.be.revertedWith("Transmit Failed");
+    // await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
+    await expect(this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers)).to.be.revertedWith(
+      "Transmit Failed",
+    );
 
     // same round
     expect(await this.proxy.latestRoundOfPricePair(this.eth_usd_id)).to.be.eq(Number(round));
@@ -687,9 +687,9 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // will revert
     await pricefeed.connect(this.signers.admin).grantRole(VALIDATOR_ROLE, this.proxy.address);
     // await expect(
-    //   this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
+    //   this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers),
     // ).to.be.revertedWith("Duplicate signature");
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
     let latestAnswer = await pricefeed.connect(this.signers.admin).latestAnswer();
     expect(latestAnswer).to.equal(3500);
   });
@@ -741,7 +741,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await this.proxy.connect(this.provider1).transmit(sigs, pricePair, decimals, answers);
 
     [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4500);

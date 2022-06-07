@@ -1,8 +1,8 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
-    "txHash": "0xfc508d33eb785f3aa517de559e66b658df0bac105c3341469d245832389273d2"
+    "address": "0xE50ce613116C3d667a4A46C2F7D39d9e53E18245",
+    "txHash": "0xc26a0b86fc84f047c901c0e2d0b2eee3c6397adc03bf5b1c412c3dfd8811d7ec"
   },
   "proxies": [
     {
@@ -894,6 +894,196 @@
       "address": "0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901",
       "txHash": "0x96b71e07f6efcb7433b8e97daae7d4e458b9f0467b891ff7772d6fb788d536da",
       "kind": "transparent"
+    },
+    {
+      "address": "0xb595a5a4ad19696fD05C91c38a9232420e43E8B1",
+      "txHash": "0x01672dfa0c5e4b988126267424a1132cbb9d2c1bf28316b058efefe9439e829c",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x1E11De6d0CB039307fa5e611Deb3aEC3921893B4",
+      "txHash": "0x02bd68c5da1cfcd2721c8d50927b89d4ff72e4d27b6be39419be588cfbf898dd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x53ABF8591782f4968d949CC5e34D2628B83Ec6A3",
+      "txHash": "0x02d6f65374262509020aa18e99540d7e1a529d4da85d40a1930dbbbb0449f668",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x6046d7cFaF8f8398D30D087EFBEd1c4cD0B46004",
+      "txHash": "0xd31b26bd500d5e148c7d810025d41bb8f53ffe93e0801734142b82cbc611f1f9",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xc405343d210Ec4f4EBB48b6020dBb51baA050D21",
+      "txHash": "0xa4104828313e55df345e677df7fe1e850c749bb6f80f52e18f465cdf29cbea95",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xf55A109AD0da0000Ac6a9A0F736135eE1A209c2E",
+      "txHash": "0x67731a3156832adcf3fe7d8bc5e94c7e9c44c8f6ef91b2bfab34d0cc5162b034",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x492b070ecbf705443b5cC0E7e5e016fF051A7d01",
+      "txHash": "0x4951de0023ba55aef69134cf1d3c61d7b281fcf1dbc1ad2c6c94706a4f7183bf",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x800419E3A081520dB85b00B9d95Ec4F2f8785958",
+      "txHash": "0x3b3258e213d98f9f90205312ead0daf9f73c779914578318bb08c86bd353b357",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2c84407B9A970C11a8a34829310Dd6113C8FfA1c",
+      "txHash": "0x5f8eea5c422b6b49ea6cf6e6e0d9e311bb5c5dbbf0c18f7543bb430db91df65e",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xE36f5aD0eE996f0e51649FE01b775B5F666fa0bd",
+      "txHash": "0xc62e86567bd97858b8ea0919fdd630b61852712b074b62b41b5f852a06929334",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x747312065287cF9B53f15072c064d57E30ad1e6F",
+      "txHash": "0xf7f0f31e1dfef6f19392690c8bccfef3833dd047245a8ce99917ca8098280ff8",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x6F81851bD04ec55ab011397C7139eBE5520CCE1A",
+      "txHash": "0xccc58af5111667f514444b255b3fbd0cfd9e45ee4fcd20157b70ec7aebae0990",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x03f7153313C746B587b23DAdC27418E5bb6b03e4",
+      "txHash": "0xea18658b93469425cc810fa2469a6b28c69b22cac97e912e7acdaeeddbddade8",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x884BCcBb6c8Ea7b991168Db73DCad9E133C751C9",
+      "txHash": "0xc4952d2de0ecc25b9c61bb3f86e9cec04058c090fb0f34146199e8a15c43b025",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x762fa0fb2bF73694C1542c4316f76a1fddA7A7E8",
+      "txHash": "0x2e91ecba71efea674adec9aeb899e11ea19f5df39b2197eb358fca252fab7892",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3BF1CEC5b3E94bccF09e6F94EDf0195355131e64",
+      "txHash": "0x1fa21785a5234a9f1051d7c4fe92085f8cf887bcd72de5e880d7943ff4fe0c40",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x758039eC856e83cAE10557690703fC6037F31Ce3",
+      "txHash": "0xfa802654ae872406035e02cfbed385243a5244518ad0f55014bce85af326cdf5",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x443224F1F20A7B1a57a7885e8Bbd9787c8D194a0",
+      "txHash": "0x48db353e67701bfb421308dceab6e56baa3aaf068ef274216a83ac374c7e24c9",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x18d3ffb4D4f92131EfCE0CEc34796dF5b3a461Bb",
+      "txHash": "0xf74c32d5414c8f9101b5306ae2cf9a53d2a953442c63c5fcf492b6cac5203976",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xfB9F1166A721C986C4920CB5B0E32BeB98a19A73",
+      "txHash": "0x634c0db91c0edca499283a5d3738b12d5d8f9059ea63206ad0905b9e13b57095",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xE2f35E071cEB38e09B3c3252735c8B06263B40D4",
+      "txHash": "0xbc27cd3bfa6db3fc69f23756bf58bb1ffe754493f0c0d594ffc9be806a1d6ece",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x431f6dE1bB8B6d96F4C055eaB8f06CB70cCBa347",
+      "txHash": "0x080b338007c1babe9c77ec96c17dd891f68b396d7c9df2fd9a05392115e891bb",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xAb843EbA00CeF866E38880ED3240974E05f21e90",
+      "txHash": "0x2caf48f22cc508aabf541bf2d0ea9817623c548e228ce04df089a483e793ddd6",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5E542871b9Ffc9eD35dB8A561bD89AB5170355fB",
+      "txHash": "0x0336fbce2abd552de40edd7720f369738f5a07a0e42d160e531cf2eb3e0015f9",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x04f980B021FFc73DBcBC202fF0D2a3F4da5767ED",
+      "txHash": "0x6cc18f86fdf4184960b259ec8f072870c2d24f83addc276b9e5a8c736b3fff93",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xeb79C527E03347D1057F1D297DdC0CC45b70B934",
+      "txHash": "0x779a8575e15ac0a7c61aba2101e83e1350c5c6fe8097f494434050e0dbe80e2c",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x87bf8438C22DE1c18F6db1F8aF74FB2C2CF31EeE",
+      "txHash": "0xa6792fd6b5d750a66660381da04f8717065a995b3b64f7986e5efb8067a89968",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xC36e82B7713f3214BfbD061042dF027a09b4218c",
+      "txHash": "0x1c6f134674c4ad7e9aaa57eeaae430dde5c3fd53ab782d8cb7102ac930305cc9",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x657954CA6Bef250E999a8a4b91B3b4ff78Ca6c11",
+      "txHash": "0xb74fab2b08e7f7e6a1b534bd12dd453100a414f1b82acaf7e5f36e2d897e8729",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x58132efE169A941790195F6448ED53ECcCCa5ec3",
+      "txHash": "0xc0b3e4ab016ed4785ffa6790a7991a6776c0926fe2935724e8a077bb797a16f3",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xDa67932880496732B47335A7aa6E08d8e6D561a0",
+      "txHash": "0x76e8b71b4520299e079da2032995ca98ca642d964a794eb842b7c88cf312df43",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x0AB23096eDb2f4a60e4FEea7bc5927d1Dcf4287C",
+      "txHash": "0x58ac826ea928f9004b6f726bdb74ed053e42d96fbcaa1103546c6446582a155d",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x1f77202727b19d4a693AC0EBCC3327496031a498",
+      "txHash": "0xa091d6d91f6eb87fe42bcf77213f4651560ab61e5ac2050877b27163c8f8e59b",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x53a2D392421aa4bbeea834AE1416e762C81c6431",
+      "txHash": "0x0c745e27227fe3415b7f8165452885fbaf8bfa9d5bbd43eda999663f77f4092e",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x09146626726854D024a4060EbA02137Ea866dBDc",
+      "txHash": "0x7ec00f628d05411f900b8fb91463e09b870252493fb26bc4aa10950d03f4eb79",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xf4F7dEd16d328dd188577aA4df5F84F8e6db2322",
+      "txHash": "0xb0fa4056a023317093309392cddf7d3c5a17e8955960773111eccf2365ae734e",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x995391d27fE411f01Ea17007E5fe03F69926B1e8",
+      "txHash": "0xe4c05e74b16952685fc804082ee01f0becf8d14210d908f6a77eb26466c125c3",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x72C5C6Bf4C63a63712FE5C06Cb3821B149f463c0",
+      "txHash": "0xf8282255cfbfe0c6520d325b7e2f041a8d4d013c5c605c94a46a295833079fea",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -1337,127 +1527,6 @@
         }
       }
     },
-    "65d8961c1e9e7810b48648e4dcd951659ee1fe9ea1b3625680a5fd5e1c3f7162": {
-      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-      "txHash": "0x42536db2123abf6ea3f81a149c0aa16eb1942992bedabbb8300059aeac58bab2",
-      "layout": {
-        "storage": [
-          {
-            "label": "_roles",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)404_storage)",
-            "contract": "AccessControl",
-            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
-          },
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "1",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
-          },
-          {
-            "label": "fluxPriceFeeds",
-            "offset": 0,
-            "slot": "2",
-            "type": "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)2346_storage)",
-            "contract": "FluxP2PFactory",
-            "src": "contracts/FluxP2PFactory.sol:26"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes32": {
-            "label": "bytes32",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)2346_storage)": {
-            "label": "mapping(bytes32 => struct FluxP2PFactory.FluxPriceFeedData)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_bytes32,t_struct(RoleData)404_storage)": {
-            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
-            "numberOfBytes": "32"
-          },
-          "t_struct(FluxPriceFeedData)2346_storage": {
-            "label": "struct FluxP2PFactory.FluxPriceFeedData",
-            "members": [
-              {
-                "label": "priceFeed",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "minSigners",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "lastSignedRound",
-                "type": "t_mapping(t_address,t_uint256)",
-                "offset": 0,
-                "slot": "2"
-              }
-            ],
-            "numberOfBytes": "96"
-          },
-          "t_struct(RoleData)404_storage": {
-            "label": "struct AccessControl.RoleData",
-            "members": [
-              {
-                "label": "members",
-                "type": "t_mapping(t_address,t_bool)",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "adminRole",
-                "type": "t_bytes32",
-                "offset": 0,
-                "slot": "1"
-              }
-            ],
-            "numberOfBytes": "64"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
     "79bc750140166aa0f46db947442667e75c2289db0bcaabe01a7764d63f7aa838": {
       "address": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
       "txHash": "0xf9dcea707ec19a619bc2568e62c3dc77f2b3c4d8b99cf82f5b23b0628a53de53",
@@ -1528,6 +1597,127 @@
           },
           "t_struct(FluxPriceFeedData)1662_storage": {
             "label": "struct FluxP2PFactoryV2.FluxPriceFeedData",
+            "members": [
+              {
+                "label": "priceFeed",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "minSigners",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "lastSignedRound",
+                "type": "t_mapping(t_address,t_uint256)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(RoleData)404_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "57fcd8769bf5c70faa6e8997b5c014cde10dba551de585a4c839ebcba1525a09": {
+      "address": "0xDf5Ac047B20669645172038f91875240768013B3",
+      "txHash": "0x1fbbe76374a6b0213f44e1d963eccc3828e4df4f8679287016c2e1d72ff3118e",
+      "layout": {
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)404_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "fluxPriceFeeds",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)1661_storage)",
+            "contract": "FluxP2PFactory",
+            "src": "contracts/FluxP2PFactory.sol:25"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)1661_storage)": {
+            "label": "mapping(bytes32 => struct FluxP2PFactory.FluxPriceFeedData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)404_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(FluxPriceFeedData)1661_storage": {
+            "label": "struct FluxP2PFactory.FluxPriceFeedData",
             "members": [
               {
                 "label": "priceFeed",
