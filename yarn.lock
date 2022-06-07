@@ -1198,10 +1198,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts-upgradeable@npm:^4.5.2":
-  version: 4.5.2
-  resolution: "@openzeppelin/contracts-upgradeable@npm:4.5.2"
-  checksum: bd6a12eb83d8e3194e0847ffb248a1063668e2bf723afd21066316090de9b02e95af6057086a95fa21b0d09a2ef0ea057459bb5f5645dfff298e59e8c3267692
+"@openzeppelin/contracts-upgradeable@npm:^4.6":
+  version: 4.6.0
+  resolution: "@openzeppelin/contracts-upgradeable@npm:4.6.0"
+  checksum: f9802c9cccf31bd475412ba5d862ed15eed5352302c30b29c38f84aed2dcfe0d957687935a72068f3d44292a4a55b0ff26cd018b2e14a47f16f74f087009aa29
   languageName: node
   linkType: hard
 
@@ -1212,19 +1212,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/hardhat-upgrades@npm:^1.17.0":
-  version: 1.17.0
-  resolution: "@openzeppelin/hardhat-upgrades@npm:1.17.0"
+"@openzeppelin/hardhat-upgrades@npm:^1.18.1":
+  version: 1.18.1
+  resolution: "@openzeppelin/hardhat-upgrades@npm:1.18.1"
   dependencies:
-    "@openzeppelin/upgrades-core": ^1.14.1
+    "@openzeppelin/upgrades-core": ^1.15.0
     chalk: ^4.1.0
     proper-lockfile: ^4.1.1
   peerDependencies:
     "@nomiclabs/hardhat-ethers": ^2.0.0
+    "@nomiclabs/hardhat-etherscan": ^3.0.3
     hardhat: ^2.0.2
+  peerDependenciesMeta:
+    "@nomiclabs/harhdat-etherscan":
+      optional: true
   bin:
     migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
-  checksum: edbfa0918023d880477f3bf86910fd71f99625cc0cb0c29a869899cf68a9f620b27302cd28ff5e3778728a0433df3090e91576e1cceb28b448a702daf686c032
+  checksum: e432734395e21fce724e3cb341acb4a648b70a85522c57d6ddf663d4482dfc0dfaac62e72f179a1e010587bae4581edda4425f9970d99c26734342ad679f973e
   languageName: node
   linkType: hard
 
@@ -1257,6 +1261,22 @@ __metadata:
     proper-lockfile: ^4.1.1
     solidity-ast: ^0.4.15
   checksum: 8ebd7ae862975e547ee17c5828f88d76b9d22537ee252c0e885ab2e59bfa258c3803ff0c9d58fe1bf227fcd31e0281d7ed2ec554cb1ca2dba302dff79ea85201
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/upgrades-core@npm:^1.15.0":
+  version: 1.15.0
+  resolution: "@openzeppelin/upgrades-core@npm:1.15.0"
+  dependencies:
+    bn.js: ^5.1.2
+    cbor: ^8.0.0
+    chalk: ^4.1.0
+    compare-versions: ^4.0.0
+    debug: ^4.1.1
+    ethereumjs-util: ^7.0.3
+    proper-lockfile: ^4.1.1
+    solidity-ast: ^0.4.15
+  checksum: a491e33452d9744277d66144206ab0121851d219a5cef1ed095f37977433c5a0536a0483e4d446f3d8b7c06dcb53dabffcc9e638b510c0b92153b6b0feaad998
   languageName: node
   linkType: hard
 
@@ -7373,8 +7393,8 @@ __metadata:
     "@nomiclabs/hardhat-etherscan": ^3.0.3
     "@nomiclabs/hardhat-waffle": ^2.0.1
     "@openzeppelin/contracts": ^4.6.0
-    "@openzeppelin/contracts-upgradeable": ^4.5.2
-    "@openzeppelin/hardhat-upgrades": ^1.17.0
+    "@openzeppelin/contracts-upgradeable": ^4.6
+    "@openzeppelin/hardhat-upgrades": ^1.18.1
     "@openzeppelin/truffle-upgrades": ^1.15.0
     "@typechain/ethers-v5": ^8.0.1
     "@typechain/hardhat": ^3.0.0

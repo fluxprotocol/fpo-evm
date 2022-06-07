@@ -7,7 +7,7 @@ import { ethers, upgrades } from "hardhat";
 import type { FluxPriceFeed } from "../../src/types/FluxPriceFeed";
 
 export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
-  // testing upgrades: duplicate FluxP2PFactory contract to FluxP2PFactoryV2 and change typeAndVersion to 2.0.0
+  // // testing upgrades: duplicate FluxP2PFactory contract to FluxP2PFactoryV2 and change typeAndVersion to 2.0.0
   // it("should upgrade proxy and keep oracles", async function () {
   //   const decimals = 3;
   //   await this.proxy
@@ -18,35 +18,52 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
   //     this.proxy
   //       .connect(this.signers.admin)
   //       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]),
-  //   ).to.be.revertedWith("Oracle already deployed");
+  //   ).to.be.revertedWith("Already deployed");
 
   //   const pricePair = this.eth_usd_str;
-  //   let answer = 3000;
+
+  //   let answers = [3000, 4000];
 
   //   // sign answer 0 by provider1 and answer 1 by provider2
-  //   let p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
-  //   let p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+  //   let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+  //   let p1_msgHash = ethers.utils.solidityKeccak256(
+  //     ["string", "uint8", "uint32", "int192"],
+  //     [pricePair, decimals, Number(round) + 1, answers[0]],
+  //   );
+  //   let p2_msgHash = ethers.utils.solidityKeccak256(
+  //     ["string", "uint8", "uint32", "int192"],
+  //     [pricePair, decimals, Number(round) + 1, answers[1]],
+  //   );
   //   let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
   //   let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
   //   let sigs = [p1_sig, p2_sig];
 
-  //   await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
+  //   await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
   //   let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
-  //   expect(price).to.equal(3000);
+  //   expect(price).to.equal(3500);
   //   expect(status).to.equal(200);
 
-  //   // answer = [4000, 5000];
-  //   p1_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
-  //   p2_msgHash = ethers.utils.solidityKeccak256(["string", "uint8", "int192"], [pricePair, decimals, answer]);
+  //   // let answers = [3000, 4000];
+
+  //   // sign answer 0 by provider1 and answer 1 by provider2
+  //   round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+  //   p1_msgHash = ethers.utils.solidityKeccak256(
+  //     ["string", "uint8", "uint32", "int192"],
+  //     [pricePair, decimals, Number(round) + 1, answers[0]],
+  //   );
+  //   p2_msgHash = ethers.utils.solidityKeccak256(
+  //     ["string", "uint8", "uint32", "int192"],
+  //     [pricePair, decimals, Number(round) + 1, answers[1]],
+  //   );
   //   p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
   //   p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
   //   sigs = [p1_sig, p2_sig];
 
-  //   await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, answer);
+  //   await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
   //   [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
-  //   expect(price).to.equal(3000);
+  //   expect(price).to.equal(3500);
   //   expect(status).to.equal(200);
 
   //   let typeAndVersion = await this.proxy.connect(this.signers.admin).typeAndVersion();
@@ -65,10 +82,10 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
   //     upgradedProxy
   //       .connect(this.signers.admin)
   //       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]),
-  //   ).to.be.revertedWith("Oracle already deployed");
+  //   ).to.be.revertedWith("Already deployed");
 
   //   [price, , status] = await upgradedProxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
-  //   expect(price).to.equal(3000);
+  //   expect(price).to.equal(3500);
   //   expect(status).to.equal(200);
   // });
 

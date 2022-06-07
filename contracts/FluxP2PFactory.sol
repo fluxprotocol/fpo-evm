@@ -40,6 +40,11 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @param minSigners new minimum signers
     event MinSignersSet(bytes32 indexed id, uint256 minSigners);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice initializes this contract (in replacement of constructor for OZ Initializable)
     function initialize() public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
