@@ -86,17 +86,17 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3500);
@@ -104,19 +104,20 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     answers = [4000, 5000];
     round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+
     p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4500);
@@ -151,15 +152,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p3tobe_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[2]],
+      [pricePair, decimals, Number(round) + 1, answers[2]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
@@ -169,7 +170,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     answers = [3000, 4000, 5000];
 
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
     ).to.be.revertedWith("Invalid signature");
   });
 
@@ -187,11 +188,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.nonprovider.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
@@ -199,7 +200,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
 
     let invalid_answers = [4000, 4000];
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, invalid_answers),
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, invalid_answers),
     ).to.be.revertedWith("Invalid signature");
   });
 
@@ -216,20 +217,20 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let sigs = [p1_sig];
 
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
     ).to.be.revertedWith("Too few signatures");
 
     // lower the threshold
     await this.proxy.connect(this.signers.admin).setMinSigners(this.eth_usd_id, 1);
 
     // should work now
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
   });
 
   it("should fetch adress of price pair", async function () {
@@ -261,20 +262,21 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let tx = await this.proxy
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+    let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
 
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, 0, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, 0, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, 0, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     const latestId = await this.proxy.connect(this.signers.admin).latestRoundOfPricePair(this.eth_usd_id);
 
@@ -300,18 +302,18 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     // let sigs = [p1_sig, p2_sig];
     let sigs = [p2_sig, p1_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3000);
@@ -333,15 +335,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p3tobe_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[2]],
+      [pricePair, decimals, Number(round) + 1, answers[2]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
@@ -349,22 +351,22 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let sigs = [p1_sig, p2_sig];
     answers = [3000, 4000];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     // format signatures for new round
     answers = [3000, 4000, 5000];
     round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     p3tobe_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[2]],
+      [pricePair, decimals, Number(round) + 1, answers[2]],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
@@ -372,11 +374,11 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     sigs = [p1_sig, p2_sig, p3tobe_sig];
 
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
     ).to.be.revertedWith("Invalid signature");
 
     await this.proxy.connect(this.signers.admin).addSigner(this.eth_usd_id, this.provider3tobe.address);
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4000);
@@ -398,15 +400,15 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p3tobe_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[2]],
+      [pricePair, decimals, Number(round) + 1, answers[2]],
     );
 
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
@@ -415,22 +417,22 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let sigs = [p1_sig, p2_sig];
     answers = [3000, 4000];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     // format signatures for new round
     round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     answers = [3000, 4000, 5000];
     p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     p3tobe_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[2]],
+      [pricePair, decimals, Number(round) + 1, answers[2]],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
@@ -438,7 +440,7 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     sigs = [p1_sig, p2_sig, p3tobe_sig];
 
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
     ).to.be.revertedWith("Invalid signature");
 
     await expect(this.proxy.connect(this.signers.nonadmin).addSigner(this.eth_usd_id, this.provider3tobe.address)).to.be
@@ -460,17 +462,17 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     await this.proxy.connect(this.signers.admin).revokeSigner(this.eth_usd_id, this.provider2.address);
 
@@ -478,18 +480,18 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     sigs = [p1_sig, p2_sig];
 
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
     ).to.be.revertedWith("Invalid signature");
   });
 
@@ -508,17 +510,17 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
 
     await expect(this.proxy.connect(this.signers.nonadmin).revokeRole(this.eth_usd_id, this.provider2.address)).to.be
       .reverted;
@@ -540,17 +542,17 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     // sign answer 0 by provider1 and answer 1 by provider2
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
     await this.proxy.connect(this.signers.admin).transferOwner(this.eth_usd_id, this.provider3tobe.address);
 
     const eth_usd_addr = await this.proxy.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
@@ -577,18 +579,18 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
     await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
     ).to.be.revertedWith("Not sorted");
   });
 
@@ -602,38 +604,130 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    // run a normal round. signatures are only checked for uniqueness after the 0th round
     let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+
     let p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
+    );
+    let p1_2_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
+    );
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p1_2_sig = await this.provider1.signMessage(arrayify(p1_2_msgHash));
+    let sigs = [p1_sig, p1_2_sig];
+
+    await expect(
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
+    ).to.be.revertedWith("Duplicate signature");
+  });
+
+  it("will have providers be unable to sign current round after failed transmission", async function () {
+    const pricePair = this.eth_usd_str;
+    const decimals = 3;
+    let answers = [3000, 4000];
+
+    // deploy oracle
+    await this.proxy
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+    const PriceFeedContract = await ethers.getContractFactory("FluxPriceFeed");
+    const eth_usd_addr = await this.proxy.connect(this.signers.admin).addressOfPricePair(this.eth_usd_id);
+    const pricefeed = PriceFeedContract.attach(eth_usd_addr);
+    const VALIDATOR_ROLE = keccak256(ethers.utils.toUtf8Bytes("VALIDATOR_ROLE"));
+    // transfer price feed owner to admin
+    await this.proxy.connect(this.signers.admin).transferOwner(this.eth_usd_id, this.signers.admin.address);
+    // increment price feed round by successfully transmitting an answer
+    // so that duplicate signature will be checked
+    await pricefeed.connect(this.signers.admin).grantRole(VALIDATOR_ROLE, this.signers.admin.address);
+    await pricefeed.connect(this.signers.admin).transmit(1);
+    let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+    // sign answer 0 by provider1 and answer 1 by provider2
+    let p1_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
     let p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
     let sigs = [p1_sig, p2_sig];
 
-    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers);
+    // step 1: revoke proxy's VALIDATOR_ROLE from price feed
+    await pricefeed.connect(this.signers.admin).revokeRole(VALIDATOR_ROLE, this.proxy.address);
+    // step 2: attempt transmission, will not revert but price feed would not have updated
+    // await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    await expect(
+      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
+    ).to.be.revertedWith("Transmit Failed");
 
-    // sign answers by the same provider
+    // same round
+    expect(await this.proxy.latestRoundOfPricePair(this.eth_usd_id)).to.be.eq(Number(round));
+    // step 3: re-grant proxy VALIDATOR_ROLE, re-attempt transmission
+    // will revert
+    await pricefeed.connect(this.signers.admin).grantRole(VALIDATOR_ROLE, this.proxy.address);
+    // await expect(
+    //   this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers),
+    // ).to.be.revertedWith("Duplicate signature");
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+    let latestAnswer = await pricefeed.connect(this.signers.admin).latestAnswer();
+    expect(latestAnswer).to.equal(3500);
+  });
+
+  it("return status 404 for 0 answers", async function () {
+    const pricePair = this.eth_usd_str;
+    const decimals = 3;
+    let answers = [3000, 4000];
+
+    let [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(0);
+    expect(status).to.equal(404);
+
+    // deploy oracle
+    await this.proxy
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+
+    // sign answer 0 by provider1 and answer 1 by provider2
+    let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+    let p1_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
+    );
+    let p2_msgHash = ethers.utils.solidityKeccak256(
+      ["string", "uint8", "uint32", "int192"],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
+    );
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let sigs = [p1_sig, p2_sig];
+
+    [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(0);
+    expect(status).to.equal(404);
+
+    answers = [4000, 5000];
     round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+
     p1_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[0]],
+      [pricePair, decimals, Number(round) + 1, answers[0]],
     );
-    let p1_2_msgHash = ethers.utils.solidityKeccak256(
+    p2_msgHash = ethers.utils.solidityKeccak256(
       ["string", "uint8", "uint32", "int192"],
-      [pricePair, decimals, round, answers[1]],
+      [pricePair, decimals, Number(round) + 1, answers[1]],
     );
     p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
-    let p1_2_sig = await this.provider1.signMessage(arrayify(p1_2_msgHash));
-    sigs = [p1_sig, p1_2_sig];
+    p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    sigs = [p1_sig, p2_sig];
 
-    await expect(
-      this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, round, answers),
-    ).to.be.revertedWith("Duplicate signature");
+    await this.proxy.connect(this.signers.admin).transmit(sigs, pricePair, decimals, Number(round) + 1, answers);
+
+    [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(4500);
+    expect(status).to.equal(200);
   });
 }

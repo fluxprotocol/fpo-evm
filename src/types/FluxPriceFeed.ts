@@ -195,39 +195,21 @@ export interface FluxPriceFeedInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "version", data: BytesLike): Result;
 
   events: {
-    "AnswerUpdated(int256,uint256,uint256)": EventFragment;
-    "NewRound(uint256,address,uint256)": EventFragment;
-    "NewTransmission(uint32,int192,address)": EventFragment;
+    "NewTransmission(uint256,int192,address)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "AnswerUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewRound"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewTransmission"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
 }
 
-export type AnswerUpdatedEvent = TypedEvent<
-  [BigNumber, BigNumber, BigNumber],
-  { current: BigNumber; roundId: BigNumber; updatedAt: BigNumber }
->;
-
-export type AnswerUpdatedEventFilter = TypedEventFilter<AnswerUpdatedEvent>;
-
-export type NewRoundEvent = TypedEvent<
-  [BigNumber, string, BigNumber],
-  { roundId: BigNumber; startedBy: string; startedAt: BigNumber }
->;
-
-export type NewRoundEventFilter = TypedEventFilter<NewRoundEvent>;
-
 export type NewTransmissionEvent = TypedEvent<
-  [number, BigNumber, string],
-  { aggregatorRoundId: number; answer: BigNumber; transmitter: string }
+  [BigNumber, BigNumber, string],
+  { aggregatorRoundId: BigNumber; answer: BigNumber; transmitter: string }
 >;
 
 export type NewTransmissionEventFilter = TypedEventFilter<NewTransmissionEvent>;
@@ -326,7 +308,7 @@ export interface FluxPriceFeed extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    latestAggregatorRoundId(overrides?: CallOverrides): Promise<[number]>;
+    latestAggregatorRoundId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     latestAnswer(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -427,7 +409,7 @@ export interface FluxPriceFeed extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  latestAggregatorRoundId(overrides?: CallOverrides): Promise<number>;
+  latestAggregatorRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
   latestAnswer(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -528,7 +510,7 @@ export interface FluxPriceFeed extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    latestAggregatorRoundId(overrides?: CallOverrides): Promise<number>;
+    latestAggregatorRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestAnswer(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -582,29 +564,7 @@ export interface FluxPriceFeed extends BaseContract {
   };
 
   filters: {
-    "AnswerUpdated(int256,uint256,uint256)"(
-      current?: BigNumberish | null,
-      roundId?: BigNumberish | null,
-      updatedAt?: null
-    ): AnswerUpdatedEventFilter;
-    AnswerUpdated(
-      current?: BigNumberish | null,
-      roundId?: BigNumberish | null,
-      updatedAt?: null
-    ): AnswerUpdatedEventFilter;
-
-    "NewRound(uint256,address,uint256)"(
-      roundId?: BigNumberish | null,
-      startedBy?: string | null,
-      startedAt?: null
-    ): NewRoundEventFilter;
-    NewRound(
-      roundId?: BigNumberish | null,
-      startedBy?: string | null,
-      startedAt?: null
-    ): NewRoundEventFilter;
-
-    "NewTransmission(uint32,int192,address)"(
+    "NewTransmission(uint256,int192,address)"(
       aggregatorRoundId?: BigNumberish | null,
       answer?: null,
       transmitter?: null

@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  */
 contract FluxPriceFeed is AccessControl, CLV2V3Interface {
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
-    uint32 public latestAggregatorRoundId;
+    uint256 public latestAggregatorRoundId;
 
     // Transmission records the answer from the transmit transaction at
     // time timestamp
@@ -19,7 +19,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         int192 answer; // 192 bits ought to be enough for anyone
         uint64 timestamp;
     }
-    mapping(uint32 => Transmission) /* aggregator round ID */
+    mapping(uint256 => Transmission) /* aggregator round ID */
         internal transmissions;
 
     /**
@@ -32,8 +32,8 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         uint8 _decimals,
         string memory __description
     ) {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(VALIDATOR_ROLE, _validator);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(VALIDATOR_ROLE, _validator);
         decimals = _decimals;
         _description = __description;
     }
@@ -55,7 +55,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * @param answer value posted by validator
      * @param transmitter address from which the report was transmitted
      */
-    event NewTransmission(uint32 indexed aggregatorRoundId, int192 answer, address transmitter);
+    event NewTransmission(uint256 indexed aggregatorRoundId, int192 answer, address transmitter);
 
     /**
      * @notice details about the most recent report
@@ -72,8 +72,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      */
     function transmit(int192 _answer) external onlyRole(VALIDATOR_ROLE) {
         // Check the report contents, and record the result
-        latestAggregatorRoundId++;
-        transmissions[latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
+        transmissions[++latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
 
         emit NewTransmission(latestAggregatorRoundId, _answer, msg.sender);
     }
@@ -111,7 +110,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         if (_roundId > 0xFFFFFFFF) {
             return 0;
         }
-        return transmissions[uint32(_roundId)].answer;
+        return transmissions[_roundId].answer;
     }
 
     /**
@@ -122,7 +121,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         if (_roundId > 0xFFFFFFFF) {
             return 0;
         }
-        return transmissions[uint32(_roundId)].timestamp;
+        return transmissions[_roundId].timestamp;
     }
 
     /*
@@ -173,7 +172,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         )
     {
         require(_roundId <= 0xFFFFFFFF, V3_NO_DATA_ERROR);
-        Transmission memory transmission = transmissions[uint32(_roundId)];
+        Transmission memory transmission = transmissions[_roundId];
         return (_roundId, transmission.answer, transmission.timestamp, transmission.timestamp, _roundId);
     }
 
@@ -198,12 +197,12 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
             uint80 answeredInRound
         )
     {
-        roundId = latestAggregatorRoundId;
+        roundId = uint80(latestAggregatorRoundId);
 
-        // Skipped for compatability with existing FluxAggregator in which latestRoundData never reverts.
+        // Skipped for compatibility with existing FluxAggregator in which latestRoundData never reverts.
         // require(roundId != 0, V3_NO_DATA_ERROR);
 
-        Transmission memory transmission = transmissions[uint32(roundId)];
+        Transmission memory transmission = transmissions[latestAggregatorRoundId];
         return (roundId, transmission.answer, transmission.timestamp, transmission.timestamp, roundId);
     }
 }

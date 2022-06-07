@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
+import "hardhat/console.sol";
 
 /// @title Flux first-party price feed factory and p2p controller
 /// @author fluxprotocol.org
@@ -41,7 +42,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
     /// @notice initializes this contract (in replacement of constructor for OZ Initializable)
     function initialize() public initializer {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /// @notice returns a hash of the price pair string
@@ -75,7 +76,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         fluxPriceFeeds[id].minSigners = 2;
 
         // set the signers
-        for (uint256 i = 0; i < _signers.length; i++) {
+        for (uint256 i = 0; i < _signers.length; ++i) {
             // grant the provider SIGNER_ROLE on the new FluxPriceFeed
             newPriceFeed.grantRole(SIGNER_ROLE, _signers[i]);
         }
@@ -105,10 +106,10 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
 
         // verify the roundId
         FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[id].priceFeed);
-        require(priceFeed.latestRound() == _roundId, "Wrong roundId");
+        require(priceFeed.latestRound() + 1 == _roundId, "Wrong roundId");
 
         // recover signatures and verify them
-        for (uint256 i = 0; i < _signatures.length; i++) {
+        for (uint256 i = 0; i < _signatures.length; ++i) {
             bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
                 keccak256(abi.encodePacked(_pricePair, _decimals, _roundId, _answers[i]))
             );
@@ -124,10 +125,8 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
                 require(_answers[i] <= _answers[i + 1], "Not sorted");
             }
 
-            // require the signer only submits an answer once for this round
-            if (_roundId > 0) {
-                require(fluxPriceFeeds[id].lastSignedRound[recoveredSigner] < _roundId, "Duplicate signature");
-            }
+            require(fluxPriceFeeds[id].lastSignedRound[recoveredSigner] < _roundId, "Duplicate signature");
+
             fluxPriceFeeds[id].lastSignedRound[recoveredSigner] = _roundId;
         }
 
@@ -146,6 +145,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         } catch Error(string memory reason) {
             // catch failing revert() and require()
             emit Log(reason);
+            revert("Transmit Failed");
         }
     }
 
@@ -163,15 +163,19 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         )
     {
         // if oracle exists then fetch values
-        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
-        if (address(priceFeed) != address(0x0)) {
-            // fetch the price feed contract and read its latest answer and timestamp
-            try priceFeed.latestRoundData() returns (uint80, int256 answer, uint256, uint256 updatedAt, uint80) {
-                return (answer, updatedAt, 200);
-            } catch {
-                // catch failing revert() and require()
-                return (0, 0, 404);
-            }
+        if (fluxPriceFeeds[_id].priceFeed != address(0x0)) {
+            try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRoundData() returns (
+                uint80 roundId,
+                int256 answer,
+                uint256,
+                uint256 updatedAt,
+                uint80
+            ) {
+                if (roundId > 0) {
+                    return (answer, updatedAt, 200);
+                }
+            } catch {}
+            return (0, 0, 404);
 
             // else return not found
         } else {
@@ -183,8 +187,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @param _id hash of the price pair string to query
     /// @return address of the FluxPriceFeed
     function addressOfPricePair(bytes32 _id) external view returns (address) {
-        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
-        return address(priceFeed);
+        return fluxPriceFeeds[_id].priceFeed;
     }
 
     /// @notice returns the latest round of a price pair

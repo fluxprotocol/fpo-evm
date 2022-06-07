@@ -2,29 +2,31 @@
 pragma solidity ^0.8.12;
 
 import "./interface/CLV2V3Interface.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title Flux example FluxPriceFeed consumer
 /// @author fluxprotocol.org
-contract ExamplePriceFeedConsumer is AccessControl {
-    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+contract ExamplePriceFeedConsumer is Ownable {
     CLV2V3Interface public priceFeed;
 
     /// @notice creates the contract and initializes priceFeed
     /// @param _priceFeed address of a deployed FluxPriceFeed
     constructor(address _priceFeed) {
-        _setupRole(OWNER_ROLE, msg.sender);
         priceFeed = CLV2V3Interface(_priceFeed);
     }
 
     /// @notice Fetches the latest price from the price feed
     function getLatestPrice() public view returns (int256) {
-        return priceFeed.latestAnswer();
+        (uint80 roundID, int256 feedPrice, , uint256 timestamp, uint80 answeredInRound) = priceFeed.latestRoundData();
+        require(feedPrice > 0, "price <= 0");
+        require(answeredInRound >= roundID, "stale price");
+        require(timestamp != 0, "round not complete");
+        return feedPrice;
     }
 
     /// @notice Changes price feed contract address
     /// @dev Only callable by the owner
-    function setPriceFeed(address _priceFeed) public onlyRole(OWNER_ROLE) {
+    function setPriceFeed(address _priceFeed) public onlyOwner {
         priceFeed = CLV2V3Interface(_priceFeed);
     }
 }
