@@ -79,7 +79,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             require(fluxPriceFeeds[_id].signers.contains(recoveredSigner), "Invalid signature");
             return recoveredSigner;
         } else {
-            revert();
+            revert("Invalid signature");
         }
     }
 
@@ -92,11 +92,11 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         uint8 _decimals,
         address[] memory _signers
     ) external {
-        require(_signers.length > 1);
+        require(_signers.length > 1, "Must >1 signers");
 
         // format the price pair id and require it to be unique
         bytes32 id = hashFeedId(_pricePair, _decimals, Strings.toHexString(uint256(uint160(msg.sender))));
-        require(fluxPriceFeeds[id].priceFeed == address(0x0));
+        require(fluxPriceFeeds[id].priceFeed == address(0x0), "Already deployed");
 
         // deploy the new contract and store it in the mapping
         FluxPriceFeed newPriceFeed = new FluxPriceFeed(address(this), _decimals, _pricePair);
@@ -132,7 +132,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         string calldata _creator,
         int192[] calldata _answers
     ) external {
-        require(_signatures.length == _answers.length);
+        require(_signatures.length == _answers.length, "Lengths mismatch");
 
         // format the price pair id
         bytes32 id = hashFeedId(_pricePair, _decimals, _creator);
@@ -260,7 +260,6 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     {
         // if oracle exists then fetch values
         if (fluxPriceFeeds[_id].priceFeed != address(0x0)) {
-            /* solhint-disable-next-line no-empty-blocks */
             try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRoundData() returns (
                 uint80 roundId,
                 int256 answer,
@@ -271,6 +270,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
                 if (roundId > 0) {
                     return (answer, updatedAt, 200);
                 }
+                /* solhint-disable-next-line no-empty-blocks */
             } catch {}
             return (0, 0, 404);
 

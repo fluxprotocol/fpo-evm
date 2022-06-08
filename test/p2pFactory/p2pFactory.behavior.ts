@@ -83,7 +83,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       this.factory
         .connect(this.signers.admin)
         .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]),
-    ).to.be.revertedWith("Transaction reverted");
+    ).to.be.revertedWith("Already deployed");
   });
 
   it("should revert if signer isn't a validator", async function () {
