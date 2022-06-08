@@ -122,41 +122,32 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
     /// @notice leader submits signed messages to update a FluxPriceFeed
     /// @param _signatures array of signed messages from allowed signers
-    /// @param _pricePair e.g. ETH/USD
-    /// @param _decimals e.g. 8
-    /// @param _creator original creator of the FluxPriceFeed who called `deployOracle()` in lowercase
+    /// @param _id hash calculated using `hashFeedId()`
     /// @param _answers array of answers from associated signers
     /// @dev only available to a majority of a feed's current signers
     function transmit(
         bytes[] calldata _signatures,
-        string calldata _pricePair,
-        uint8 _decimals,
-        address _creator,
+        bytes32 _id,
         int192[] calldata _answers
     ) external {
         require(_signatures.length == _answers.length, "Lengths mismatch");
 
-        // format the price pair id
-        bytes32 id = hashFeedId(_pricePair, _decimals, _creator);
-
         // verify the minimum required signers
-        require(_signatures.length >= fluxPriceFeeds[id].minSigners, "Too few signers");
+        require(_signatures.length >= fluxPriceFeeds[_id].minSigners, "Too few signers");
 
         TransmitData memory data = TransmitData(
-            // initialize round, fetch after `data` is initialized
-            FluxPriceFeed(fluxPriceFeeds[id].priceFeed).latestRound() + 1,
-            // initialize validCaller, set to true if msg.sender is a signer
+            // round to update
+            FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRound() + 1,
+            // validCaller, later set to true if msg.sender is a signer
             false,
-            // initialize answer
+            // answer, calculated as median of _answers
             0
         );
 
         // recover signatures and verify them
         for (uint256 i = 0; i < _signatures.length; ++i) {
-            bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
-                keccak256(abi.encodePacked(_pricePair, _decimals, _creator, data.round, _answers[i]))
-            );
-            address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], id);
+            bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_id, data.round, _answers[i])));
+            address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
             // check if the caller is a signer
             if (recoveredSigner == msg.sender) {
@@ -169,8 +160,8 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             }
 
             // require each signer only submits an answer once
-            require(fluxPriceFeeds[id].lastRoundTransmit[recoveredSigner] < data.round, "Duplicate signer");
-            fluxPriceFeeds[id].lastRoundTransmit[recoveredSigner] = data.round;
+            require(fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] < data.round, "Duplicate signer");
+            fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] = data.round;
         }
 
         // require that the caller is a signer
@@ -185,7 +176,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
-        try FluxPriceFeed(fluxPriceFeeds[id].priceFeed).transmit(data.answer) {
+        try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).transmit(data.answer) {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()
@@ -196,55 +187,46 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
     /// @notice leader submits signed messages to modify the signers of a FluxPriceFeed
     /// @param _signatures array of signed messages from allowed signers
-    /// @param _pricePair e.g. ETH/USD
-    /// @param _decimals e.g. 8
-    /// @param _creator original creator of the FluxPriceFeed who called `deployOracle()` in lowercase
+    /// @param _id hash calculated using `hashFeedId()`
     /// @param _signer signer to add or remove from the FluxPriceFeed
     /// @param _add true to add, false to remove
     /// @dev only available to a majority of a feed's current signers
     function modifySigners(
         bytes[] calldata _signatures,
-        string calldata _pricePair,
-        uint8 _decimals,
-        address _creator,
+        bytes32 _id,
         address _signer,
         bool _add
     ) external {
-        // format the price pair id
-        bytes32 id = hashFeedId(_pricePair, _decimals, _creator);
-
         // verify the minimum required signatures
-        require(_signatures.length >= fluxPriceFeeds[id].minSigners, "Too few signers");
+        require(_signatures.length >= fluxPriceFeeds[_id].minSigners, "Too few signers");
 
         // parse the signed message
-        uint256 roundId = FluxPriceFeed(fluxPriceFeeds[id].priceFeed).latestRound();
-        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
-            keccak256(abi.encodePacked(_pricePair, _decimals, _creator, roundId, _signer, _add))
-        );
+        uint256 roundId = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRound();
+        bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_id, roundId, _signer, _add)));
 
         // recover signatures and verify them
         for (uint256 i = 0; i < _signatures.length; i++) {
-            address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], id);
+            address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
             // require each signer only submits an answer once
             if (roundId > 0) {
-                require(fluxPriceFeeds[id].lastRoundModifySigners[recoveredSigner] < roundId, "Duplicate signer");
+                require(fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] < roundId, "Duplicate signer");
             }
-            fluxPriceFeeds[id].lastRoundModifySigners[recoveredSigner] = roundId;
+            fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] = roundId;
         }
 
         // add or remove signer to the FluxPriceFeed
         if (_add) {
-            fluxPriceFeeds[id].signers.add(_signer);
+            fluxPriceFeeds[_id].signers.add(_signer);
         } else {
-            require(fluxPriceFeeds[id].signers.length() > 2, "Need >2 signers");
-            fluxPriceFeeds[id].signers.remove(_signer);
+            require(fluxPriceFeeds[_id].signers.length() > 2, "Need >2 signers");
+            fluxPriceFeeds[_id].signers.remove(_signer);
         }
 
         // update the minimum required signers
-        fluxPriceFeeds[id].minSigners = _getMinSigners(fluxPriceFeeds[id].signers.length());
+        fluxPriceFeeds[_id].minSigners = _getMinSigners(fluxPriceFeeds[_id].signers.length());
 
-        emit PriceFeedSignersModified(id, _signer, _add);
+        emit PriceFeedSignersModified(_id, _signer, _add);
     }
 
     /// @notice returns the recent report for a price pair
