@@ -95,7 +95,6 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         require(_signers.length > 1, "Must >1 signers");
 
         // format the price pair id and require it to be unique
-        // bytes32 id = hashFeedId(_pricePair, _decimals, Strings.toHexString(uint256(uint160(msg.sender))));
         bytes32 id = hashFeedId(_pricePair, _decimals, address(msg.sender));
 
         require(fluxPriceFeeds[id].priceFeed == address(0x0), "Already deployed");
