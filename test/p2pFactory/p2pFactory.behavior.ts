@@ -12,7 +12,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
     let answers = [3000, 4000];
-    let timestamps = [this.timestamp, this.timestamp + 1];
+    let timestamps = [this.timestamp, this.timestamp + 2];
 
     // deploy oracle
     await this.factory
@@ -39,12 +39,13 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
 
     await this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps);
 
-    let [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    let [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3500);
+    expect(timestamp).to.equal(this.timestamp + 1);
     expect(status).to.equal(200);
 
     answers = [4000, 5000];
-    timestamps = [this.timestamp + 2, this.timestamp + 3];
+    timestamps = [this.timestamp + 2, this.timestamp + 4];
     round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
 
     p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
@@ -65,8 +66,9 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
 
     await this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps);
 
-    [price, , status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4500);
+    expect(timestamp).to.equal(this.timestamp + 3);
     expect(status).to.equal(200);
   });
 
