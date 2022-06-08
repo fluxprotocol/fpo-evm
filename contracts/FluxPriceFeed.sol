@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.12;
+pragma solidity ^0.8.14;
 
 import "./interface/CLV2V3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -42,7 +42,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * Versioning
      */
     function typeAndVersion() external pure virtual returns (string memory) {
-        return "FluxPriceFeed 1.2.0";
+        return "FluxPriceFeed 1.2.1";
     }
 
     /*

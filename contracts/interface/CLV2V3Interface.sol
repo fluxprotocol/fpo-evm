@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.12;
+pragma solidity ^0.8.14;
 
 import "./CLInterface.sol";
 import "./CLV3Interface.sol";
