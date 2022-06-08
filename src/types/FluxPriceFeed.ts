@@ -38,7 +38,7 @@ export interface FluxPriceFeedInterface extends utils.Interface {
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
-    "transmit(int192)": FunctionFragment;
+    "transmit(int192,uint64)": FunctionFragment;
     "typeAndVersion()": FunctionFragment;
     "version()": FunctionFragment;
   };
@@ -118,7 +118,7 @@ export interface FluxPriceFeedInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "transmit",
-    values: [BigNumberish]
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "typeAndVersion",
@@ -356,6 +356,7 @@ export interface FluxPriceFeed extends BaseContract {
 
     transmit(
       _answer: BigNumberish,
+      _timestamp: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -457,6 +458,7 @@ export interface FluxPriceFeed extends BaseContract {
 
   transmit(
     _answer: BigNumberish,
+    _timestamp: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -556,7 +558,11 @@ export interface FluxPriceFeed extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    transmit(_answer: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    transmit(
+      _answer: BigNumberish,
+      _timestamp: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     typeAndVersion(overrides?: CallOverrides): Promise<string>;
 
@@ -681,6 +687,7 @@ export interface FluxPriceFeed extends BaseContract {
 
     transmit(
       _answer: BigNumberish,
+      _timestamp: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -767,6 +774,7 @@ export interface FluxPriceFeed extends BaseContract {
 
     transmit(
       _answer: BigNumberish,
+      _timestamp: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

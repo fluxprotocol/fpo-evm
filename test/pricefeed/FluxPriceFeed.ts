@@ -14,6 +14,8 @@ describe("Unit tests", function () {
     const signers: SignerWithAddress[] = await ethers.getSigners();
     this.signers.admin = signers[0];
     this.signers.nonadmin = signers[1];
+
+    this.timestamp = Math.round(new Date().getTime() / 1000);
   });
 
   describe("FluxPriceFeed", function () {

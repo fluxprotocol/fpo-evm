@@ -32,6 +32,8 @@ describe("Unit tests", function () {
     this.provider2 = signers[3];
     this.nonprovider = signers[4];
     this.provider3tobe = signers[5];
+
+    this.timestamp = Math.round(new Date().getTime() / 1000);
   });
 
   describe("FluxP2PFactoryV1", function () {

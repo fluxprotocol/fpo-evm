@@ -69,10 +69,11 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
     /**
      * @notice transmit is called to post a new report to the contract
      * @param _answer latest answer
+     * @param _timestamp timestamp the answer was fetched
      */
-    function transmit(int192 _answer) external onlyRole(VALIDATOR_ROLE) {
+    function transmit(int192 _answer, uint64 _timestamp) external onlyRole(VALIDATOR_ROLE) {
         // Check the report contents, and record the result
-        transmissions[++latestAggregatorRoundId] = Transmission(_answer, uint64(block.timestamp));
+        transmissions[++latestAggregatorRoundId] = Transmission(_answer, _timestamp);
 
         emit NewTransmission(latestAggregatorRoundId, _answer, msg.sender);
     }

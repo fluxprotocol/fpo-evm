@@ -115,38 +115,44 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
 
     /// @notice internal struct to store local variables for `transmit()` to avoid stack too deep
     struct TransmitData {
-        uint256 round;
-        bool validCaller;
         int192 answer;
+        uint64 timestamp;
+        bool validCaller;
     }
 
     /// @notice leader submits signed messages to update a FluxPriceFeed
     /// @param _signatures array of signed messages from allowed signers
     /// @param _id hash calculated using `hashFeedId()`
     /// @param _answers array of answers from associated signers
+    /// @param _timestamps array of timestamps from associated signers
     /// @dev only available to a majority of a feed's current signers
     function transmit(
         bytes[] calldata _signatures,
         bytes32 _id,
-        int192[] calldata _answers
+        int192[] calldata _answers,
+        uint64[] calldata _timestamps
     ) external {
-        require(_signatures.length == _answers.length, "Lengths mismatch");
+        // validate array lengths
+        uint256 len = _signatures.length;
+        require(_answers.length == len && _timestamps.length == len, "Lengths mismatch");
 
-        // verify the minimum required signers
-        require(_signatures.length >= fluxPriceFeeds[_id].minSigners, "Too few signers");
+        // require the minumum number of signers
+        require(len >= fluxPriceFeeds[_id].minSigners, "Too few signers");
 
-        TransmitData memory data = TransmitData(
-            // round to update
-            FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRound() + 1,
-            // validCaller, later set to true if msg.sender is a signer
-            false,
-            // answer, calculated as median of _answers
-            0
-        );
+        // fetch the round and last timestamp
+        uint256 round = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRound() + 1;
+        uint256 lastRoundTimestamp = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestTimestamp();
 
-        // recover signatures and verify them
-        for (uint256 i = 0; i < _signatures.length; ++i) {
-            bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_id, data.round, _answers[i])));
+        // validate each signature
+        TransmitData memory data;
+        data.validCaller = false;
+        for (uint256 i = 0; i < len; ++i) {
+            // recover the message
+            bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
+                keccak256(abi.encodePacked(_id, round, _answers[i], _timestamps[i]))
+            );
+
+            // recover and verify the signer
             address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
             // check if the caller is a signer
@@ -155,28 +161,33 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             }
 
             // require transmitted answers to be sorted in ascending order
-            if (i < _signatures.length - 1) {
+            if (i < len - 1) {
                 require(_answers[i] <= _answers[i + 1], "Not sorted");
             }
 
+            // require the timestamp to be greater than the last timestamp
+            require(_timestamps[i] > lastRoundTimestamp, "Bad timestamp");
+
             // require each signer only submits an answer once
-            require(fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] < data.round, "Duplicate signer");
-            fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] = data.round;
+            require(fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] < round, "Duplicate signer");
+            fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] = round;
         }
 
         // require that the caller is a signer
         require(data.validCaller, "Invalid caller");
 
         // calculate median of _answers
-        if (_answers.length % 2 == 0) {
-            data.answer = ((_answers[(_answers.length / 2) - 1] + _answers[_answers.length / 2]) / 2);
+        if (len % 2 == 0) {
+            data.answer = ((_answers[(len / 2) - 1] + _answers[len / 2]) / 2);
+            data.timestamp = ((_timestamps[(len / 2) - 1] + _timestamps[len / 2]) / 2);
         } else {
-            data.answer = _answers[_answers.length / 2];
+            data.answer = _answers[len / 2];
+            data.timestamp = _timestamps[len / 2];
         }
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
-        try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).transmit(data.answer) {
+        try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).transmit(data.answer, data.timestamp) {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()

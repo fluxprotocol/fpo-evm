@@ -4,13 +4,13 @@ import { TEST_VALUE } from "../types";
 export function shouldBehaveLikeFluxPriceFeed(): void {
   it("should return latestAnswer once it's changed", async function () {
     expect(await this.pricefeed.connect(this.signers.admin).latestAnswer()).to.equal(0);
-    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE, this.timestamp);
     expect(await this.pricefeed.connect(this.signers.admin).latestAnswer()).to.equal(TEST_VALUE);
   });
   it("should not allow nonadmin to change value", async function () {
     expect(await this.pricefeed.connect(this.signers.admin).latestAnswer()).to.equal(0);
     try {
-      await this.pricefeed.connect(this.signers.nonadmin).transmit(TEST_VALUE);
+      await this.pricefeed.connect(this.signers.nonadmin).transmit(TEST_VALUE, this.timestamp);
     } catch (e) {
       if (!(e instanceof Error)) return;
       expect(e.message).to.include(
@@ -26,7 +26,7 @@ export function shouldBehaveLikeFluxPriceFeed(): void {
     expect(await this.pricefeed.connect(this.signers.admin).decimals()).to.equal(6);
   });
   it("should return latestRoundData correctly", async function () {
-    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE, this.timestamp);
     const roundDataCall = await this.pricefeed.connect(this.signers.admin).latestRoundData();
     const roundData = {
       roundId: roundDataCall[0].toNumber(),
@@ -42,7 +42,7 @@ export function shouldBehaveLikeFluxPriceFeed(): void {
     expect(roundData.answer).to.equal(TEST_VALUE);
   });
   it("should return getRoundData correctly", async function () {
-    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE, this.timestamp);
     const roundDataCall = await this.pricefeed.connect(this.signers.admin).getRoundData(1);
     const roundData = {
       roundId: roundDataCall[0].toNumber(),
@@ -58,15 +58,15 @@ export function shouldBehaveLikeFluxPriceFeed(): void {
     expect(roundData.answer).to.equal(TEST_VALUE);
   });
   it("should return getAnswer correctly", async function () {
-    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE, this.timestamp);
     expect(await this.pricefeed.connect(this.signers.admin).getAnswer(1)).to.equal(TEST_VALUE);
   });
   it("should return latestRound correctly", async function () {
-    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE, this.timestamp);
     expect(await this.pricefeed.connect(this.signers.admin).latestRound()).to.equal(1);
   });
   it("should let the consumer contract call latestAnswer()", async function () {
-    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE, this.timestamp);
     expect(await this.pricefeedconsumer.connect(this.signers.admin).getLatestPrice()).to.equal(TEST_VALUE);
   });
 }
