@@ -87,7 +87,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     ) internal view returns (address signer) {
         (address recoveredSigner, ECDSA.RecoverError error) = ECDSA.tryRecover(_hashedMsg, _signature);
         if (error == ECDSA.RecoverError.NoError) {
-            require(fluxPriceFeeds[_id].signers.contains(recoveredSigner), "Invalid signer");
+            require(fluxPriceFeeds[_id].signers.contains(recoveredSigner), "Invalid signature");
             return recoveredSigner;
         } else {
             revert();
