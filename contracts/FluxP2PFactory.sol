@@ -215,7 +215,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_id, roundId, _signer, _add)));
 
         // recover signatures and verify them
-        for (uint256 i = 0; i < _signatures.length; i++) {
+        for (uint256 i = 0; i < _signatures.length; ++i) {
             address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
             // require each signer only submits an answer once
