@@ -4,8 +4,8 @@ import { arrayify } from "@ethersproject/bytes";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-const transmitTypes: string[] = ["string", "uint8", "string", "uint256", "int192"];
-const modifySignersTypes: string[] = ["string", "uint8", "string", "uint256", "address", "bool"];
+const transmitTypes: string[] = ["string", "uint8", "address", "uint256", "int192"];
+const modifySignersTypes: string[] = ["string", "uint8", "address", "uint256", "address", "bool"];
 
 export function shouldBehaveLikeFluxP2PFactory(): void {
   it("should transmit and calculate median", async function () {

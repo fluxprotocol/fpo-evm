@@ -14,12 +14,19 @@ describe("Unit tests", function () {
     this.signers.admin = signers[0];
     this.signers.nonadmin = signers[1];
 
-    this.owner = this.signers.admin.address.toLowerCase();
+    this.owner = this.signers.admin.address;
 
     this.eth_usd_str = "ETH/USD";
     this.btc_usd_str = "BTC/USD";
-    this.eth_usd_id = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`Price-${this.eth_usd_str}-3-${this.owner}`));
-    this.btc_usd_id = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`Price-${this.btc_usd_str}-3-${this.owner}`));
+    this.eth_usd_id = ethers.utils.solidityKeccak256(
+      ["string", "string", "string", "address"],
+      ["Price-", this.eth_usd_str, "-3-", this.owner],
+    );
+
+    this.btc_usd_id = ethers.utils.solidityKeccak256(
+      ["string", "string", "string", "address"],
+      ["Price-", this.btc_usd_str, "-3-", this.owner],
+    );
 
     this.provider1 = signers[2];
     this.provider2 = signers[3];

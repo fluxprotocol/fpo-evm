@@ -49,10 +49,10 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     function hashFeedId(
         string calldata _pricePair,
         uint8 _decimals,
-        string memory _creator
+        address _creator
     ) public pure returns (bytes32) {
         string memory str = string(
-            abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals), "-", _creator)
+            abi.encodePacked("Price-", _pricePair, "-", Strings.toString(_decimals), "-", abi.encodePacked(_creator))
         );
         return keccak256(bytes(str));
     }
@@ -95,7 +95,9 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         require(_signers.length > 1, "Must >1 signers");
 
         // format the price pair id and require it to be unique
-        bytes32 id = hashFeedId(_pricePair, _decimals, Strings.toHexString(uint256(uint160(msg.sender))));
+        // bytes32 id = hashFeedId(_pricePair, _decimals, Strings.toHexString(uint256(uint160(msg.sender))));
+        bytes32 id = hashFeedId(_pricePair, _decimals, address(msg.sender));
+
         require(fluxPriceFeeds[id].priceFeed == address(0x0), "Already deployed");
 
         // deploy the new contract and store it in the mapping
@@ -129,7 +131,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         bytes[] calldata _signatures,
         string calldata _pricePair,
         uint8 _decimals,
-        string calldata _creator,
+        address _creator,
         int192[] calldata _answers
     ) external {
         require(_signatures.length == _answers.length, "Lengths mismatch");
@@ -204,7 +206,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         bytes[] calldata _signatures,
         string calldata _pricePair,
         uint8 _decimals,
-        string calldata _creator,
+        address _creator,
         address _signer,
         bool _add
     ) external {
