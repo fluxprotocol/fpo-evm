@@ -106,7 +106,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         require(_signers.length > 1);
 
         // format the price pair id and require it to be unique
-        bytes32 id = hashFeedId(_pricePair, _decimals, Strings.toHexString(uint256(uint160(msg.sender)), 20));
+        bytes32 id = hashFeedId(_pricePair, _decimals, Strings.toHexString(uint256(uint160(msg.sender))));
         require(fluxPriceFeeds[id].priceFeed == address(0x0));
 
         // deploy the new contract and store it in the mapping
@@ -228,7 +228,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         // parse the signed message
         uint256 roundId = FluxPriceFeed(fluxPriceFeeds[id].priceFeed).latestRound();
         bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
-            keccak256(abi.encodePacked(_pricePair, _creator, _decimals, roundId, _signer))
+            keccak256(abi.encodePacked(_pricePair, _decimals, _creator, roundId, _signer, _add))
         );
 
         // recover signatures and verify them
@@ -246,7 +246,7 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
         if (_add) {
             fluxPriceFeeds[id].signers.add(_signer);
         } else {
-            require(fluxPriceFeeds[id].signers.length() > 2);
+            require(fluxPriceFeeds[id].signers.length() > 2, "Need >2 signers");
             fluxPriceFeeds[id].signers.remove(_signer);
         }
 

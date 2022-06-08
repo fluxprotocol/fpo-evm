@@ -2,11 +2,10 @@
 /* eslint-disable prefer-const */
 import { arrayify } from "@ethersproject/bytes";
 import { expect } from "chai";
-import { keccak256 } from "ethers/lib/utils";
 import { ethers, upgrades } from "hardhat";
-import type { FluxPriceFeed } from "../../src/types/FluxPriceFeed";
 
 const transmitTypes: string[] = ["string", "uint8", "string", "uint256", "int192"];
+const modifySignersTypes: string[] = ["string", "uint8", "string", "uint256", "address", "bool"];
 
 export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
   it("should transmit and calculate median", async function () {
@@ -462,5 +461,124 @@ export function shouldBehaveLikeUpgradeableFluxP2PFactory(): void {
     [price, , status] = await this.proxy.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(3500);
     expect(status).to.equal(200);
+  });
+
+  it("should modify signers", async function () {
+    let answers = [3000, 4000, 5000];
+    let decimals = 3;
+
+    // deploy oracle
+    await this.proxy
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+
+    // provider1 and provider2 sign a message to add nonprovider
+    let round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+    let p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_str,
+      decimals,
+      this.signers.admin.address.toLowerCase(),
+      round,
+      this.nonprovider.address,
+      true,
+    ]);
+    let p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_str,
+      decimals,
+      this.signers.admin.address.toLowerCase(),
+      round,
+      this.nonprovider.address,
+      true,
+    ]);
+
+    let p1_sig0 = await this.provider1.signMessage(arrayify(p1_mHash));
+    let p2_sig0 = await this.provider2.signMessage(arrayify(p2_mHash));
+    let sigs0 = [p1_sig0, p2_sig0];
+
+    // add nonprovider
+    await this.proxy
+      .connect(this.provider1)
+      .modifySigners(
+        sigs0,
+        this.eth_usd_str,
+        decimals,
+        this.signers.admin.address.toLowerCase(),
+        this.nonprovider.address,
+        true,
+      );
+
+    // now remove the nonprovider
+
+    round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+
+    p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_str,
+      decimals,
+      this.signers.admin.address.toLowerCase(),
+      round,
+      this.nonprovider.address,
+      false,
+    ]);
+    p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_str,
+      decimals,
+      this.signers.admin.address.toLowerCase(),
+      round,
+      this.nonprovider.address,
+      false,
+    ]);
+
+    p1_sig0 = await this.provider1.signMessage(arrayify(p1_mHash));
+    p2_sig0 = await this.provider2.signMessage(arrayify(p2_mHash));
+    sigs0 = [p1_sig0, p2_sig0];
+
+    // rm provider3
+    await this.proxy
+      .connect(this.signers.admin)
+      .modifySigners(
+        sigs0,
+        this.eth_usd_str,
+        decimals,
+        this.signers.admin.address.toLowerCase(),
+        this.nonprovider.address,
+        false,
+      );
+
+    // try removing more signers (provider2)
+    round = await this.proxy.latestRoundOfPricePair(this.eth_usd_id);
+
+    p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_str,
+      decimals,
+      this.signers.admin.address.toLowerCase(),
+      round,
+      this.provider2.address,
+      false,
+    ]);
+    p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_str,
+      decimals,
+      this.signers.admin.address.toLowerCase(),
+      round,
+      this.provider2.address,
+      false,
+    ]);
+
+    p1_sig0 = await this.provider1.signMessage(arrayify(p1_mHash));
+    p2_sig0 = await this.provider2.signMessage(arrayify(p2_mHash));
+    sigs0 = [p1_sig0, p2_sig0];
+
+    await expect(
+      this.proxy
+        .connect(this.signers.admin)
+        .modifySigners(
+          sigs0,
+          this.eth_usd_str,
+          decimals,
+          this.signers.admin.address.toLowerCase(),
+          this.provider2.address,
+          false,
+        ),
+    ).to.be.revertedWith("Need >2 signers");
   });
 }
