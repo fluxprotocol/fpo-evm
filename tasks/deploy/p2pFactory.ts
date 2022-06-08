@@ -5,10 +5,10 @@ import { FluxP2PFactory__factory } from "../../src/types/factories/FluxP2PFactor
 import sleep from "../../utils/sleep";
 const VERIFY_DELAY = 100000;
 
-// npx hardhat deploy:UpgradeableP2P --network kovan --verify
-task("deploy:UpgradeableP2P")
+// npx hardhat deploy:p2pFactory --network kovan --verify
+task("deploy:p2pFactory")
   .addFlag("verify")
-  .setAction(async function (taskArgs: TaskArguments, { run, ethers, upgrades }) {
+  .setAction(async function (taskArgs: TaskArguments, { run, ethers }) {
     const p2pFactory: FluxP2PFactory__factory = <FluxP2PFactory__factory>(
       await ethers.getContractFactory("FluxP2PFactory")
     );
