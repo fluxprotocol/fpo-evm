@@ -2,7 +2,7 @@
   "manifestVersion": "3.2",
   "admin": {
     "address": "0xE50ce613116C3d667a4A46C2F7D39d9e53E18245",
-    "txHash": "0xb6ffc54026b6d9609d33dac6f5c96734932ec8e8d777a6d745f7969aabb3ce50"
+    "txHash": "0x70b6a2f9a2727c69959ac6588437dd3cd9b6b659b01eefb3aa387edf450ac498"
   },
   "proxies": [
     {
@@ -1032,72 +1032,72 @@
     },
     {
       "address": "0xE2f35E071cEB38e09B3c3252735c8B06263B40D4",
-      "txHash": "0x653eed4ee7a80c582c5bc60d807f68b61df2a902380b6a3630f37405d06404fb",
+      "txHash": "0x724daebaaee84074726095a2f6dd5ae1a419791141643fde76d02fb67b30f085",
       "kind": "transparent"
     },
     {
       "address": "0x431f6dE1bB8B6d96F4C055eaB8f06CB70cCBa347",
-      "txHash": "0xd859845f8f223de6bc17f4efb47e2c616be763c75e0d26d67afde2252390ba52",
+      "txHash": "0x1d07eeaf8132fc31a4a79f0fda74cf5ca2dc0d8f7ffe85f25e098e7f41725501",
       "kind": "transparent"
     },
     {
       "address": "0xAb843EbA00CeF866E38880ED3240974E05f21e90",
-      "txHash": "0xeab519b523c4d6736e098eb844549c97a5c8146883a5b9bcc751466f0e6f4398",
+      "txHash": "0x6ce9d5243a4d10843d54b1e39636c463f9a910c64c03ea777d929d09a886a251",
       "kind": "transparent"
     },
     {
       "address": "0x5E542871b9Ffc9eD35dB8A561bD89AB5170355fB",
-      "txHash": "0x1fa16dad718494dedfbd93ad1c2e01a5fa074cbb85bbc32ebe63995e33b42424",
+      "txHash": "0x77d31d0e6127b4ddd33f5f60025682ec86b7072bd0c4a3da0fd401ffaaede720",
       "kind": "transparent"
     },
     {
       "address": "0x04f980B021FFc73DBcBC202fF0D2a3F4da5767ED",
-      "txHash": "0x27e74f1b87dfe8eea0b6c60ebbec60da7e201c514721d2952b0755ef7d8b6128",
+      "txHash": "0x579ccff6c5649c39924cc6e90b864decbfc9d673b54e197d0082dc2218e049c5",
       "kind": "transparent"
     },
     {
       "address": "0x6F81851bD04ec55ab011397C7139eBE5520CCE1A",
-      "txHash": "0x470340d98488614579e2444d3fd165509ff18f2e6b870bc39be1fd8fb472e033",
+      "txHash": "0xca864c08d770af5caf4593098806da44a728e0c4d298781198c91a1641655711",
       "kind": "transparent"
     },
     {
       "address": "0x03f7153313C746B587b23DAdC27418E5bb6b03e4",
-      "txHash": "0x4a42b88b0f4d4056a1a8e4733815a3aeefc0af3ebbc9125bc6e728d041dffeee",
+      "txHash": "0xe3734d20c1d321b5a5578474c12a7c71e7f897963009da3fff6b18c2c079269c",
       "kind": "transparent"
     },
     {
       "address": "0x884BCcBb6c8Ea7b991168Db73DCad9E133C751C9",
-      "txHash": "0x7ee42add71b8ad6c889b74b7f3a62e6744f35083e1a11dc0239a873b01ee7879",
+      "txHash": "0xc545f10ce9a401b51e8dd17a62de07d430fd8e5d52d5a0acd8c472e71484fe2e",
       "kind": "transparent"
     },
     {
       "address": "0x657954CA6Bef250E999a8a4b91B3b4ff78Ca6c11",
-      "txHash": "0x914df1fdba247ef5dda925520ada549e1a762cc33b026cebabf60d7eab021c1d",
+      "txHash": "0x3be38b152a8d5d561cda7316857690978cc13ecca9b08308425700a7008fd4a4",
       "kind": "transparent"
     },
     {
       "address": "0x762fa0fb2bF73694C1542c4316f76a1fddA7A7E8",
-      "txHash": "0x6e02d9f8a0ae04a9cec1927e041ae305937f81a2095bc2509cc123f6987e244f",
+      "txHash": "0x61dc3ed5593332fb556aed1b6e40b00d477f5eb0fdec514c2a83729709b45e14",
       "kind": "transparent"
     },
     {
       "address": "0x3BF1CEC5b3E94bccF09e6F94EDf0195355131e64",
-      "txHash": "0x3862ec0f6c952da5a36d9dd2b9a9366bbc673e365e1dfddff0193e6671ffa4d9",
+      "txHash": "0x04918cd0e0748a878d9f8d841af1c698ccad0e929203c3a10f1531c45052f9f1",
       "kind": "transparent"
     },
     {
       "address": "0xDa67932880496732B47335A7aa6E08d8e6D561a0",
-      "txHash": "0xa1f87bbe6df79bfccacaae54ad02c76e7ed6c7bbe41273ab7519f5cd62ed318a",
+      "txHash": "0x496cd765cef8906252ecdcbddec952143d34ce89a3028ac1b1e158992f2eed97",
       "kind": "transparent"
     },
     {
       "address": "0x0AB23096eDb2f4a60e4FEea7bc5927d1Dcf4287C",
-      "txHash": "0x7958c26bbdf159a7b7b4259d1c1e9c320645f471c85f36681dd8dd0001e526ff",
+      "txHash": "0x1e1a72958ae53878fd568b5b0534b7f5573cccee32823a21a783018b12125876",
       "kind": "transparent"
     },
     {
       "address": "0x758039eC856e83cAE10557690703fC6037F31Ce3",
-      "txHash": "0xe20f44938228b443fe4d61f4a58a30d54f8bc41d63e821c9162198ae31952c8e",
+      "txHash": "0x9abce4d46a245d0b18f1a28f4519ee6785a49af58944d40fbb1224b8d99da713",
       "kind": "transparent"
     }
   ],
@@ -1663,43 +1663,26 @@
         }
       }
     },
-    "8df5c97c74dfa37f5f3ac2895180631d46ac72a3e32b2de9ed958e05b071ab3d": {
+    "3cef56bae9fe07c59a540939f32635b6e15d4b73e5946d07d3ef565ac39f55e5": {
       "address": "0xDf5Ac047B20669645172038f91875240768013B3",
-      "txHash": "0x724ab7a65e743d422b0378ffbd8ec7fb522f020798e120738392c4361ac4649f",
+      "txHash": "0x2aa9f96bbf6e586777775ac6158d77323574309c31f7323d4b6895a8dd482d6a",
       "layout": {
         "storage": [
           {
             "label": "_roles",
             "offset": 0,
             "slot": "0",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)404_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)19_storage)",
             "contract": "AccessControl",
             "src": "@openzeppelin/contracts/access/AccessControl.sol:55"
           },
           {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "1",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
-          },
-          {
             "label": "fluxPriceFeeds",
             "offset": 0,
-            "slot": "2",
-            "type": "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)2266_storage)",
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)1878_storage)",
             "contract": "FluxP2PFactory",
-            "src": "contracts/FluxP2PFactory.sol:27"
+            "src": "contracts/FluxP2PFactory.sol:26"
           }
         ],
         "types": {
@@ -1727,11 +1710,11 @@
             "label": "mapping(address => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)2266_storage)": {
+          "t_mapping(t_bytes32,t_struct(FluxPriceFeedData)1878_storage)": {
             "label": "mapping(bytes32 => struct FluxP2PFactory.FluxPriceFeedData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)404_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)19_storage)": {
             "label": "mapping(bytes32 => struct AccessControl.RoleData)",
             "numberOfBytes": "32"
           },
@@ -1739,19 +1722,19 @@
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_struct(AddressSet)1862_storage": {
+          "t_struct(AddressSet)1477_storage": {
             "label": "struct EnumerableSet.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)1561_storage",
+                "type": "t_struct(Set)1176_storage",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(FluxPriceFeedData)2266_storage": {
+          "t_struct(FluxPriceFeedData)1878_storage": {
             "label": "struct FluxP2PFactory.FluxPriceFeedData",
             "members": [
               {
@@ -1768,7 +1751,7 @@
               },
               {
                 "label": "signers",
-                "type": "t_struct(AddressSet)1862_storage",
+                "type": "t_struct(AddressSet)1477_storage",
                 "offset": 0,
                 "slot": "2"
               },
@@ -1787,7 +1770,7 @@
             ],
             "numberOfBytes": "192"
           },
-          "t_struct(RoleData)404_storage": {
+          "t_struct(RoleData)19_storage": {
             "label": "struct AccessControl.RoleData",
             "members": [
               {
@@ -1805,7 +1788,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Set)1561_storage": {
+          "t_struct(Set)1176_storage": {
             "label": "struct EnumerableSet.Set",
             "members": [
               {
@@ -1826,10 +1809,6 @@
           "t_uint256": {
             "label": "uint256",
             "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
           }
         }
       }

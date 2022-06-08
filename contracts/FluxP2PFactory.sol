@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -11,7 +10,7 @@ import "./FluxPriceFeed.sol";
 
 /// @title Flux first-party price feed factory and p2p controller
 /// @author fluxprotocol.org
-contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
+contract FluxP2PFactory is AccessControl, IERC2362 {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /// @dev struct containing FluxPriceFeed with associated signers
@@ -32,25 +31,15 @@ contract FluxP2PFactory is AccessControl, IERC2362, Initializable {
     /// @param signers addresses of the intitial signers
     event PriceFeedCreated(bytes32 indexed id, address indexed oracle, address[] signers);
 
-    /// @notice logs error messages
-    /// @param message the error message
-    event Log(string message);
-
     /// @notice indicates that a signer was added or removed from a FluxPriceFeed
     /// @param id hash of the price pair string
     /// @param signer address of the signer
     /// @param isAdded true if the signer was added, false if removed
     event PriceFeedSignersModified(bytes32 indexed id, address signer, bool isAdded);
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    /// @notice initializes this contract (in replacement of constructor for OZ Initializable)
-    function initialize() public initializer {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
+    /// @notice logs error messages
+    /// @param message the error message
+    event Log(string message);
 
     /// @notice formats a hash of a price pair string
     /// @param _pricePair e.g. ETH/USD

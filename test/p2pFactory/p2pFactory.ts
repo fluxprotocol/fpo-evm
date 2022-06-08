@@ -1,9 +1,10 @@
-import { ethers, upgrades } from "hardhat";
+import { artifacts, ethers, waffle } from "hardhat";
+import type { Artifact } from "hardhat/types";
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 
 import { Signers } from "../types";
-import { shouldBehaveLikeUpgradeableFluxP2PFactory } from "./UpgradeableP2P.behavior";
-import { FluxP2PFactory__factory } from "../../src/types/factories/FluxP2PFactory__factory";
+import { shouldBehaveLikeFluxP2PFactory } from "./p2pFactory.behavior";
+import type { FluxP2PFactory } from "../../src/types/FluxP2PFactory";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -26,19 +27,11 @@ describe("Unit tests", function () {
     this.provider3tobe = signers[5];
   });
 
-  describe("UpgradeableFluxP2PFactoryV1", function () {
+  describe("FluxP2PFactoryV1", function () {
     beforeEach(async function () {
-      const p2pFactory: FluxP2PFactory__factory = <FluxP2PFactory__factory>(
-        await ethers.getContractFactory("FluxP2PFactory")
-      );
-
-      this.proxy = await upgrades.deployProxy(p2pFactory);
-      await this.proxy.deployed();
-      // console.log("proxy deployed to:", this.proxy.address);
-
-      // const implementationAddress = await upgrades.erc1967.getImplementationAddress(this.proxy.address);
-      // console.log("implementationAddress: ", implementationAddress); // p2pFactory address
+      const p2pFactoryArtifact: Artifact = await artifacts.readArtifact("FluxP2PFactory");
+      this.factory = <FluxP2PFactory>await waffle.deployContract(this.signers.admin, p2pFactoryArtifact);
     });
-    shouldBehaveLikeUpgradeableFluxP2PFactory();
+    shouldBehaveLikeFluxP2PFactory();
   });
 });

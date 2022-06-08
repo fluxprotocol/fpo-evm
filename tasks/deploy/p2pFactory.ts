@@ -1,5 +1,6 @@
 import { task } from "hardhat/config";
 import { TaskArguments } from "hardhat/types";
+import { FluxP2PFactory } from "../../src/types/FluxP2PFactory";
 import { FluxP2PFactory__factory } from "../../src/types/factories/FluxP2PFactory__factory";
 import sleep from "../../utils/sleep";
 const VERIFY_DELAY = 100000;
@@ -12,18 +13,15 @@ task("deploy:UpgradeableP2P")
       await ethers.getContractFactory("FluxP2PFactory")
     );
 
-    const proxy = await upgrades.deployProxy(p2pFactory);
-    await proxy.deployed();
-    console.log("proxy deployed to:", proxy.address);
-
-    const implementationAddress = await upgrades.erc1967.getImplementationAddress(proxy.address);
-    console.log("implementationAddress: ", implementationAddress); // p2pFactory address
+    const p2p: FluxP2PFactory = <FluxP2PFactory>await p2pFactory.deploy();
+    await p2p.deployed();
+    console.log("FluxP2PFactory deployed to: ", p2p.address);
 
     if (taskArgs.verify) {
       console.log("Verifying contract, can take some time");
       await sleep(VERIFY_DELAY);
       await run("verify:verify", {
-        address: implementationAddress,
+        address: p2p,
         constructorArguments: [],
       });
       console.log("Etherscan Verification Done");

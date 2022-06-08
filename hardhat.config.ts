@@ -19,7 +19,6 @@ import "./tasks/p2pAddressOfPricePair";
 import "./tasks/p2pAddProvider";
 import "./tasks/p2pRevokeProvider";
 import "./tasks/p2pDeployOracle";
-import "./tasks/upgradeP2P";
 import "./tasks/p2pLatestRoundOfPricePair";
 import { resolve } from "path";
 

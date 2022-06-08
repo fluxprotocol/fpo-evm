@@ -1,3 +1,3 @@
 import "./pricefeeds";
 import "./examplepricefeedconsumer";
-import "./upgradeableP2pFactory";
+import "./p2pFactory";
