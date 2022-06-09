@@ -449,13 +449,13 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     let round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
     let p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
-      round,
+      Number(round) + 1,
       this.provider3tobe.address,
       true,
     ]);
     let p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
-      round,
+      Number(round) + 1,
       this.provider3tobe.address,
       true,
     ]);
@@ -467,19 +467,39 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     // add provider3tobe
     await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3tobe.address, true);
 
+    // advance the round
+    let answers = [3000, 4000];
+    let timestamps = [this.timestamp, this.timestamp + 2];
+    let p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    let p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let sigs = [p1_sig, p2_sig];
+    await this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps);
+
     // now remove the provider3tobe
 
     round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
 
     p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
-      round,
+      Number(round) + 1,
       this.provider3tobe.address,
       false,
     ]);
     p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
-      round,
+      Number(round) + 1,
       this.provider3tobe.address,
       false,
     ]);
@@ -491,18 +511,39 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     // rm provider3
     await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3tobe.address, false);
 
+    // advance the round
+    await network.provider.send("evm_increaseTime", [3600]);
+    this.timestamp += 3600;
+    timestamps = [this.timestamp, this.timestamp + 1];
+    p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    sigs = [p1_sig, p2_sig];
+    await this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps);
+
     // try removing more signers (provider2)
     round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
 
     p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
-      round,
+      Number(round) + 1,
       this.provider2.address,
       false,
     ]);
     p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
-      round,
+      Number(round) + 1,
       this.provider2.address,
       false,
     ]);
