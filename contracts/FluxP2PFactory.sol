@@ -215,6 +215,7 @@ contract FluxP2PFactory is IERC2362 {
         bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_id, roundId, _signer, _add)));
 
         // recover signatures and verify them
+        bool validCaller = false;
         for (uint256 i = 0; i < _signatures.length; ++i) {
             address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
@@ -223,7 +224,15 @@ contract FluxP2PFactory is IERC2362 {
                 require(fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] < roundId, "Duplicate signer");
             }
             fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] = roundId;
+
+            // check if the caller is a signer
+            if (recoveredSigner == msg.sender) {
+                validCaller = true;
+            }
         }
+
+        // require that the caller is a signer
+        require(validCaller, "Invalid caller");
 
         // add or remove signer to the FluxPriceFeed
         if (_add) {

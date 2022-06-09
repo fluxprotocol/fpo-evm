@@ -489,9 +489,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     sigs0 = [p1_sig0, p2_sig0];
 
     // rm provider3
-    await this.factory
-      .connect(this.signers.admin)
-      .modifySigners(sigs0, this.eth_usd_id, this.provider3tobe.address, false);
+    await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3tobe.address, false);
 
     // try removing more signers (provider2)
     round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
@@ -514,7 +512,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     sigs0 = [p1_sig0, p2_sig0];
 
     await expect(
-      this.factory.connect(this.signers.admin).modifySigners(sigs0, this.eth_usd_id, this.provider2.address, false),
+      this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider2.address, false),
     ).to.be.revertedWith("Need >2 signers");
   });
 
