@@ -517,4 +517,88 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       this.factory.connect(this.signers.admin).modifySigners(sigs0, this.eth_usd_id, this.provider2.address, false),
     ).to.be.revertedWith("Need >2 signers");
   });
+
+  it("should revert stale/future timestamps", async function () {
+    const pricePair = this.eth_usd_str;
+    const decimals = 3;
+    let answers = [3000, 4000];
+    let timestamps = [this.timestamp, this.timestamp + 2];
+
+    // deploy oracle
+    await this.factory
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+
+    // sign answer 0 by provider1 and answer 1 by provider2
+    let round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+    let p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    let p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let sigs = [p1_sig, p2_sig];
+
+    await this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps);
+
+    let [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(3500);
+    expect(timestamp).to.equal(this.timestamp + 1);
+    expect(status).to.equal(200);
+
+    answers = [4000, 5000];
+    round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+
+    p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    sigs = [p1_sig, p2_sig];
+
+    await expect(
+      this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps),
+    ).to.be.revertedWith("Stale timestamp");
+
+    // increase timestamp
+    this.timestamp += 100;
+    timestamps = [this.timestamp, this.timestamp + 2];
+    round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+    p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    sigs = [p1_sig, p2_sig];
+
+    await expect(
+      this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps),
+    ).to.be.revertedWith("Future timestamp");
+  });
 }
