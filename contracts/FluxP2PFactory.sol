@@ -3,14 +3,13 @@ pragma solidity ^0.8.14;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./interface/IERC2362.sol";
 import "./FluxPriceFeed.sol";
 
 /// @title Flux first-party price feed factory and p2p controller
 /// @author fluxprotocol.org
-contract FluxP2PFactory is AccessControl, IERC2362 {
+contract FluxP2PFactory is IERC2362 {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /// @dev struct containing FluxPriceFeed with associated signers
