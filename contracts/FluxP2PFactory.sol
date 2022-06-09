@@ -165,7 +165,8 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             }
 
             // require the timestamp to be greater than the last timestamp
-            require(_timestamps[i] > lastRoundTimestamp, "Bad timestamp");
+            require(_timestamps[i] > lastRoundTimestamp, "Stale timestamp");
+            require(_timestamps[i] <= block.timestamp + 3, "Future timestamp");
 
             // require each signer only submits an answer once
             require(fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] < round, "Duplicate signer");

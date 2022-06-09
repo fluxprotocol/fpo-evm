@@ -3,6 +3,7 @@
 import { arrayify } from "@ethersproject/bytes";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { network } from "hardhat";
 
 const transmitTypes: string[] = ["bytes32", "uint256", "int192", "uint64"];
 const modifySignersTypes: string[] = ["bytes32", "uint256", "address", "bool"];
@@ -44,8 +45,12 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     expect(timestamp).to.equal(this.timestamp + 1);
     expect(status).to.equal(200);
 
+    // add one hour to timestamp
+    await network.provider.send("evm_increaseTime", [3600]);
+    this.timestamp += 3600;
+
+    timestamps = [this.timestamp, this.timestamp + 2];
     answers = [4000, 5000];
-    timestamps = [this.timestamp + 2, this.timestamp + 4];
     round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
 
     p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
@@ -68,7 +73,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
 
     [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4500);
-    expect(timestamp).to.equal(this.timestamp + 3);
+    expect(timestamp).to.equal(this.timestamp + 1);
     expect(status).to.equal(200);
   });
 
