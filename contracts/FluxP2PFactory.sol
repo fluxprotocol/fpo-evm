@@ -22,7 +22,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         mapping(address => uint256) lastRoundModifySigners; // helps check for duplicate signers in `modifySigners()`
     }
 
-    /// @dev mapping of id (e.g. `Price-ETH/USD-8`) to FluxPriceFeedData
+    /// @dev mapping of id (e.g. `Price-ETH/USD-8-creator`) to FluxPriceFeedData
     mapping(bytes32 => FluxPriceFeedData) private fluxPriceFeeds;
 
     /// @notice indicates that a new oracle was created
@@ -67,7 +67,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
     /// @notice verifies that a signer has permission to sign a given message
     /// @param _hashedMsg the hashed message to verify against
     /// @param _signature the signed message from the signer
-    /// @param _id hash of the price pair string of the FluxPriceFeed (for fetching permissions)
+    /// @param _id hash of the price pair string of the FluxPriceFeed for checking permissions
     /// @return signer address of the recovered signer
     function _verifySignature(
         bytes32 _hashedMsg,
@@ -154,23 +154,23 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
             // recover and verify the signer
             address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
-            // check if the caller is a signer
-            if (recoveredSigner == msg.sender) {
-                data.validCaller = true;
-            }
+            // require the timestamp to be greater than the last timestamp
+            require(_timestamps[i] > lastRoundTimestamp, "Stale timestamp");
+            require(_timestamps[i] <= block.timestamp + 3, "Future timestamp");
 
             // require transmitted answers to be sorted in ascending order
             if (i < len - 1) {
                 require(_answers[i] <= _answers[i + 1], "Not sorted");
             }
 
-            // require the timestamp to be greater than the last timestamp
-            require(_timestamps[i] > lastRoundTimestamp, "Stale timestamp");
-            require(_timestamps[i] <= block.timestamp + 3, "Future timestamp");
-
             // require each signer only submits an answer once
             require(fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] < round, "Duplicate signer");
             fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] = round;
+
+            // check if the caller is a signer
+            if (recoveredSigner == msg.sender) {
+                data.validCaller = true;
+            }
         }
 
         // require that the caller is a signer
@@ -240,7 +240,7 @@ contract FluxP2PFactory is AccessControl, IERC2362 {
         emit PriceFeedSignersModified(_id, _signer, _add);
     }
 
-    /// @notice returns the recent report for a price pair
+    /// @notice returns the latest report for a FluxPriceFeed
     /// @param _id hash of the price pair string to query
     /// @return tuple containing answer, updatedAt, and status message (200 for success; 404 for not found)
     function valueFor(bytes32 _id)

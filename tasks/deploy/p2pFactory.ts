@@ -21,7 +21,7 @@ task("deploy:p2pFactory")
       console.log("Verifying contract, can take some time");
       await sleep(VERIFY_DELAY);
       await run("verify:verify", {
-        address: p2p,
+        address: p2p.address,
         constructorArguments: [],
       });
       console.log("Etherscan Verification Done");
