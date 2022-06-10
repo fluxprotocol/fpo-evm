@@ -59,8 +59,8 @@ contract FluxP2PFactory is IERC2362 {
     /// @notice calculates the minimum number of signers required to update a FluxPriceFeed or modify signers
     /// @param _length number of signers
     /// @return minimum required number of signers
-    function _getMinSigners(uint256 _length) internal pure returns (uint8 minimum) {
-        return uint8((_length / 2) + 1);
+    function _getMinSigners(uint256 _length) internal pure returns (uint256 minimum) {
+        return (_length / 2) + 1;
     }
 
     /// @notice verifies that a signer has permission to sign a given message
