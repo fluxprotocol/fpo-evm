@@ -13,7 +13,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
     let answers = [3000, 4000];
-    let timestamps = [this.timestamp, this.timestamp + 2];
+    let timestamps = [this.timestamp + 1, this.timestamp + 1];
 
     // deploy oracle
     await this.factory
@@ -49,7 +49,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     await network.provider.send("evm_increaseTime", [3600]);
     this.timestamp += 3600;
 
-    timestamps = [this.timestamp, this.timestamp + 2];
+    timestamps = [this.timestamp, this.timestamp];
     answers = [4000, 5000];
     round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
 
@@ -73,7 +73,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
 
     [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
     expect(price).to.equal(4500);
-    expect(timestamp).to.equal(this.timestamp + 1);
+    expect(timestamp).to.equal(this.timestamp);
     expect(status).to.equal(200);
   });
 
