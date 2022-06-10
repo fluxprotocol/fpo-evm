@@ -111,13 +111,6 @@ contract FluxP2PFactory is IERC2362 {
         emit PriceFeedCreated(id, address(newPriceFeed), _signers);
     }
 
-    /// @notice internal struct to store local variables for `transmit()` to avoid stack too deep
-    struct TransmitData {
-        int192 answer;
-        uint64 timestamp;
-        bool validCaller;
-    }
-
     /// @notice leader submits signed messages to update a FluxPriceFeed
     /// @param _signatures array of signed messages from allowed signers
     /// @param _id hash calculated using `hashFeedId()`
@@ -130,6 +123,9 @@ contract FluxP2PFactory is IERC2362 {
         int192[] calldata _answers,
         uint64[] calldata _timestamps
     ) external {
+        // require the caller to be a signer
+        require(fluxPriceFeeds[_id].signers.contains(msg.sender), "Invalid caller");
+
         // validate array lengths
         uint256 len = _signatures.length;
         require(_answers.length == len && _timestamps.length == len, "Lengths mismatch");
@@ -142,8 +138,6 @@ contract FluxP2PFactory is IERC2362 {
         uint256 lastRoundTimestamp = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestTimestamp();
 
         // validate each signature
-        TransmitData memory data;
-        data.validCaller = false;
         for (uint256 i = 0; i < len; ++i) {
             // recover the message
             bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
@@ -155,7 +149,7 @@ contract FluxP2PFactory is IERC2362 {
 
             // require the timestamp to be greater than the last timestamp
             require(_timestamps[i] > lastRoundTimestamp, "Stale timestamp");
-            require(_timestamps[i] <= block.timestamp + 3, "Future timestamp");
+            require(_timestamps[i] < block.timestamp + 5, "Future timestamp");
 
             // require transmitted answers to be sorted in ascending order
             if (i < len - 1) {
@@ -165,28 +159,22 @@ contract FluxP2PFactory is IERC2362 {
             // require each signer only submits an answer once
             require(fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] < round, "Duplicate signer");
             fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] = round;
-
-            // check if the caller is a signer
-            if (recoveredSigner == msg.sender) {
-                data.validCaller = true;
-            }
         }
 
-        // require that the caller is a signer
-        require(data.validCaller, "Invalid caller");
-
-        // calculate median of _answers
+        // calculate median of _answers and associated timestamp
+        int192 answer;
+        uint64 timestamp;
         if (len % 2 == 0) {
-            data.answer = ((_answers[(len / 2) - 1] + _answers[len / 2]) / 2);
-            data.timestamp = ((_timestamps[(len / 2) - 1] + _timestamps[len / 2]) / 2);
+            answer = ((_answers[(len / 2) - 1] + _answers[len / 2]) / 2);
+            timestamp = ((_timestamps[(len / 2) - 1] + _timestamps[len / 2]) / 2);
         } else {
-            data.answer = _answers[len / 2];
-            data.timestamp = _timestamps[len / 2];
+            answer = _answers[len / 2];
+            timestamp = _timestamps[len / 2];
         }
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
-        try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).transmit(data.answer, data.timestamp) {
+        try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).transmit(answer, timestamp) {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()
@@ -207,6 +195,9 @@ contract FluxP2PFactory is IERC2362 {
         address _signer,
         bool _add
     ) external {
+        // require the caller to be a signer
+        require(fluxPriceFeeds[_id].signers.contains(msg.sender), "Invalid caller");
+
         // verify the minimum required signatures
         require(_signatures.length >= fluxPriceFeeds[_id].minSigners, "Too few signers");
 
@@ -215,22 +206,13 @@ contract FluxP2PFactory is IERC2362 {
         bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_id, round, _signer, _add)));
 
         // recover signatures and verify them
-        bool validCaller = false;
         for (uint256 i = 0; i < _signatures.length; ++i) {
             address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
             // require each signer only submits an answer once
             require(fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] < round, "Duplicate signer");
             fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] = round;
-
-            // check if the caller is a signer
-            if (recoveredSigner == msg.sender) {
-                validCaller = true;
-            }
         }
-
-        // require that the caller is a signer
-        require(validCaller, "Invalid caller");
 
         // add or remove signer to the FluxPriceFeed
         if (_add) {
