@@ -27,7 +27,7 @@ contract FluxP2PFactory is IERC2362 {
     /// @notice indicates that a new oracle was created
     /// @param id hash of the price pair string
     /// @param oracle address of the deployed oracle
-    /// @param signers addresses of the intitial signers
+    /// @param signers addresses of the initial signers
     event PriceFeedCreated(bytes32 indexed id, address indexed oracle, address[] signers);
 
     /// @notice indicates that a signer was added or removed from a FluxPriceFeed
