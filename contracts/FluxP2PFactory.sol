@@ -105,7 +105,7 @@ contract FluxP2PFactory is IERC2362 {
 
         // set the signers
         for (uint256 i = 0; i < _signers.length; ++i) {
-            fluxPriceFeeds[id].signers.add(_signers[i]);
+            require(fluxPriceFeeds[id].signers.add(_signers[i]) == true, "Duplicate signer");
         }
 
         emit PriceFeedCreated(id, address(newPriceFeed), _signers);
