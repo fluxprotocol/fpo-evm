@@ -554,7 +554,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
 
     await expect(
       this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider2.address, false),
-    ).to.be.revertedWith("Need >2 signers");
+    ).to.be.revertedWith("Need >1 signers");
   });
 
   it("should revert stale/future timestamps", async function () {

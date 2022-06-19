@@ -218,7 +218,7 @@ contract FluxP2PFactory is IERC2362 {
         if (_add) {
             fluxPriceFeeds[_id].signers.add(_signer);
         } else {
-            require(fluxPriceFeeds[_id].signers.length() > 2, "Need >2 signers");
+            require(fluxPriceFeeds[_id].signers.length() > 2, "Need >1 signers");
             fluxPriceFeeds[_id].signers.remove(_signer);
         }
 
