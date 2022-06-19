@@ -136,20 +136,23 @@ contract FluxP2PFactory is IERC2362 {
         // fetch the round and last timestamp
         uint256 round = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRound() + 1;
         uint256 lastRoundTimestamp = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestTimestamp();
+        uint64 timestamp;
 
         // validate each signature
         for (uint256 i = 0; i < len; ++i) {
+            timestamp = _timestamps[i];
+
             // recover the message
             bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
-                keccak256(abi.encodePacked(_id, round, _answers[i], _timestamps[i]))
+                keccak256(abi.encodePacked(_id, round, _answers[i], timestamp))
             );
 
             // recover and verify the signer
             address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
             // require the timestamp to be greater than the last timestamp
-            require(_timestamps[i] > lastRoundTimestamp, "Stale timestamp");
-            require(_timestamps[i] < block.timestamp + 5, "Future timestamp");
+            require(timestamp > lastRoundTimestamp, "Stale timestamp");
+            require(timestamp < block.timestamp + 5, "Future timestamp");
 
             // require transmitted answers to be sorted in ascending order
             if (i < len - 1) {
@@ -163,7 +166,6 @@ contract FluxP2PFactory is IERC2362 {
 
         // calculate median of _answers and associated timestamp
         int192 answer;
-        uint64 timestamp;
         if (len % 2 == 0) {
             answer = ((_answers[(len / 2) - 1] + _answers[len / 2]) / 2);
             timestamp = ((_timestamps[(len / 2) - 1] + _timestamps[len / 2]) / 2);
