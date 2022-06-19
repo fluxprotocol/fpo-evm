@@ -43,7 +43,7 @@ contract FluxP2PFactory is IERC2362 {
     /// @notice formats a hash of a price pair string
     /// @param _pricePair e.g. ETH/USD
     /// @param _decimals e.g. 8
-    /// @param _creator msg.sender of `deployOracle()` in lowercase
+    /// @param _creator msg.sender of `deployOracle()`
     /// @return hash of the price pair string
     function hashFeedId(
         string calldata _pricePair,
