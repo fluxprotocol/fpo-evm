@@ -165,13 +165,14 @@ contract FluxP2PFactory is IERC2362 {
         }
 
         // calculate median of _answers and associated timestamp
+        uint256 medianIndex = len >> 1;
         int192 answer;
         if (len % 2 == 0) {
-            answer = ((_answers[(len / 2) - 1] + _answers[len / 2]) / 2);
-            timestamp = ((_timestamps[(len / 2) - 1] + _timestamps[len / 2]) / 2);
+            answer = ((_answers[medianIndex - 1] + _answers[medianIndex]) / 2);
+            timestamp = ((_timestamps[medianIndex - 1] + _timestamps[medianIndex]) / 2);
         } else {
-            answer = _answers[len / 2];
-            timestamp = _timestamps[len / 2];
+            answer = _answers[medianIndex];
+            timestamp = _timestamps[medianIndex];
         }
 
         // try transmitting values to the oracle
