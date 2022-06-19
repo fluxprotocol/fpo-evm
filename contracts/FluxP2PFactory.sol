@@ -16,6 +16,7 @@ contract FluxP2PFactory is IERC2362 {
     struct FluxPriceFeedData {
         address priceFeed;
         uint256 minSigners;
+        uint256 signerModificationRound;
         EnumerableSet.AddressSet signers;
         mapping(address => uint256) lastRoundTransmit; // helps check for duplicate signers in `transmit()`
         mapping(address => uint256) lastRoundModifySigners; // helps check for duplicate signers in `modifySigners()`
@@ -204,7 +205,7 @@ contract FluxP2PFactory is IERC2362 {
         require(_signatures.length >= fluxPriceFeeds[_id].minSigners, "Too few signers");
 
         // parse the signed message
-        uint256 round = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRound() + 1;
+        uint256 round = fluxPriceFeeds[_id].signerModificationRound + 1;
         bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(_id, round, _signer, _add)));
 
         // recover signatures and verify them
@@ -226,6 +227,7 @@ contract FluxP2PFactory is IERC2362 {
 
         // update the minimum required signers
         fluxPriceFeeds[_id].minSigners = _getMinSigners(fluxPriceFeeds[_id].signers.length());
+        fluxPriceFeeds[_id].signerModificationRound++;
 
         emit PriceFeedSignersModified(_id, _signer, _add);
     }
@@ -278,6 +280,13 @@ contract FluxP2PFactory is IERC2362 {
     function latestRoundOfPricePair(bytes32 _id) external view returns (uint256) {
         FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
         return priceFeed.latestRound();
+    }
+
+    /// @notice returns the latest signer modification round of a price pair
+    /// @param _id hash of the price pair string to query
+    /// @return latestRound for modifying signers
+    function latestSignerModificationRound(bytes32 _id) external view returns (uint256) {
+        return fluxPriceFeeds[_id].signerModificationRound;
     }
 
     /// @notice returns factory's type and version
