@@ -134,25 +134,23 @@ contract FluxP2PFactory is IERC2362 {
         require(len >= fluxPriceFeeds[_id].minSigners, "Too few signers");
 
         // fetch the round and last timestamp
-        uint256 round = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestRound() + 1;
-        uint256 lastRoundTimestamp = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).latestTimestamp();
-        uint64 timestamp;
+        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+        uint256 round = priceFeed.latestRound() + 1;
+        uint256 lastRoundTimestamp = priceFeed.latestTimestamp();
 
         // validate each signature
         for (uint256 i = 0; i < len; ++i) {
-            timestamp = _timestamps[i];
-
             // recover the message
             bytes32 hashedMsg = ECDSA.toEthSignedMessageHash(
-                keccak256(abi.encodePacked(_id, round, _answers[i], timestamp))
+                keccak256(abi.encodePacked(_id, round, _answers[i], _timestamps[i]))
             );
 
             // recover and verify the signer
             address recoveredSigner = _verifySignature(hashedMsg, _signatures[i], _id);
 
             // require the timestamp to be greater than the last timestamp
-            require(timestamp > lastRoundTimestamp, "Stale timestamp");
-            require(timestamp < block.timestamp + 5, "Future timestamp");
+            require(_timestamps[i] > lastRoundTimestamp, "Stale timestamp");
+            require(_timestamps[i] < block.timestamp + 5, "Future timestamp");
 
             // require transmitted answers to be sorted in ascending order
             if (i < len - 1) {
@@ -167,6 +165,7 @@ contract FluxP2PFactory is IERC2362 {
         // calculate median of _answers and associated timestamp
         uint256 medianIndex = len >> 1;
         int192 answer;
+        uint64 timestamp;
         if (len % 2 == 0) {
             answer = ((_answers[medianIndex - 1] + _answers[medianIndex]) / 2);
             timestamp = ((_timestamps[medianIndex - 1] + _timestamps[medianIndex]) / 2);
@@ -177,7 +176,7 @@ contract FluxP2PFactory is IERC2362 {
 
         // try transmitting values to the oracle
         /* solhint-disable-next-line no-empty-blocks */
-        try FluxPriceFeed(fluxPriceFeeds[_id].priceFeed).transmit(answer, timestamp) {
+        try priceFeed.transmit(answer, timestamp) {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()
