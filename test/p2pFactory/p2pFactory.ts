@@ -31,7 +31,8 @@ describe("Unit tests", function () {
     this.provider1 = signers[2];
     this.provider2 = signers[3];
     this.nonprovider = signers[4];
-    this.provider3tobe = signers[5];
+    this.provider3 = signers[5];
+    this.provider4 = signers[6];
 
     this.timestamp = Math.round(new Date().getTime() / 1000);
   });

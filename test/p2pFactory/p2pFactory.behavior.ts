@@ -9,6 +9,221 @@ const transmitTypes: string[] = ["bytes32", "uint256", "int192", "uint64"];
 const modifySignersTypes: string[] = ["bytes32", "uint256", "address", "bool"];
 
 export function shouldBehaveLikeFluxP2PFactory(): void {
+  it("should allow signer to cancel transmit signature", async function () {
+    const pricePair = this.eth_usd_str;
+    const decimals = 3;
+    let answers = [3000, 4000, 5000];
+    let timestamps = [this.timestamp + 1, this.timestamp + 1, this.timestamp + 1];
+
+    // deploy oracle
+    await this.factory
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [
+        this.provider1.address,
+        this.provider2.address,
+        this.provider3.address,
+      ]);
+
+    // sign answers
+    let round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+    let p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    let p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    let p3_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[2],
+      timestamps[2],
+    ]);
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let p3_sig = await this.provider3.signMessage(arrayify(p3_msgHash));
+
+    let sigs = [p1_sig, p2_sig, p3_sig];
+
+    await this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps);
+
+    let [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(4000);
+    expect(timestamp).to.equal(this.timestamp + 1);
+    expect(status).to.equal(200);
+
+    // add one hour to timestamp
+    await network.provider.send("evm_increaseTime", [3600]);
+    this.timestamp += 3600;
+
+    timestamps = [this.timestamp, this.timestamp, this.timestamp];
+    answers = [4000, 5000, 6000];
+    round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+
+    p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    p3_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[2],
+      timestamps[2],
+    ]);
+    p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    p3_sig = await this.provider3.signMessage(arrayify(p3_msgHash));
+
+    sigs = [p1_sig, p2_sig, p3_sig];
+
+    // provider1 cancels its transmit signature
+    await this.factory.connect(this.provider1).cancelTransmitSignature(this.eth_usd_id);
+
+    await expect(
+      this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps),
+    ).to.be.revertedWith("Duplicate signer or cacelled signature");
+
+    answers = [5000, 6000];
+    timestamps = [this.timestamp, this.timestamp];
+    sigs = [p2_sig, p3_sig];
+    // transmit without provider1 signature
+    await this.factory.connect(this.provider2).transmit(sigs, this.eth_usd_id, answers, timestamps);
+    [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(5500);
+    expect(timestamp).to.equal(this.timestamp);
+    expect(status).to.equal(200);
+
+    timestamps = [this.timestamp + 2, this.timestamp + 2, this.timestamp + 2];
+    answers = [4000, 5000, 6000];
+    round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+
+    p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    p3_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[2],
+      timestamps[2],
+    ]);
+    p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    p3_sig = await this.provider3.signMessage(arrayify(p3_msgHash));
+
+    sigs = [p1_sig, p2_sig, p3_sig];
+
+    await this.factory.connect(this.provider2).transmit(sigs, this.eth_usd_id, answers, timestamps);
+    [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(5000);
+    expect(timestamp).to.equal(this.timestamp + 2);
+    expect(status).to.equal(200);
+  });
+
+  it("should allow signer to cancel modify signers signature", async function () {
+    let decimals = 3;
+
+    // deploy oracle
+    await this.factory
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [
+        this.provider1.address,
+        this.provider2.address,
+        this.provider3.address,
+      ]);
+
+    // provider1,  provider2, provider3 sign a message to add provider4
+    let round = await this.factory.latestSignerModificationRound(this.eth_usd_id);
+    let p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      this.provider4.address,
+      true,
+    ]);
+    let p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      this.provider4.address,
+      true,
+    ]);
+    let p3_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      this.provider4.address,
+      true,
+    ]);
+
+    let p1_sig0 = await this.provider1.signMessage(arrayify(p1_mHash));
+    let p2_sig0 = await this.provider2.signMessage(arrayify(p2_mHash));
+    let p3_sig0 = await this.provider3.signMessage(arrayify(p3_mHash));
+
+    let sigs0 = [p1_sig0, p2_sig0, p3_sig0];
+    // provider1 cancels its signature
+    await this.factory.connect(this.provider1).cancelModifySignersSignature(this.eth_usd_id);
+    // try adding provider4 after provider1 cancelled his signature
+    await expect(
+      this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider4.address, true),
+    ).to.be.revertedWith("Duplicate signer or cacelled signature");
+    // try adding provider4 using provider2 and provider3 signatures
+    sigs0 = [p2_sig0, p3_sig0];
+    this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider4.address, true);
+
+    let timestamps = [this.timestamp + 2, this.timestamp + 2, this.timestamp + 2];
+    let answers = [4000, 5000, 6000];
+    round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+
+    let p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[0],
+      timestamps[0],
+    ]);
+    let p2_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[1],
+      timestamps[1],
+    ]);
+    let p4_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      answers[2],
+      timestamps[2],
+    ]);
+    let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
+    let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
+    let p4_sig = await this.provider4.signMessage(arrayify(p4_msgHash));
+
+    let sigs = [p1_sig, p2_sig, p4_sig];
+    // transmit provider4 signature
+    await this.factory.connect(this.provider2).transmit(sigs, this.eth_usd_id, answers, timestamps);
+    let [price, timestamp, status] = await this.factory.connect(this.signers.admin).valueFor(this.eth_usd_id);
+    expect(price).to.equal(5000);
+    expect(timestamp).to.equal(this.timestamp + 2);
+    expect(status).to.equal(200);
+  });
+
   it("should transmit and calculate median", async function () {
     const pricePair = this.eth_usd_str;
     const decimals = 3;
@@ -124,7 +339,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     ]);
     let p1_sig = await this.provider1.signMessage(arrayify(p1_msgHash));
     let p2_sig = await this.provider2.signMessage(arrayify(p2_msgHash));
-    let p3tobe_sig = await this.provider3tobe.signMessage(arrayify(p3tobe_msgHash));
+    let p3tobe_sig = await this.provider3.signMessage(arrayify(p3tobe_msgHash));
 
     let sigs = [p1_sig, p2_sig, p3tobe_sig];
     answers = [3000, 4000, 5000];
@@ -445,18 +660,18 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       .connect(this.signers.admin)
       .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
 
-    // provider1 and provider2 sign a message to add provider3tobe
+    // provider1 and provider2 sign a message to add provider3
     let round = await this.factory.latestSignerModificationRound(this.eth_usd_id);
     let p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
       Number(round) + 1,
-      this.provider3tobe.address,
+      this.provider3.address,
       true,
     ]);
     let p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
       Number(round) + 1,
-      this.provider3tobe.address,
+      this.provider3.address,
       true,
     ]);
 
@@ -464,23 +679,23 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     let p2_sig0 = await this.provider2.signMessage(arrayify(p2_mHash));
     let sigs0 = [p1_sig0, p2_sig0];
 
-    // add provider3tobe
-    await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3tobe.address, true);
+    // add provider3
+    await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3.address, true);
 
-    // now remove the provider3tobe
+    // now remove the provider3
 
     round = await this.factory.latestSignerModificationRound(this.eth_usd_id);
 
     p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
       Number(round) + 1,
-      this.provider3tobe.address,
+      this.provider3.address,
       false,
     ]);
     p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
       this.eth_usd_id,
       Number(round) + 1,
-      this.provider3tobe.address,
+      this.provider3.address,
       false,
     ]);
 
@@ -489,7 +704,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     sigs0 = [p1_sig0, p2_sig0];
 
     // rm provider3
-    await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3tobe.address, false);
+    await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3.address, false);
 
     // try removing more signers (provider2)
     round = await this.factory.latestSignerModificationRound(this.eth_usd_id);
