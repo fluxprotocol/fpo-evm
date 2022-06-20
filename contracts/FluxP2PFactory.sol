@@ -37,9 +37,9 @@ contract FluxP2PFactory is IERC2362 {
     /// @param isAdded true if the signer was added, false if removed
     event PriceFeedSignersModified(bytes32 indexed id, address signer, bool isAdded);
 
-    /// @notice logs error messages
+    /// @notice logs error messages for `transmit()` in FluxPriceFeed
     /// @param message the error message
-    event Log(string message);
+    event LogTransmitError(string message);
 
     /// @notice formats a hash of a price pair string
     /// @param _pricePair e.g. ETH/USD
@@ -184,7 +184,7 @@ contract FluxP2PFactory is IERC2362 {
             // transmission is successful, nothing to do
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            emit Log(reason);
+            emit LogTransmitError(reason);
             revert("Transmit failed");
         }
     }
