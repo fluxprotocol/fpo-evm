@@ -195,7 +195,7 @@ export interface FluxPriceFeedInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "version", data: BytesLike): Result;
 
   events: {
-    "NewTransmission(uint256,int192,address)": EventFragment;
+    "NewTransmission(uint256,int192,address,uint64)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
@@ -208,8 +208,13 @@ export interface FluxPriceFeedInterface extends utils.Interface {
 }
 
 export type NewTransmissionEvent = TypedEvent<
-  [BigNumber, BigNumber, string],
-  { aggregatorRoundId: BigNumber; answer: BigNumber; transmitter: string }
+  [BigNumber, BigNumber, string, BigNumber],
+  {
+    aggregatorRoundId: BigNumber;
+    answer: BigNumber;
+    transmitter: string;
+    timestamp: BigNumber;
+  }
 >;
 
 export type NewTransmissionEventFilter = TypedEventFilter<NewTransmissionEvent>;
@@ -570,15 +575,17 @@ export interface FluxPriceFeed extends BaseContract {
   };
 
   filters: {
-    "NewTransmission(uint256,int192,address)"(
+    "NewTransmission(uint256,int192,address,uint64)"(
       aggregatorRoundId?: BigNumberish | null,
       answer?: null,
-      transmitter?: null
+      transmitter?: null,
+      timestamp?: null
     ): NewTransmissionEventFilter;
     NewTransmission(
       aggregatorRoundId?: BigNumberish | null,
       answer?: null,
-      transmitter?: null
+      transmitter?: null,
+      timestamp?: null
     ): NewTransmissionEventFilter;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)"(

@@ -55,7 +55,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
      * @param answer value posted by validator
      * @param transmitter address from which the report was transmitted
      */
-    event NewTransmission(uint256 indexed aggregatorRoundId, int192 answer, address transmitter);
+    event NewTransmission(uint256 indexed aggregatorRoundId, int192 answer, address transmitter, uint64 timestamp);
 
     /**
      * @notice details about the most recent report
@@ -75,7 +75,7 @@ contract FluxPriceFeed is AccessControl, CLV2V3Interface {
         // Check the report contents, and record the result
         transmissions[++latestAggregatorRoundId] = Transmission(_answer, _timestamp);
 
-        emit NewTransmission(latestAggregatorRoundId, _answer, msg.sender);
+        emit NewTransmission(latestAggregatorRoundId, _answer, msg.sender, _timestamp);
     }
 
     /*
