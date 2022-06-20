@@ -161,7 +161,7 @@ contract FluxP2PFactory is IERC2362 {
             // require each signer only submits an answer once
             require(
                 fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] < round,
-                "Duplicate signer or cacelled signature"
+                "Duplicate signer or cancelled signature"
             );
             fluxPriceFeeds[_id].lastRoundTransmit[recoveredSigner] = round;
         }
@@ -218,7 +218,7 @@ contract FluxP2PFactory is IERC2362 {
             // require each signer only submits an answer once
             require(
                 fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] < round,
-                "Duplicate signer or cacelled signature"
+                "Duplicate signer or cancelled signature"
             );
             fluxPriceFeeds[_id].lastRoundModifySigners[recoveredSigner] = round;
         }
@@ -238,21 +238,20 @@ contract FluxP2PFactory is IERC2362 {
         emit PriceFeedSignersModified(_id, _signer, _add);
     }
 
-    /// @notice signer calls this function to cancel a modify-signers signature
+    /// @notice signer calls this function to cancel a transmit/modifySigners signature
     /// @param _id hash calculated using `hashFeedId()`
-    function cancelModifySignersSignature(bytes32 _id) external {
+    /// @param cancelTransmitSignature bool to determine which signature to cancel
+    function cancelSignature(bytes32 _id, bool cancelTransmitSignature) external {
         // require the caller to be a signer
         require(fluxPriceFeeds[_id].signers.contains(msg.sender), "Invalid caller");
-        fluxPriceFeeds[_id].lastRoundModifySigners[msg.sender] = fluxPriceFeeds[_id].signerModificationRound + 1;
-    }
-
-    /// @notice signer calls this function to cancel a modify-signers signature
-    /// @param _id hash calculated using `hashFeedId()`
-    function cancelTransmitSignature(bytes32 _id) external {
-        // require the caller to be a signer
-        require(fluxPriceFeeds[_id].signers.contains(msg.sender), "Invalid caller");
-        FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
-        fluxPriceFeeds[_id].lastRoundTransmit[msg.sender] = priceFeed.latestRound() + 1;
+        if (cancelTransmitSignature) {
+            // Cancel transmit signature
+            FluxPriceFeed priceFeed = FluxPriceFeed(fluxPriceFeeds[_id].priceFeed);
+            fluxPriceFeeds[_id].lastRoundTransmit[msg.sender] = priceFeed.latestRound() + 1;
+        } else {
+            // Cancel modifySigners signature
+            fluxPriceFeeds[_id].lastRoundModifySigners[msg.sender] = fluxPriceFeeds[_id].signerModificationRound + 1;
+        }
     }
 
     /// @notice returns the latest report for a FluxPriceFeed

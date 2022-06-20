@@ -90,11 +90,11 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     sigs = [p1_sig, p2_sig, p3_sig];
 
     // provider1 cancels its transmit signature
-    await this.factory.connect(this.provider1).cancelTransmitSignature(this.eth_usd_id);
+    await this.factory.connect(this.provider1).cancelSignature(this.eth_usd_id, true);
 
     await expect(
       this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps),
-    ).to.be.revertedWith("Duplicate signer or cacelled signature");
+    ).to.be.revertedWith("Duplicate signer or cancelled signature");
 
     answers = [5000, 6000];
     timestamps = [this.timestamp, this.timestamp];
@@ -180,11 +180,11 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
 
     let sigs0 = [p1_sig0, p2_sig0, p3_sig0];
     // provider1 cancels its signature
-    await this.factory.connect(this.provider1).cancelModifySignersSignature(this.eth_usd_id);
+    await this.factory.connect(this.provider1).cancelSignature(this.eth_usd_id, false);
     // try adding provider4 after provider1 cancelled his signature
     await expect(
       this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider4.address, true),
-    ).to.be.revertedWith("Duplicate signer or cacelled signature");
+    ).to.be.revertedWith("Duplicate signer or cancelled signature");
     // try adding provider4 using provider2 and provider3 signatures
     sigs0 = [p2_sig0, p3_sig0];
     this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider4.address, true);
