@@ -7,6 +7,7 @@ import "@nomiclabs/buidler/config";
 import "@nomiclabs/hardhat-etherscan";
 
 import "./tasks/accounts";
+import "./tasks/getAnswer";
 import "./tasks/deploy/";
 import "./tasks/derivePrivateKey";
 import "./tasks/latestAnswer";
@@ -147,6 +148,11 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
       url: "https://cronos-testnet-3.crypto.org:8545",
       chainId: 338,
+    },
+    evmos: {
+      accounts: { mnemonic },
+      url: "https://evmos-json-rpc.stakely.io",
+      chainId: 9001,
     },
     "evmos-testnet": {
       accounts: { mnemonic },
