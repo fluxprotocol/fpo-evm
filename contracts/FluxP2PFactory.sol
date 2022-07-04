@@ -33,9 +33,17 @@ contract FluxP2PFactory is IERC2362 {
 
     /// @notice indicates that a transmission was made
     /// @param id hash of the price pair string
+    /// @param roundId round of the transmission
     /// @param answer median answer derived from the transmission
     /// @param timestamp timestamp of the transmission
-    event PriceFeedTransmitted(bytes32 indexed id, int192 answer, uint64 timestamp);
+    /// @param numAnswers number of signed answers in the transmission
+    event PriceFeedTransmitted(
+        bytes32 indexed id,
+        uint256 roundId,
+        int192 answer,
+        uint64 timestamp,
+        uint256 numAnswers
+    );
 
     /// @notice indicates that a signer was added or removed from a FluxPriceFeed
     /// @param id hash of the price pair string
@@ -194,7 +202,7 @@ contract FluxP2PFactory is IERC2362 {
             revert("Transmit failed");
         }
 
-        emit PriceFeedTransmitted(_id, answer, timestamp);
+        emit PriceFeedTransmitted(_id, round, answer, timestamp, len);
     }
 
     /// @notice leader submits signed messages to modify the signers of a FluxPriceFeed
