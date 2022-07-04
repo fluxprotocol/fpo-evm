@@ -165,7 +165,7 @@ contract FluxP2PFactory is IERC2362 {
 
             // require the timestamp to be greater than the last timestamp
             require(_timestamps[i] > lastRoundTimestamp, "Stale timestamp");
-            require(_timestamps[i] < block.timestamp + 5, "Future timestamp");
+            require(_timestamps[i] < block.timestamp + 60, "Future timestamp");
 
             // require transmitted answers to be sorted in ascending order
             if (i < len - 1) {
