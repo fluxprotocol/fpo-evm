@@ -792,7 +792,7 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
 
     // increase timestamp
     this.timestamp += 100;
-    timestamps = [this.timestamp, this.timestamp + 2];
+    timestamps = [this.timestamp + 1000, this.timestamp + 500];
     round = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
     p1_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
       this.eth_usd_id,
@@ -813,5 +813,77 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     await expect(
       this.factory.connect(this.provider1).transmit(sigs, this.eth_usd_id, answers, timestamps),
     ).to.be.revertedWith("Future timestamp");
+  });
+
+  it("should batch transmit", async function () {
+    const decimals = 3;
+    let answers1 = [2000, 3000];
+    let answers2 = [30000, 40000];
+    let timestamps = [this.timestamp, this.timestamp];
+
+    // deploy oracles
+    await this.factory
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+    await this.factory
+      .connect(this.signers.admin)
+      .deployOracle(this.btc_usd_str, decimals, [this.provider1.address, this.provider2.address]);
+
+    // sign answers for both rounds
+    let round_eth = await this.factory.latestRoundOfPricePair(this.eth_usd_id);
+    let p1_eth_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round_eth) + 1,
+      answers1[0],
+      timestamps[0],
+    ]);
+    let p2_eth_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.eth_usd_id,
+      Number(round_eth) + 1,
+      answers1[1],
+      timestamps[1],
+    ]);
+    let round_btc = await this.factory.latestRoundOfPricePair(this.btc_usd_id);
+    let p1_btc_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.btc_usd_id,
+      Number(round_btc) + 1,
+      answers2[0],
+      timestamps[0],
+    ]);
+    let p2_btc_msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+      this.btc_usd_id,
+      Number(round_btc) + 1,
+      answers2[1],
+      timestamps[1],
+    ]);
+    let p1_eth_sig = await this.provider1.signMessage(arrayify(p1_eth_msgHash));
+    let p2_eth_sig = await this.provider2.signMessage(arrayify(p2_eth_msgHash));
+    let p1_btc_sig = await this.provider1.signMessage(arrayify(p1_btc_msgHash));
+    let p2_btc_sig = await this.provider2.signMessage(arrayify(p2_btc_msgHash));
+    let sigs_eth = [p1_eth_sig, p2_eth_sig];
+    let sigs_btc = [p1_btc_sig, p2_btc_sig];
+
+    await this.factory
+      .connect(this.provider1)
+      .transmitBatch(
+        [sigs_eth, sigs_btc],
+        [this.eth_usd_id, this.btc_usd_id],
+        [answers1, answers2],
+        [timestamps, timestamps],
+      );
+
+    let [price_eth, timestamp_eth, status_eth] = await this.factory
+      .connect(this.signers.admin)
+      .valueFor(this.eth_usd_id);
+    expect(price_eth).to.equal(2500);
+    expect(timestamp_eth).to.equal(this.timestamp);
+    expect(status_eth).to.equal(200);
+
+    let [price_btc, timestamp_btc, status_btc] = await this.factory
+      .connect(this.signers.admin)
+      .valueFor(this.btc_usd_id);
+    expect(price_btc).to.equal(35000);
+    expect(timestamp_btc).to.equal(this.timestamp);
+    expect(status_btc).to.equal(200);
   });
 }

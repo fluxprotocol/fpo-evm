@@ -138,6 +138,42 @@ contract FluxP2PFactory is IERC2362 {
         int192[] calldata _answers,
         uint64[] calldata _timestamps
     ) external {
+        _transmit(_signatures, _id, _answers, _timestamps);
+    }
+
+    /// @notice leader submits signed messages to update multiple FluxPriceFeeds
+    /// @param _signatures array of array of signed messages from allowed signers
+    /// @param _id array of hashes calculated using `hashFeedId()`
+    /// @param _answers array of array of answers from associated signers
+    /// @param _timestamps array of array of timestamps from associated signers
+    /// @dev only available to a majority of a feed's current signers
+    function transmitBatch(
+        bytes[][] calldata _signatures,
+        bytes32[] calldata _id,
+        int192[][] calldata _answers,
+        uint64[][] calldata _timestamps
+    ) external {
+        // validate array lengths
+        uint256 len = _signatures.length;
+        require(_answers.length == len && _timestamps.length == len, "Lengths mismatch");
+
+        for (uint256 i = 0; i < len; ++i) {
+            _transmit(_signatures[i], _id[i], _answers[i], _timestamps[i]);
+        }
+    }
+
+    /// @notice leader submits signed messages to update a FluxPriceFeed
+    /// @param _signatures array of signed messages from allowed signers
+    /// @param _id hash calculated using `hashFeedId()`
+    /// @param _answers array of answers from associated signers
+    /// @param _timestamps array of timestamps from associated signers
+    /// @dev only available to a majority of a feed's current signers
+    function _transmit(
+        bytes[] calldata _signatures,
+        bytes32 _id,
+        int192[] calldata _answers,
+        uint64[] calldata _timestamps
+    ) internal {
         // require the caller to be a signer
         require(fluxPriceFeeds[_id].signers.contains(msg.sender), "Invalid caller");
 
