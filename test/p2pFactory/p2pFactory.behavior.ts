@@ -886,4 +886,59 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
     expect(timestamp_btc).to.equal(this.timestamp);
     expect(status_btc).to.equal(200);
   });
+
+  it("should max batch transmit", async function () {
+    const decimals = 3;
+    const feeds_number = 227;
+    let providers = [this.provider1, this.provider2];
+    let providers_addresses = [this.provider1.address, this.provider2.address];
+
+    let feed_strs_arr = [];
+    let feed_ids_arr = [];
+
+    let answers = Array.from(Array(feeds_number), () => [2000, 3000]);
+
+    let timestamps = Array.from(Array(feeds_number), () => new Array(providers.length).fill(this.timestamp));
+
+    let sigs_arr = Array.from(Array(feeds_number), () => new Array(providers.length));
+
+    for (let i = 0; i < feeds_number; i++) {
+      // 100 feeds
+      let feed_str = "ETH/USD" + i.toString();
+      feed_strs_arr.push(feed_str);
+      let feed_id = ethers.utils.solidityKeccak256(
+        ["string", "string", "string", "address"],
+        ["Price-", feed_str, "-3-", this.owner],
+      );
+      feed_ids_arr.push(feed_id);
+
+      await this.factory.connect(this.signers.admin).deployOracle(feed_str, decimals, providers_addresses);
+
+      let round = await this.factory.latestRoundOfPricePair(feed_id);
+      for (let j = 0; j < providers.length; j++) {
+        let msgHash = ethers.utils.solidityKeccak256(transmitTypes, [
+          feed_id,
+          Number(round) + 1,
+          answers[i][j],
+          timestamps[i][j],
+        ]);
+        let provider = providers[j];
+        let sig = await provider.signMessage(arrayify(msgHash));
+
+        sigs_arr[i][j] = sig;
+      }
+    }
+
+    await this.factory.connect(this.provider1).transmitBatch(sigs_arr, feed_ids_arr, answers, timestamps);
+
+    for (let i = 0; i < feeds_number; i++) {
+      let [price_eth, timestamp_eth, status_eth] = await this.factory
+        .connect(this.signers.admin)
+        .valueFor(feed_ids_arr[i]);
+
+      expect(price_eth).to.equal(2500);
+      expect(timestamp_eth).to.equal(this.timestamp);
+      expect(status_eth).to.equal(200);
+    }
+  });
 }
