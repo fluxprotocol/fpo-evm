@@ -941,4 +941,44 @@ export function shouldBehaveLikeFluxP2PFactory(): void {
       expect(status_eth).to.equal(200);
     }
   });
+
+  it("should return min signers", async function () {
+    let decimals = 3;
+    let min_signers = await this.factory.connect(this.signers.admin).minSignersOfPricePair(this.eth_usd_id);
+    expect(min_signers).to.equal(0);
+    // deploy oracle
+    await this.factory
+      .connect(this.signers.admin)
+      .deployOracle(this.eth_usd_str, decimals, [
+        this.provider1.address,
+        this.provider2.address,
+        this.provider4.address,
+      ]);
+    min_signers = await this.factory.connect(this.signers.admin).minSignersOfPricePair(this.eth_usd_id);
+    expect(min_signers).to.equal(2);
+    // provider1 and provider2 sign a message to add provider3
+    let round = await this.factory.latestSignerModificationRound(this.eth_usd_id);
+    let p1_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      this.provider3.address,
+      true,
+    ]);
+    let p2_mHash = ethers.utils.solidityKeccak256(modifySignersTypes, [
+      this.eth_usd_id,
+      Number(round) + 1,
+      this.provider3.address,
+      true,
+    ]);
+
+    let p1_sig0 = await this.provider1.signMessage(arrayify(p1_mHash));
+    let p2_sig0 = await this.provider2.signMessage(arrayify(p2_mHash));
+    let sigs0 = [p1_sig0, p2_sig0];
+
+    // add provider3
+    await this.factory.connect(this.provider1).modifySigners(sigs0, this.eth_usd_id, this.provider3.address, true);
+
+    min_signers = await this.factory.connect(this.signers.admin).minSignersOfPricePair(this.eth_usd_id);
+    expect(min_signers).to.equal(3);
+  });
 }

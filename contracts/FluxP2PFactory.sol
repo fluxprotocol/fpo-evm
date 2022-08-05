@@ -348,6 +348,13 @@ contract FluxP2PFactory is IERC2362 {
         return fluxPriceFeeds[_id].priceFeed;
     }
 
+    /// @notice returns minSigners of a price feed id
+    /// @param _id hash of the price pair string to query
+    /// @return uint256 minSigners of the FluxPriceFeed
+    function minSignersOfPricePair(bytes32 _id) external view returns (uint256) {
+        return fluxPriceFeeds[_id].minSigners;
+    }
+
     /// @notice returns the latest round of a price pair
     /// @param _id hash of the price pair string to query
     /// @return latestRound of the FluxPriceFeed
