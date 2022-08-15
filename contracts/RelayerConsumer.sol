@@ -2,16 +2,14 @@
 pragma solidity ^0.8.12;
 
 import "./interface/CLV2V3Interface.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RelayerConsumer is AccessControl {
-    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+contract RelayerConsumer is Ownable {
     CLV2V3Interface public priceFeed;
     CLV2V3Interface public relayer;
     uint256 public deviationPercent = 200; // 2%
 
     constructor(address _priceFeed, address _relayer) {
-        _setupRole(OWNER_ROLE, msg.sender);
         priceFeed = CLV2V3Interface(_priceFeed);
         relayer = CLV2V3Interface(_relayer);
     }
@@ -28,20 +26,20 @@ contract RelayerConsumer is AccessControl {
 
     /// @notice Changes price feed contract address
     /// @dev Only callable by the owner
-    function setPriceFeed(address _priceFeed) external onlyRole(OWNER_ROLE) {
+    function setPriceFeed(address _priceFeed) external onlyOwner {
         priceFeed = CLV2V3Interface(_priceFeed);
     }
 
     /// @notice Changes relayer feed contract address
     /// @dev Only callable by the owner
-    function setRelayerFeed(address _relayer) external onlyRole(OWNER_ROLE) {
+    function setRelayerFeed(address _relayer) external onlyOwner {
         relayer = CLV2V3Interface(_relayer);
     }
 
     /// @notice Sets consumer contract deviationPercent variable
     /// @dev Only callable by the owner
     /// @param _deviation deviation percentage based on which the contract is paused
-    function setDeviation(uint8 _deviation) external onlyRole(OWNER_ROLE) {
+    function setDeviation(uint8 _deviation) external onlyOwner {
         deviationPercent = _deviation;
     }
 
