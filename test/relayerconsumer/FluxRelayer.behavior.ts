@@ -17,7 +17,7 @@ export function shouldBehaveLikeFluxRelayerFeedConsumer(): void {
     const deviatedValue = Math.floor(TEST_VALUE - 0.05 * TEST_VALUE);
     await this.pricefeed.connect(this.signers.admin).transmit(deviatedValue);
     await expect(this.relayerConsumer.connect(this.signers.admin).callStatic.getLatestPrice()).to.be.revertedWith(
-      "function paused",
+      "Relayer deviated too much from price feed",
     );
   });
 }
