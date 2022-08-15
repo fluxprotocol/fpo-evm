@@ -8,7 +8,7 @@ contract RelayerConsumer is AccessControl {
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     CLV2V3Interface public priceFeed;
     CLV2V3Interface public relayer;
-    uint256 public deviationPercent = 2;
+    uint256 public deviationPercent = 200; // 2%
 
     constructor(address _priceFeed, address _relayer) {
         _setupRole(OWNER_ROLE, msg.sender);
@@ -21,7 +21,7 @@ contract RelayerConsumer is AccessControl {
     function getLatestPrice() public view returns (int256) {
         int256 price = priceFeed.latestAnswer();
         int256 relayerPrice = relayer.latestAnswer();
-        uint256 calculatedDeviation = uint256((abs(relayerPrice - price) * 100) / relayerPrice);
+        uint256 calculatedDeviation = uint256((abs(relayerPrice - price) * 10000) / relayerPrice);
         require(calculatedDeviation >= deviationPercent, "Relayer/price feed deviation too large");
         return priceFeed.latestAnswer();
     }
