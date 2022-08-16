@@ -14,10 +14,12 @@ export function shouldBehaveLikeFluxRelayerFeedConsumer(): void {
     await this.relayerfeed.connect(this.signers.admin).transmit(TEST_VALUE);
     await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
     expect(await this.relayerConsumer.connect(this.signers.admin).callStatic.getLatestPrice()).to.equal(TEST_VALUE);
-    const deviatedValue = Math.floor(TEST_VALUE - 0.05 * TEST_VALUE);
+    const deviatedValue = Math.floor(TEST_VALUE - 0.005 * TEST_VALUE);
     await this.pricefeed.connect(this.signers.admin).transmit(deviatedValue);
     await expect(this.relayerConsumer.connect(this.signers.admin).callStatic.getLatestPrice()).to.be.revertedWith(
-      "Relayer deviated too much from price feed",
+      "Relayer/price feed deviation too large",
     );
+    await this.pricefeed.connect(this.signers.admin).transmit(TEST_VALUE);
+    expect(await this.relayerConsumer.connect(this.signers.admin).callStatic.getLatestPrice()).to.equal(TEST_VALUE);
   });
 }
