@@ -4,8 +4,8 @@ import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signe
 
 import type { FluxPriceFeed } from "../../src/types/FluxPriceFeed";
 import { Signers } from "../types";
-import { shouldBehaveLikeFluxRelayerFeedConsumer } from "./FluxRelayer.behavior";
-import { RelayerConsumer } from "../../src/types/RelayerConsumer";
+import { shouldBehaveLikeFluxRelayerFeedConsumer } from "./FluxRelayerOracle.behavior";
+import { RelayerOracleConsumer } from "../../src/types/RelayerOracleConsumer";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -35,8 +35,8 @@ describe("Unit tests", function () {
           description,
         ])
       );
-      const relayerConsumerArtifact: Artifact = await artifacts.readArtifact("RelayerConsumer");
-      this.relayerConsumer = <RelayerConsumer>(
+      const relayerConsumerArtifact: Artifact = await artifacts.readArtifact("RelayerOracleConsumer");
+      this.relayerConsumer = <RelayerOracleConsumer>(
         await waffle.deployContract(this.signers.admin, relayerConsumerArtifact, [
           this.pricefeed.address,
           this.relayerfeed.address,
