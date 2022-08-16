@@ -8,7 +8,7 @@ contract RelayerOracleConsumer is Ownable {
     CLV2V3Interface public priceFeed;
     CLV2V3Interface public relayerFeed;
     uint256 public deviationPercent = 50; // 0.5%
-    uint256 public maxDelay = 15 * 60; // 15 mins
+    uint256 public maxDelay = 15 minutes;
 
     constructor(address _priceFeed, address _relayer) {
         priceFeed = CLV2V3Interface(_priceFeed);
@@ -32,27 +32,34 @@ contract RelayerOracleConsumer is Ownable {
         return price;
     }
 
-    /// @notice Changes pricefeed contract address
+    /// @notice Changes priceFeed contract address
     /// @dev Only callable by the owner
     function setPriceFeed(address _priceFeed) external onlyOwner {
         priceFeed = CLV2V3Interface(_priceFeed);
     }
 
-    /// @notice Changes relayerfeed contract address
+    /// @notice Changes relayerFeed contract address
     /// @dev Only callable by the owner
-    function setRelayerFeed(address _relayer) external onlyOwner {
-        relayerFeed = CLV2V3Interface(_relayer);
+    function setRelayerFeed(address _relayerFeed) external onlyOwner {
+        relayerFeed = CLV2V3Interface(_relayerFeed);
     }
 
-    /// @notice Sets consumer contract deviationPercent variable
+    /// @notice Sets consumer contract deviationPercent variable (50 => 0.5%)
     /// @dev Only callable by the owner
-    /// @param _deviation deviation percentage based on which the contract is paused
-    function setDeviation(uint8 _deviation) external onlyOwner {
+    /// @param _deviation maximum allowed price deviation
+    function setDeviation(uint256 _deviation) external onlyOwner {
         deviationPercent = _deviation;
     }
 
+    /// @notice Sets consumer contract maxDelay variable in seconds
+    /// @dev Only callable by the owner
+    /// @param _delay maximum allowed delay after which prices are considered outdated
+    function setMaxDelay(uint256 _delay) external onlyOwner {
+        maxDelay = _delay;
+    }
+
     /// @notice Returns absolute value
-    /// @param val signed value that we wanna calculate its absolute
+    /// @param val signed value
     function abs(int256 val) internal pure returns (int256 result) {
         return (val < 0 ? -val : val);
     }
