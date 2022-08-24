@@ -24,6 +24,7 @@ import "./tasks/factoryAddressOfPricePairId";
 import "./tasks/factoryValueFor";
 import "./tasks/priceFeedGrantRole";
 import "./tasks/priceFeedRevokeRole";
+import "./tasks/fetchDeviation";
 
 import { resolve } from "path";
 
