@@ -36,11 +36,15 @@ describe("Unit tests", function () {
         ])
       );
       const relayerConsumerArtifact: Artifact = await artifacts.readArtifact("RelayerOracleConsumer");
-      this.relayerConsumer = <RelayerOracleConsumer>(
-        await waffle.deployContract(this.signers.admin, relayerConsumerArtifact, [
+      this.relayerConsumer = <RelayerOracleConsumer>await waffle.deployContract(
+        this.signers.admin,
+        relayerConsumerArtifact,
+        [
           this.pricefeed.address,
           this.relayerfeed.address,
-        ])
+          50, // deviationPercentage
+          15 * 60, // maxDelay
+        ],
       );
     });
 
