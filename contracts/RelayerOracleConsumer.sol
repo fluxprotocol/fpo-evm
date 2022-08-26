@@ -4,6 +4,8 @@ pragma solidity ^0.8.12;
 import "./interface/CLV2V3Interface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @title RelayerOracleConsumer
+/// @notice an example contract using a price feed with a relayer feed
 contract RelayerOracleConsumer is Ownable {
     CLV2V3Interface public priceFeed;
     CLV2V3Interface public relayerFeed;
