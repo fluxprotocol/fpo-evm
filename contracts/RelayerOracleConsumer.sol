@@ -7,12 +7,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract RelayerOracleConsumer is Ownable {
     CLV2V3Interface public priceFeed;
     CLV2V3Interface public relayerFeed;
-    uint256 public deviationPercent = 50; // 0.5%
-    uint256 public maxDelay = 15 minutes;
+    uint256 public deviationPercent; // 100 = 1%
+    uint256 public maxDelay;
 
-    constructor(address _priceFeed, address _relayer) {
+    constructor(
+        address _priceFeed,
+        address _relayer,
+        uint256 _deviationPercent,
+        uint256 _maxDelay
+    ) {
         priceFeed = CLV2V3Interface(_priceFeed);
         relayerFeed = CLV2V3Interface(_relayer);
+        deviationPercent = _deviationPercent;
+        maxDelay = _maxDelay;
     }
 
     /// @notice Fetches the latest price from the price feed after checking for deviation
