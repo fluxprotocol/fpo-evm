@@ -1,6 +1,6 @@
 ## Relayer model
 
-For increased redundancy, we encourage protocols to implement a relayer price feed to verify against a main price feed. The contract `RelayerPriceFeedConsumer` demonstrates an example of how a relayer oracle might be used:
+For increased redundancy, protocols are encouraged to implement a relayer price feed to verify against a main price feed. The contract `RelayerPriceFeedConsumer` demonstrates an example of how a relayer oracle might be used:
 
 ```solidity
 (, int256 price, , uint256 timestamp, ) = priceFeed.latestRoundData();
@@ -19,4 +19,4 @@ return price;
 
 In this example, if the relayer oracle reports too large of a deviation from the main oracle or the maximum delay is exceeded, the transaction will be reverted.
 
-The maximum delay and maximum deviation percentage depend on the price feeds being used. It is recommended to test with different values before deploying to production.
+The maximum delay and maximum deviation percentage depend on the price feeds being used (for example, stablecoins will require a smaller maximum deviation percentage than volatile assets). It is recommended to test with different values before deploying to production.

@@ -1,8 +1,10 @@
 # Flux - First-Party Price Feeds for EVM
 
-This repository contains contracts for first-party price feeds for EVM chains, using [OpenZeppelin](https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl) for access control. Those with a validator role can post numeric data to deployed contracts at any interval. `FluxPriceFeed` contracts are compatible with Chainlink's V2 and V3 aggregator interface, and `FluxPriceFeedFactory` is EIP-2362 compatible.
+This repository contains contracts for first-party price feeds for EVM chains, using [OpenZeppelin](https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl) for access control. Those with a validator role can post numeric data to deployed contracts at any interval. `FluxPriceFeed` contracts are compatible with Chainlink's V2 and V3 aggregator interface, and the `FluxPriceFeedFactory` contract is EIP-2362 compatible.
 
-If you are a smart contract developer looking to utilize Flux price feeds, check out the [live pairs](https://docs.fluxprotocol.org/docs/live-data-feeds/live-pairs) on the documentation and copy the interface file `contracts/interface/CLV2V3Interface.sol` to use within your project so your contracts know how to query a price feed contract. If you are interested in becoming a first-party data provider, deploy a price feed factory or individual price feed using the instructions in this repository and post data to it using the [fpo-node](https://github.com/fluxprotocol/fpo-node).
+If you are a smart contract developer looking to utilize Flux price feeds, check out the [live pairs](https://docs.fluxprotocol.org/docs/live-data-feeds/fpo-live-networks-and-pairs) on the documentation and copy the interface file `contracts/interface/CLV2V3Interface.sol` to use within your contracts. The contracts `ExamplePriceFeedConsumer` and `RelayerOracleConsumer` demonstrate how to use a price feed within a smart contract.
+
+If you are interested in becoming a first-party data provider, deploy a price feed factory or individual price feed using the instructions in this repository and post data to it using the [fpo-node](https://github.com/fluxprotocol/fpo-node).
 
 See the `docs/` directory for more information on using the contracts.
 
@@ -24,8 +26,6 @@ Next, compile the smart contracts with Hardhat:
 ```sh
 $ yarn compile
 ```
-
----
 
 ### TypeChain
 
